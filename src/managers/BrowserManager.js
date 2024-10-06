@@ -1,18 +1,15 @@
 import puppeteer from 'puppeteer';
-import ProfileManager from './ProfileManager.js';
 
 export default class BrowserManager {
-    constructor(token, profileId) {
+    constructor(token, profileManager) {
         this.token = token;
-        this.profileId = profileId;
         this.browser = null;
+        this.profile = profileManager;
     }
 
     async connect() {
-        const profileManager = new ProfileManager(this.token, this.profileId);
-        await profileManager.startProfile();
         this.browser = await puppeteer.connect({
-            browserWSEndpoint: `ws://127.0.0.1:${profileManager.port}${profileManager.wsEndpoint}`,
+            browserWSEndpoint: `ws://127.0.0.1:${this.profile.port}${this.profile.wsEndpoint}`,
         });
     }
 

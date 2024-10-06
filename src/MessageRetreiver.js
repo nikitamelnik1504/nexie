@@ -6,12 +6,13 @@ export default class MessageRetriever {
     async getMessagesFromTon(page) {
         try {
             await page.waitForSelector('.Dialog__cont');
+            await page.screenshot({path: 'test.png'})
             
             return await page.evaluate(async () => {
-                const wrappers = document.querySelectorAll('.Dialog__cont');
+                const wrappers = await document.querySelectorAll('.Dialog__cont');
                 let results = [];
 
-                wrappers.forEach(wrapper => {
+                await wrappers.forEach(wrapper => {
                     if (wrapper.nextElementSibling && wrapper.nextElementSibling.classList.contains('Dialog__unread')) {
                         results.push({
                             name: wrapper.querySelector('.Dialog__name').innerText,

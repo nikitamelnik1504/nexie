@@ -8,7 +8,6 @@ export default class ProfileManager {
         this.profileId = profileId;
         this.port = null;
         this.wsEndpoint = null;
-        this.filePath = 'private/profiles.json';
         this.headlessMode = true;
     }
 
@@ -27,33 +26,18 @@ export default class ProfileManager {
         }
     }
 
-    async startProfile() {
-        // const profiles = await getArrayFromFile(this.filePath);
-        // if (profiles && profiles.length > 0) {
-        //     for (const profile of profiles) {
-        //         if (profile.profileId === this.profileId) {
-        //             this.port = profile.port;
-        //             this.wsEndpoint = profile.wsEndpoint;
-        //             console.log(profile.port)
-        //         }
-        //     }
-        // }
-        await this.startNewProfile();
-    }
-
     async saveProfileConnectData() {
         let fileArray = await getArrayFromFile(this.filePath);
         await fileArray.push({profileId: this.profileId, port: this.port, wsEndpoint: this.wsEndpoint});
         await writeArrayToFile(this.filePath, fileArray);
     }
 
-    async startNewProfile() {
+    async startProfile() {
         try {
             await axios.post(`${this.apiBaseURL}/auth/login-with-token`, { token: this.token }, { headers: { 'Content-Type': 'application/json' } });
             const { data } = await axios.get(`${this.apiBaseURL}/browser_profiles/${this.profileId}/start?automation=1&headless=${Number(this.headlessMode)}`);
             this.port = data.automation.port;
             this.wsEndpoint = data.automation.wsEndpoint;
-            await this.saveProfileConnectData();
         } catch (error) {
             console.error('Error start profile:', error);
             return null;
