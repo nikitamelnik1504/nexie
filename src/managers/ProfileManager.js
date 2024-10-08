@@ -38,8 +38,14 @@ export default class ProfileManager {
             const { data } = await axios.get(`${this.apiBaseURL}/browser_profiles/${this.profileId}/start?automation=1&headless=${Number(this.headlessMode)}`);
             this.port = data.automation.port;
             this.wsEndpoint = data.automation.wsEndpoint;
+            await writeArrayToFile('./private/profile.json', [{port: this.port, wsEndpoint: this.wsEndpoint}]);
         } catch (error) {
-            console.error('Error start profile:', error);
+            console.error('Error start profile:', error.response.data);
+            if (error.status === 500) {
+                const profile = await getArrayFromFile('./private/profile.json');
+                this.port = profile[0].port;
+                this.wsEndpoint = profile[0].wsEndpoint;
+            }
             return null;
         }
     }
