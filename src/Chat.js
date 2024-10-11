@@ -1,9 +1,10 @@
 import ProfileManager from "./managers/ProfileManager.js";
 import BrowserManager from "./managers/BrowserManager.js";
 import CookieManager from "./managers/CookieManager.js";
+import { getArrayFromFile, writeArrayToFile } from "./utils/helper.js";
 
 export default class Chat {
-    constructor(token, profileId) {
+    constructor(token, profileId, handleNewMessageCallback) {
         this.page = null;
         this.chat = null;
         this.profileId = profileId;
@@ -12,6 +13,8 @@ export default class Chat {
         this.profile = null;
         this.queue = [];
         this.messageSending = false;
+        this.dialogId = null;
+        this.handleNewMessageCallback = handleNewMessageCallback;
     }
 
     async startChat(userName) {
@@ -26,6 +29,15 @@ export default class Chat {
             this.page = await this.browser.newPage();
             await this.page.setCookie(...cookies);
 
+            await this.page.setRequestInterception(true);
+            this.page.on('request', req => {
+                if (['stylesheet', 'font'].includes(req.resourceType())) {
+                    req.abort();
+                } else {
+                    req.continue();
+                }
+            })
+            this.handleWebSocketNewMessage();
             this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
             await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
             await this.page.waitForSelector('.Dialog__name', { timeout: 10000 });
@@ -39,16 +51,19 @@ export default class Chat {
                         return true;
                     }
                 }
+                console.log('Netu elementa');
                 return false;
             }, userName);
             if (!isChat) {
                 return;
             }
             await this.page.waitForSelector('.inbox');
+            await this.page.screenshot({path:'screren.png'})
+            console.log(await this.page.content());
+            
             this.chat = await this.page.evaluate(() => {
                 const chat = document.querySelector('.History');
-
-                const elementsMessages = chat.querySelectorAll('.inbox, .outbox');
+                const elementsMessages = chat.querySelectorAll('.Message');
 
                 let consChat = [];
 
@@ -57,20 +72,22 @@ export default class Chat {
                         consChat.push({
                             message: message.querySelector('.Linkify').innerText,
                             sender: "inbox",
-                            time: message.querySelector('.Message__time').innerText
                         });
                     } else if (message.classList.contains('outbox')) {
                         consChat.push({
                             message: message.querySelector('.Linkify').innerText,
                             sender: "outbox",
-                            time: message.querySelector('.Message__time').innerText
                         });
                     }
                 }
 
                 return consChat;
             });
-            console.log(this.page.url());
+            this.dialogId = this.page.url().match(/\d+/g).join('');
+            console.log(this.dialogId);
+            const chats = await getArrayFromFile('./private/chats.json');
+            chats.push(this.chat);
+            await writeArrayToFile('./private/chats.json');
             return;
         } catch (error) {
             console.log(error);
@@ -118,6 +135,18 @@ export default class Chat {
             await new Promise(resolve => setTimeout(resolve, 10000));
             await this.addMessageToQueue();
         }
+    }
+
+    async handleWebSocketNewMessage() {
+        const client = await this.page.target().createCDPSession();
+        await client.send('Network.enable')
+        client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
+            const data = JSON.parse(response.payloadData);
+            console.log('New message in dialog', data.body);
+            if (data.body?.dialog?.id === this.dialogId && data.body.message) {
+                this.handleNewMessageCallback(data.body.message.text);
+            }
+        });
     }
 
     async close() {
