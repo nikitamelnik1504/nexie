@@ -68,7 +68,7 @@ export default class Chat {
                 let consChat = [];
 
                 for (const message of elementsMessages) {
-                    if (message.classList.contains('inbox')) {
+                    if (message.classList.contains('inbox') && message.querySelector('.Linkify')) {
                         consChat.push({
                             message: message.querySelector('.Linkify').innerText,
                             sender: "inbox",
@@ -142,6 +142,7 @@ export default class Chat {
         await client.send('Network.enable')
         client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
             const data = JSON.parse(response.payloadData);
+            this.handleNewMessageCallback(data.body);
             console.log('New message in dialog', data.body);
             if (data.body?.dialog?.id === this.dialogId && data.body.message) {
                 this.handleNewMessageCallback(data.body.message.text);
