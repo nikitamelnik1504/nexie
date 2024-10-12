@@ -26,11 +26,13 @@ export default class MessageRetriever {
             this.browser = new BrowserManager(this.token, this.profile);
             this.cookie = new CookieManager(this.token, this.profileId);
             await this.browser.connect();
-        } catch {
+        } catch (error){
             if (this.browser) {
                 await this.profile.stopProfile();
                 await this.browser.disconnect();
             }
+            console.log(error)
+            console.log('restart')
             await this.start();
         }
     }
@@ -71,28 +73,43 @@ export default class MessageRetriever {
                 const client = await this.page.target().createCDPSession();
                 await client.send('Network.enable');
 
-                client.on('Network.webSocketCreated', ({ requestId, url }) => {
-                    console.log('WebSocket created', url);
-                });
-
                 client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
-                    const data = JSON.parse(response.payloadData);
+                    const data = await JSON.parse(response.payloadData);
                     
-                    if (data.body.message) {
-                        const messages = await getArrayFromFile('./private/messages.json');
-                        messages.push({
-                            name: data.body.user.firstName +' '+ data.body.user.lastName,
-                            message: data.body.message.text,
-                            profileId: this.profileId
-                        });
-                        await writeArrayToFile('./private/messages.json', messages);
-                        console.log('WebSocket initialized');
+                    if (data.body?.message) {
+                        const dialogs = await getArrayFromFile('./private/dialogs.json');
+                        let dialogFound = false;
+                        for (const dialog of dialogs) {
+                            if (dialog.dialogId === data.body.dialog.id) {
+                                await dialog.messages.push(data.body.message.text);
+                                dialogFound = true;
+                                break;
+                            }
+                        }
+                        if (!dialogFound) {
+                            await dialogs.push({
+                                dialogId: data.body.dialog.id,
+                                profileId: this.profileId,
+                                name: `${data.body.user.firstName} ${data.body.user.lastName}`,
+                                viewed: false,
+                                messages: 
+                                [{
+                                    message: data.body.message.text,
+                                    sender: 'inbox'
+                                }],
+                            });
+                        }
+                        await writeArrayToFile('./private/dialogs.json', dialogs);
                     }
                 });
-                await this.page.goto(`https://${site.url}${site.messages_url}`, { waitUntil: 'networkidle2', timeout: 60000 });
+                await this.page.goto(`https://${site.url}${site.messages_url}`, { waitUntil: 'networkidle0'});
             }
-        } catch {
-            this.getMessageFromWebSocket()
+        } catch (error) {
+            console.log(error);
+            await this.profile.stopProfile();
+            await this.browser.disconnect();
+            await this.start();
+            await this.getMessageFromWebSocket()
         }
     }
 

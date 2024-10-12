@@ -82,9 +82,15 @@ export default class Chat {
                 return consChat;
             });
             this.dialogId = this.page.url().match(/\d+/g).join('');
-            // const chats = await getArrayFromFile('./private/chats.json');
-            // await chats.push(this.chat);
-            // await writeArrayToFile('./private/chats.json');
+            const chats = await getArrayFromFile('./private/dialogs.json');
+            await chats.push({
+                dialogId: this.dialogId,
+                profileId: this.profileId,
+                name: userName,
+                viewed: true,
+                messages: this.chat
+            });
+            await writeArrayToFile('./private/dialogs.json');
             return;
         } catch (error) {
             console.log(error);
