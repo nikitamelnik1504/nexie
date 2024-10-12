@@ -1,8 +1,7 @@
 const elementChatBody = document.querySelector('.chat-body');
-elementChatBody.scrollBy(0, 100000);
 const profileId = new URLSearchParams(window.location.search).get('profile_id');
 const userName = new URLSearchParams(window.location.search).get('name');
-const socket = new WebSocket('wss://8080-skripchak-telegramparse-wyotrcsx0ua.ws-eu116.gitpod.io');
+const socket = new WebSocket('wss://cuddly-happiness-jgqv546w7pp2j7px-8080.app.github.dev/');
 
 socket.onopen = () => {
     socket.send(JSON.stringify({userName, profileId}));
@@ -26,6 +25,11 @@ socket.onmessage = (message) => {
             }
         }
         elementChatBody.innerHTML = chat;
+        elementChatBody.scrollBy(0, 100000);
+    } else if (data.newMessage) {
+        elementChatBody.innerHTML += `<div class="message received">
+        <p>${data.newMessage}</p>
+    </div>`;
     }
 }
 

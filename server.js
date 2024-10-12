@@ -111,7 +111,7 @@ wss.on('connection', (ws) => {
         const data = JSON.parse(message);
         if (data.userName && data.profileId) {
             ws.chat = new Chat(token, data.profileId, (newMessage) => {
-                console.log(newMessage);
+                ws.send(JSON.stringify({newMessage}));
             });
             await ws.chat.startChat(data.userName);
             const chat = await ws.chat.chat;

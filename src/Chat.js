@@ -58,8 +58,6 @@ export default class Chat {
                 return;
             }
             await this.page.waitForSelector('.inbox');
-            await this.page.screenshot({path:'screren.png'})
-            console.log(await this.page.content());
             
             this.chat = await this.page.evaluate(() => {
                 const chat = document.querySelector('.History');
@@ -73,7 +71,7 @@ export default class Chat {
                             message: message.querySelector('.Linkify').innerText,
                             sender: "inbox",
                         });
-                    } else if (message.classList.contains('outbox')) {
+                    } else if (message.classList.contains('outbox') && message.querySelector('.Linkify')) {
                         consChat.push({
                             message: message.querySelector('.Linkify').innerText,
                             sender: "outbox",
@@ -84,10 +82,9 @@ export default class Chat {
                 return consChat;
             });
             this.dialogId = this.page.url().match(/\d+/g).join('');
-            console.log(this.dialogId);
-            const chats = await getArrayFromFile('./private/chats.json');
-            chats.push(this.chat);
-            await writeArrayToFile('./private/chats.json');
+            // const chats = await getArrayFromFile('./private/chats.json');
+            // await chats.push(this.chat);
+            // await writeArrayToFile('./private/chats.json');
             return;
         } catch (error) {
             console.log(error);
@@ -142,8 +139,6 @@ export default class Chat {
         await client.send('Network.enable')
         client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
             const data = JSON.parse(response.payloadData);
-            this.handleNewMessageCallback(data.body);
-            console.log('New message in dialog', data.body);
             if (data.body?.dialog?.id === this.dialogId && data.body.message) {
                 this.handleNewMessageCallback(data.body.message.text);
             }
