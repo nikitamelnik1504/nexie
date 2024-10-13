@@ -1,0 +1,81 @@
+/* Основной стиль для страницы */
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #2A2F38;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Контейнер для списка чатов */
+.chat-list-container {
+  max-width: 420px;
+  width: 100%;
+  background-color: #23252A;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid #2F3238;
+}
+
+/* Заголовок списка чатов */
+.chat-header {
+  background-color: #2F3238;
+  padding: 15px;
+  text-align: center;
+  border-bottom: 1px solid #3B3F45;
+}
+
+.chat-header h2 {
+  margin: 0;
+  color: #E3E4E8;
+  font-size: 18px;
+}
+
+/* Стили для элементов чата */
+.chat-item {
+  padding: 15px;
+  display: block;
+  background-color: #23252A;
+  border-bottom: 1px solid #2F3238;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.3s ease;
+}
+
+.chat-item:hover {
+  background-color: #30333A!important;
+}
+
+/* Ограничение текста для сообщений */
+.chat-item p {
+  margin: 5px 0 0;
+  font-size: 13px;
+  color: #B2B4B8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Стиль для непрочитанных сообщений */
+.chat-item.not-viewed {
+  background-color: #2E3C4A;
+}
+
+.chat-item h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #FFFFFF;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .chat-list-container {
+      max-width: 100%;
+      margin: 10px;
+  }
+}
