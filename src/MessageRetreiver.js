@@ -2,6 +2,7 @@ import ProfileManager from "./managers/ProfileManager.js";
 import BrowserManager from "./managers/BrowserManager.js";
 import CookieManager from "./managers/CookieManager.js";
 import { getArrayFromFile, writeArrayToFile } from "./utils/helper.js";
+import { timeout } from "puppeteer";
 
 export default class MessageRetriever {
     constructor(token, profileId) {
@@ -11,10 +12,15 @@ export default class MessageRetriever {
         this.browser = null;
         this.cookie = null;
         this.sitesList = [
+            // {
+            //     'name': 'Ton',
+            //     'url': 'ton.place',
+            //     'messages_url': '/im'
+            // },
             {
-                'name': 'Ton',
-                'url': 'ton.place',
-                'messages_url': '/im'
+                'name': 'Fancentro',
+                'url': 'fancentro.com',
+                'messages_url': '/messages'
             }
         ];
     }
@@ -27,12 +33,7 @@ export default class MessageRetriever {
             this.cookie = new CookieManager(this.token, this.profileId);
             await this.browser.connect();
         } catch (error){
-            if (this.browser) {
-                await this.profile.stopProfile();
-                await this.browser.disconnect();
-            }
-            console.log(error)
-            console.log('restart')
+            console.log(error);
             await this.start();
         }
     }
@@ -64,7 +65,7 @@ export default class MessageRetriever {
     async getMessageFromWebSocket() {
         try {
             for (const site of this.sitesList) {
-                const cookies = await this.cookie.getFilteredCookieByUrl(site.url);
+                const cookies = await this.cookie.exportCookies();
                 this.page = await this.browser.newPage();
                 await this.page.setCookie(...cookies);
 
@@ -75,6 +76,7 @@ export default class MessageRetriever {
 
                 client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
                     const data = await JSON.parse(response.payloadData);
+                    console.log('websocks', data)
                     
                     if (data.body?.message) {
                         const dialogs = await getArrayFromFile('./private/dialogs.json');
@@ -103,6 +105,8 @@ export default class MessageRetriever {
                     }
                 });
                 await this.page.goto(`https://${site.url}${site.messages_url}`, { waitUntil: 'networkidle0'});
+                await this.page.screenshot({path: 'testffdfd.png'})
+                console.log('oks')
             }
         } catch (error) {
             console.log(error);

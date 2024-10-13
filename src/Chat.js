@@ -39,8 +39,8 @@ export default class Chat {
             })
             this.handleWebSocketNewMessage();
             this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
-            await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
-            await this.page.waitForSelector('.Dialog__name', { timeout: 10000 });
+            await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle0', timeout: 60000 });
+            await this.page.waitForSelector('.Dialog__name');
 
             const isChat = await this.page.evaluate((userName) => {
                 const elements = document.querySelectorAll('.Dialog__name');
@@ -94,10 +94,9 @@ export default class Chat {
             return;
         } catch (error) {
             console.log(error);
-            await this.profile.stopProfile();
             if (this.browser) {
                 console.log('destroy browser')
-                await this.browser.disconnect()
+                await this.browser.browser.close()
             }
             await this.startChat(userName);
         }
@@ -153,8 +152,7 @@ export default class Chat {
 
     async close() {
         if (!this.messageSending) {
-            await this.browser.disconnect();
-            await this.profile.stopProfile();
+            await this.page.close();
         } else {
             await new Promise(resolve => setTimeout(resolve, 10000));
             await this.close();
