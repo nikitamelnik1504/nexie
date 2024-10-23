@@ -112,15 +112,15 @@ app.listen(PORT, async () => {
     // const profiles = await ProfileManager.getProfiles(token);
     // console.log(profiles)
     // for (const profile of profiles.data) {
-    //     const messageRetreiver = new MessageRetriever(token, profile.id);
-    //     await messageRetreiver.start();
-    //     await messageRetreiver.getMessageFromWebSocket();
+        // console.log(await profile.proxy);
+        // const messageRetreiver = new MessageRetriever(token, profile.id);
+        // await messageRetreiver.start();
+        // await messageRetreiver.getMessageFromWebSocket();
     // }
 
-    // const messageRetreiver = new MessageRetriever(token, 439402330);
-    // await messageRetreiver.start();
-    // await messageRetreiver.getMessageFromWebSocket();
-
+    const messageRetreiver = new MessageRetriever(token, 401936834);
+    await messageRetreiver.start();
+    await messageRetreiver.getMessageFromWebSocket();
 })
 
 bot.launch();
