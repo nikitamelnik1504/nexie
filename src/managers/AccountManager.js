@@ -1,15 +1,12 @@
 import Account from "../Account.js";
 
 export default class AccountManager {
-    constructor(token, profiles, accounts, login, password, name, twoFaCode) {
+    constructor(token, profiles, accounts, login, password) {
         this.profiles = profiles;
         this.token = token;
         this.accounts = accounts;
         this.login = login;
         this.password = password;
-        this.name = name;
-        // this.platform = platform;
-        this.twoFaCode = twoFaCode;
         this.account = null;
     }
 
@@ -21,18 +18,17 @@ export default class AccountManager {
             console.log(freeProfile);
         } else {
             freeProfile = this.profiles[0];
-            console.log(freeProfile.id);
         }
 
         if (!freeProfile) {
             return {success: false, message: 'There are no free profiles'};
         }
 
-        this.account = new Account(this.token, freeProfile.id, this.name, this.login, this.password );
+        this.account = new Account(this.token, freeProfile.id, this.login, this.password );
         await this.account.start();
         const accountLogin = await this.account.fanslyAuth();
 
-        if (accountLogin.success) {
+        if (accountLogin?.success) {
             freeProfile.account = {login: this.login, password: this.password, name: this.name};
             return {success: true, profile: freeProfile, isCode: accountLogin.isCode};
         } else {

@@ -59,21 +59,21 @@ bot.hears('Access', (ctx) => {
     // })
 })
 
-let accounts = await getArrayFromFile('./private/accounts.json');
-let addingAccount = false;
-let accountLogin = '';
-let accountPassword = '';
-let accountName = '';
+
 const profiles = await ProfileManager.getProfiles(token);
+const platforms = ['ton', 'fancentro', 'fansly'];
 
-bot.hears('Accounts', (ctx) => {
-    // accounts.forEach(account => {
-
-    // })
+bot.hears('Accounts', async (ctx) => {
+    let accounts = await getArrayFromFile('./private/accounts.json');
+    if (accounts.length > 0) {
+        accounts.forEach(account => {
+            ctx.reply(`Account name: ${account.name} \nPlatform: ${account.platform}`);
+        })
+    }
     ctx.reply('Choose option', {
         reply_markup: {
             keyboard: [
-                [{ text: 'Add account' }, { text: 'Delete account' }]
+                [{ text: 'Add account' }]
             ],
             resize_keyboard: true
         }
@@ -83,30 +83,27 @@ bot.hears('Accounts', (ctx) => {
 const addAccountScene = new Scenes.WizardScene(
     'add-account-scene',
 
-    // Первый шаг - ввод логина
     async (ctx) => {
         ctx.reply('Введите логин:');
         return ctx.wizard.next();
     },
 
-    // Второй шаг - ввод пароля
     async (ctx) => {
         ctx.scene.session.login = ctx.message.text;
         ctx.reply('Введите пароль:');
         return ctx.wizard.next();
     },
 
-    // async (ctx) => {
-    //     ctx.scene.session.password = ctx.message.text;
-    //     ctx.reply('Введите имя:');
-    //     return ctx.wizard.next();
-    // },
+    async (ctx) => {
+        ctx.scene.session.password = ctx.message.text;
+        ctx.reply('Введите имя:');
+        return ctx.wizard.next();
+    },
 
-    // Четвёртый шаг - выбор платформы
     async (ctx) => {
         ctx.scene.session.name = ctx.message.text;
 
-        const platforms = ['ton', 'fancentro', 'fansly'];
+        
         await ctx.reply('Выберите платформу:', Markup.inlineKeyboard(
             platforms.map(platform => Markup.button.callback(platform, platform))
         ));
@@ -115,11 +112,12 @@ const addAccountScene = new Scenes.WizardScene(
     },
 
     async (ctx) => {
+        let accounts = await getArrayFromFile('./private/accounts.json');
         const platform = ctx.callbackQuery.data;
         ctx.scene.session.platform = platform;
         await ctx.reply('Wait please');
         const { login, password, name } = ctx.scene.session;
-        const accountManager = new AccountManager(token, profiles.data, accounts, login, password, name);
+        const accountManager = new AccountManager(token, profiles.data, accounts, login, password);
         const result = await accountManager.bindAccount();
         ctx.scene.session.result = result;
         ctx.scene.session.accountManager = accountManager;
@@ -127,61 +125,47 @@ const addAccountScene = new Scenes.WizardScene(
             ctx.reply('Enter 2Fa code');
             return ctx.wizard.next();
         } else {
+            if (result.success) {
+
+                accounts.push({login, password, name, platform, profileId: result.profile.id});
+                await writeArrayToFile('./private/accounts.json', accounts)
+                await ctx.reply(`Аккаунт ${name} успешно привязан к профилю`);
+            } else {
+                await ctx.reply(result.message);
+            }
+            console.log('leave');
             return ctx.scene.leave();
         }
     },
 
     async (ctx) => {
+        let accounts = await getArrayFromFile('./private/accounts.json');
+        const { login, password, name } = ctx.scene.session;
             const code = ctx.message.text;
-            ctx.scene.session.accountManager.setTwoFactorAuthCode(code);
-            const result = ctx.scene.session.result;
+            const result = await ctx.scene.session.accountManager.setTwoFactorAuthCode(code);
+            console.log(result);
 
             if (result.success) {
-                await ctx.reply(`Аккаунт успешно привязан к профилю ${result.profile.name}`);
+                accounts.push({login, password, name, platform, profileId: result.profile.id});
+                await writeArrayToFile('./private/accounts.json', accounts)
+                await ctx.reply(`Аккаунт ${name} успешно привязан к профилю`);
             } else {
                 await ctx.reply(result.message);
             }
-            return ctx.scene.leave(); // Завершаем сцену
+            return ctx.scene.leave();
             }
         );
 
-        // Создаём менеджер сцен
         const stage = new Scenes.Stage([addAccountScene]);
 
         bot.use(session());
         bot.use(stage.middleware());
 
-        // Обрабатываем команду добавления аккаунта
         bot.hears('Add account', (ctx) => {
             ctx.scene.enter('add-account-scene');
         });
 
-
-        // bot.hears('Add account', (ctx) => {
-        //     addingAccount = true;
-        //     ctx.reply('Enter login:');
-        // })
-
-        // bot.on('text', async (ctx) => {
-        //     if (addingAccount && !accountLogin) {
-        //         accountLogin = ctx.message.text;
-        //         ctx.reply('Enter password:');
-        //     } else if (addingAccount && accountLogin && !accountPassword) {
-        //         accountPassword = ctx.message.text;
-        //         ctx.reply('Enter name');
-        //     } else if (addingAccount && accountLogin && accountPassword && !accountName) {
-        //         accountName = ctx.message.text;
-        //         ctx.reply('Ented 2fa code or any character');
-        //     } else if (addingAccount && accountLogin && accountPassword && accountName) {
-        //         accounts.push({login: accountLogin, password: accountPassword, name: accountName});
-        //         await writeArrayToFile('./private/accounts.json', accounts);
-        //         const account = new Account();
-        //     }
-        // })
-
-
         console.log('bot started');
-
 
 
         const app = express();
