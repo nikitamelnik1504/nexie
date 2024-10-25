@@ -17,9 +17,14 @@ export default class MessageRetriever {
             //     'url': 'ton.place',
             //     'messages_url': '/im'
             // },
+            // {
+            //     'name': 'Fancentro',
+            //     'url': 'fancentro.com',
+            //     'messages_url': '/messages'
+            // },
             {
-                'name': 'Fancentro',
-                'url': 'fancentro.com',
+                'name': 'Fansly',
+                'url': 'fansly.com',
                 'messages_url': '/messages'
             }
         ];
@@ -74,6 +79,8 @@ export default class MessageRetriever {
                 const client = await this.page.target().createCDPSession();
                 await client.send('Network.enable');
 
+                try {
+
                 client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
                     const data = await JSON.parse(response.payloadData);
                     console.log('websocks', data)
@@ -104,12 +111,22 @@ export default class MessageRetriever {
                         await writeArrayToFile('./private/dialogs.json', dialogs);
                     }
                 });
+                } catch {}
                 await this.page.goto(`https://${site.url}${site.messages_url}`, { waitUntil: 'networkidle0'});
-                await this.page.screenshot({path: 'testffdfd.png'})
+                // await this.AuthAccount();
+
+                await this.page.click('.modal-content .btn');
+
+                try {
+                    await this.page.waitForSelector('dfdfd', {timeout: 60000});
+                } catch {}
+                
+                await this.page.screenshot({path: 'test.png'})
                 console.log('oks')
             }
         } catch (error) {
             console.log(error);
+            console.log('restart');
             await this.profile.stopProfile();
             await this.browser.disconnect();
             await this.start();
@@ -130,5 +147,24 @@ export default class MessageRetriever {
                     console.log(`Undefined site: ${site.name}`);
             }
         }
+    }
+
+    async AuthAccount() {
+        try {
+            await this.page.evaluate(()=>{
+                // const elements = Array.from(document.querySelectorAll('span[data-i18context="snapcentro_authorize_login"]'));
+                const elements = Array.from(document.querySelectorAll('*'))
+                const btn = elements.find(el => el.textContent === 'Sign in' || el.textContent === 'Login');
+                btn.click()
+                return;
+            })
+            await this.page.waitForSelector('#fansly_login');
+            
+            await this.page.type('#fansly_login', 'skripchakandreywork@gmail.com');
+            await this.page.type('#fansly_password', '123QAZzaq');
+            await this.page.click('.modal-content app-button.btn xd-localization-string')
+            await this.page.waitForSelector('modal-content');
+            await this.page.click('.modal-content .btn');
+            } catch (error){console.log(error)}
     }
 }
