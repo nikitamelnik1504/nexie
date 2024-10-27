@@ -57,8 +57,6 @@ export default class Account {
             this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
 
             await this.page.goto(`https://fansly.com/messages`, { waitUntil: 'networkidle0' });
-            await this.page.screenshot({ path: 'test.png' });
-            console.log(await this.page.content());
             await this.page.evaluate(() => {
                 // const elements = Array.from(document.querySelectorAll('span[data-i18context="snapcentro_authorize_login"]'));
                 const elements = Array.from(document.querySelectorAll('*'))
@@ -120,8 +118,56 @@ export default class Account {
         } catch (error){console.log(error) }
     }
 
-    async logout() {
+    async tonAuth () {
+        try {
+        const cookies = await this.cookie.exportCookies();
+        this.page = await this.browser.newPage();
+        await this.page.setCookie(...cookies);
 
+        this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+
+        await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
+        
+        await this.page.waitForSelector('.Input', {timeout: 60000, visible: true});
+        await this.page.type('.Input', this.login);
+        await this.page.click('.Form__item__cont .Button__text');
+        await this.page.screenshot({path: 'test1.png'})
+
+        // await this.page.waitForNavigation({timeout: 60000});
+        
+
+        await this.page.waitForSelector('#identifierId', {timeout: 60000});
+        await this.page.type('#identifierId', this.login);
+        await this.page.waitForSelector('#identifierNext', {visible: true});
+        await this.page.click('#identifierNext');
+        
+        // await this.page.waitForNavigation({timeout: 60000});
+        await this.page.screenshot({path: 'test2.png'});
+
+        await this.page.waitForSelector('input[type=password]', {visible: true,});
+        await this.page.type('input[type="password"]', this.password);
+        await this.page.screenshot({path: 'test.png'});
+        await this.page.click('#passwordNext');
+
+        // await this.page.waitForNavigation({timeout: 90000});
+        try {
+            await this.page.waitForSelector('lflfl');
+        } catch {
+            await this.page.screenshot({path: 'test3.png'});
+        }
+
+        await this.stop();
+        return { success: true, isCode: false };
+
+        } catch (err) {
+            console.log(err);
+            console.log('restart');
+            await this.page.close();
+            await this.browser.disconnect();
+            await this.profile.stopProfile();
+            await this.start();
+            return await this.tonAuth();
+        }
     }
 
 }

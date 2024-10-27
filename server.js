@@ -1,4 +1,4 @@
-import { Telegraf, Markup, Scenes, session} from "telegraf";
+import { Telegraf, Markup, Scenes, session } from "telegraf";
 import { getArrayFromFile, writeArrayToFile } from "./src/utils/helper.js";
 import express from "express";
 import { WebSocketServer } from "ws";
@@ -9,35 +9,26 @@ import Account from "./src/Account.js";
 import AccountManager from "./src/managers/AccountManager.js";
 
 
-const bot = new Telegraf('7639460431:AAFv2g2y9wdz1GEb7gORgiugyJ8qWlYHkRg', {handlerTimeout: 300000});
+const bot = new Telegraf('7639460431:AAFv2g2y9wdz1GEb7gORgiugyJ8qWlYHkRg', { handlerTimeout: 300000 });
 const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiODBlOGFjM2E4ZGY1NjZiZjkxYjU2MjU0NjM4NWE4NjI1NjlhMGEwMTE5OTVkZWVlZjNkMWU1YzM3ZjRjN2I1MDQ5NjFiZDA5MTgyMzkyMjIiLCJpYXQiOjE3MjcyOTI1OTcuNjExNTQ1LCJuYmYiOjE3MjcyOTI1OTcuNjExNTQ2LCJleHAiOjE3NTg4Mjg1OTcuNTk2OTYzLCJzdWIiOiIzNzUwNTE0Iiwic2NvcGVzIjpbXX0.cu3orWJhCEn2nqytQXTs7H6_7DhzlcSbZXxOTkbmkOzA_VpVRVuCrU3wtLGl-NSGhdi9yLTaE6Jo5i14NSqJTsUf3j2eWetUoHN3t-XIT_0dcHxFTUD1NvEF0JoJX6CPk05r6AOC7Dw4f10SPGVWbdVct2vJJDuvnWKdWDR8AAsvj-Uszgg8R8u80P1zh1o3OpQ5qSXsl1kHeacj4Nog1ZNKDZ6kGQ-6b1yR8bOItjW_FlIu37pfiiZNzWB6WIs_N7amRB9EAXXAl1AQxLHZHreJ0butYzn6nWIfW-2vvB5ZS8H6nDI-khpzAo4-Qomeg8qPELJmCDEoTbOdaQB-TISFATMGvAI2oYIbVDHpk0GxGGEh4RiM3A181IToypYdsxvsmSYrzgEsybekdQavuVIiVnhLcyNcZJRIfYYFj14pyk_oCwRl12yMUYylFU6q_LN7_Nj-zaEH0jAIHlRWM2gVZCCIgb_-37xgtwT6hOc_JGohhl1p_wIjW-HgJjgP-42l4JAmCcLJBKtVSS6PilGO9tPfldfqgK0Z4fHpBOgJkkpNxcqhlykf91hbU4h85eIqD1UH5bhVdr5608mN1_FC_VRqX8W_RvDskQi47_7Z0lSdj7lL6E-dZ4YJpIYfqc0BTXlXFJb0_uTSIlXFTAQFYSEs-Su7TR_ywbXFI4Y'
-const chatsUrl = 'https://';
+const chatsUrl = 'https://dark-spooky-skull-qww9wqqp4w5hxgx-3000.app.github.dev/chats';
 
 bot.start((ctx) => {
-    ctx.reply('Choose option:', Markup.keyboard(['Chats', 'Settings']).resize());
+    ctx.reply('Choose option:', Markup.keyboard([Markup.button.webApp('Chats', chatsUrl), 'Settings']).resize());
 });
 
 bot.hears('Chats', async (ctx) => {
-    ctx.reply(
-        'Opening chat...',
-        Markup.inlineKeyboard([
-            Markup.button.webApp('Open chat', `${chatsUrl}/chats`)
-        ])
-    );
+    Markup.button.webApp('Open chat', `${chatsUrl}/chats`)
+    // ctx.reply(
+    //     'Opening chat...',
+    //     Markup.inlineKeyboard([
+    //         Markup.button.webApp('Open chat', `${chatsUrl}/chats`)
+    //     ])
+    // );
 });
 
 
 bot.hears('Settings', (ctx) => {
-    // ctx.reply('Settings:', {
-    //     reply_markup: {
-    //         keyboard: [
-    //             [{text: 'Access', callback_data: 'acces'}],
-    //             [{text: 'Back', callback_data: 'back'}]
-    //         ],
-    //         rezise_keyboard: true,
-    //         one_time_keyboard: true
-    //     }
-    // })
     ctx.reply('Settings:', Markup.keyboard(['Access', 'Accounts', 'Back']).resize());
 });
 
@@ -80,27 +71,27 @@ const addAccountScene = new Scenes.WizardScene(
     'add-account-scene',
 
     async (ctx) => {
-        ctx.reply('Введите логин:');
+        ctx.reply('Enter login or email:');
         return ctx.wizard.next();
     },
 
     async (ctx) => {
         ctx.scene.session.login = ctx.message.text;
-        ctx.reply('Введите пароль:');
+        ctx.reply('Enter password:');
         return ctx.wizard.next();
     },
 
     async (ctx) => {
         ctx.scene.session.password = ctx.message.text;
-        ctx.reply('Введите имя:');
+        ctx.reply('Enter name:');
         return ctx.wizard.next();
     },
 
     async (ctx) => {
         ctx.scene.session.name = ctx.message.text;
 
-        
-        await ctx.reply('Выберите платформу:', Markup.inlineKeyboard(
+
+        await ctx.reply('Choose platform:', Markup.inlineKeyboard(
             platforms.map(platform => Markup.button.callback(platform, platform))
         ));
 
@@ -113,7 +104,7 @@ const addAccountScene = new Scenes.WizardScene(
         ctx.scene.session.platform = platform;
         await ctx.reply('Wait please');
         const { login, password, name } = ctx.scene.session;
-        const accountManager = new AccountManager(token, profiles.data, accounts, login, password);
+        const accountManager = new AccountManager(token, profiles.data, accounts, login, password, platform);
         const result = await accountManager.bindAccount();
         ctx.scene.session.result = result;
         ctx.scene.session.accountManager = accountManager;
@@ -123,9 +114,9 @@ const addAccountScene = new Scenes.WizardScene(
         } else {
             if (result.success) {
 
-                accounts.push({login, password, name, platform, profileId: result.profile.id});
+                accounts.push({ login, password, name, platform, profileId: result.profile.id });
                 await writeArrayToFile('./private/accounts.json', accounts)
-                await ctx.reply(`Аккаунт ${name} успешно привязан к профилю`);
+                await ctx.reply(`The account ${name} is successfully linked to the platform`);
             } else {
                 await ctx.reply(result.message);
             }
@@ -136,32 +127,32 @@ const addAccountScene = new Scenes.WizardScene(
 
     async (ctx) => {
         let accounts = await getArrayFromFile('./private/accounts.json');
-        const { login, password, name } = ctx.scene.session;
-            const code = ctx.message.text;
-            const result = await ctx.scene.session.accountManager.setTwoFactorAuthCode(code);
-            console.log(result);
+        const { login, password, name, platform } = ctx.scene.session;
+        const code = ctx.message.text;
+        const result = await ctx.scene.session.accountManager.setTwoFactorAuthCode(code);
+        console.log(result);
 
-            if (result.success) {
-                accounts.push({login, password, name, platform, profileId: result.profile.id});
-                await writeArrayToFile('./private/accounts.json', accounts)
-                await ctx.reply(`Аккаунт ${name} успешно привязан к профилю`);
-            } else {
-                await ctx.reply(result.message);
-            }
-            return ctx.scene.leave();
-            }
-        );
+        if (result.success) {
+            accounts.push({ login, password, name, platform, profileId: result.profile.id });
+            await writeArrayToFile('./private/accounts.json', accounts)
+            await ctx.reply(`Аккаунт ${name} успешно привязан к профилю`);
+        } else {
+            await ctx.reply(result.message);
+        }
+        return ctx.scene.leave();
+    }
+);
 
-        const stage = new Scenes.Stage([addAccountScene]);
+const stage = new Scenes.Stage([addAccountScene]);
 
-        bot.use(session());
-        bot.use(stage.middleware());
+bot.use(session());
+bot.use(stage.middleware());
 
-        bot.hears('Add account', (ctx) => {
-            ctx.scene.enter('add-account-scene');
-        });
+bot.hears('Add account', (ctx) => {
+    ctx.scene.enter('add-account-scene');
+});
 
-        console.log('bot started');
+console.log('bot started');
 
 
 const app = express();
@@ -198,11 +189,11 @@ app.get('/chats', async (req, res) => {
         `)
 })
 
-        app.get('/chat', async (req, res) => {
-            const profileId = decodeURIComponent(req.query.profile_id);
-            const userName = decodeURIComponent(req.query.name);
+app.get('/chat', async (req, res) => {
+    const profileId = decodeURIComponent(req.query.profile_id);
+    const userName = decodeURIComponent(req.query.name);
 
-            res.send(`
+    res.send(`
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -235,52 +226,51 @@ app.get('/chats', async (req, res) => {
         </body>
         </html>
     `);
-        })
+})
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log('server running');
-    // const profiles = await ProfileManager.getProfiles(token);
+    const profiles = await ProfileManager.getProfiles(token);
     // console.log(profiles)
     // for (const profile of profiles.data) {
-        // console.log(await profile.proxy);
-        // const messageRetreiver = new MessageRetriever(token, profile.id);
-        // await messageRetreiver.start();
-        // await messageRetreiver.getMessageFromWebSocket();
+    //     const messageRetreiver = new MessageRetriever(token, profile.id);
+    //     await messageRetreiver.start();
+    //     await messageRetreiver.getMessageFromWebSocket();
     // }
 
-    const messageRetreiver = new MessageRetriever(token, 401936834);
-    await messageRetreiver.start();
-    await messageRetreiver.getMessageFromWebSocket();
+    // const messageRetreiver = new MessageRetriever(token, 491070732);
+    // await messageRetreiver.start();
+    // await messageRetreiver.getMessageFromWebSocket();
 })
 
-        bot.launch();
+bot.launch();
 
 const wss = new WebSocketServer({ port: 8080 });
 
-        wss.on('connection', (ws) => {
-            ws.on('message', async (message) => {
-                const data = JSON.parse(message);
-                if (data.userName && data.profileId) {
-                    ws.chat = new Chat(token, data.profileId, (newMessage) => {
-                        ws.send(JSON.stringify({ newMessage }));
-                    });
-                    await ws.chat.startChat(data.userName);
-                    const chat = await ws.chat.chat;
-                    ws.send(JSON.stringify({ chat }));
-                }
+wss.on('connection', (ws) => {
+    ws.on('message', async (message) => {
+        const data = JSON.parse(message);
+        if (data.userName && data.profileId) {
+            ws.chat = new Chat(token, data.profileId, (newMessage) => {
+                ws.send(JSON.stringify({ newMessage }));
+            });
+            await ws.chat.startChat(data.userName);
+            const chat = await ws.chat.chat;
+            ws.send(JSON.stringify({ chat }));
+        }
 
-                if (data.message) {
-                    await ws.chat.addMessageToQueue(data.message);
-                }
-            });
+        if (data.message) {
+            await ws.chat.addMessageToQueue(data.message);
+        }
+    });
 
-            ws.on('close', (close) => {
-                console.log('Connect closed', close)
-                ws.chat.close();
-            });
-            ws.on('headers', (headers) => {
-                headers.push('Access-Control-Allow-Origin: *');
-                headers.push('Acces-Control-Allow-Methods: GET, POST');
-            });
-        });
+    ws.on('close', (close) => {
+        console.log('Connect closed', close)
+        ws.chat.close();
+    });
+    ws.on('headers', (headers) => {
+        headers.push('Access-Control-Allow-Origin: *');
+        headers.push('Acces-Control-Allow-Methods: GET, POST');
+    });
+});
