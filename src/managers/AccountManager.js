@@ -30,8 +30,7 @@ export default class AccountManager {
         console.log(freeProfile.id);
 
         this.account = new Account(this.token, freeProfile.id, this.login, this.password );
-        // await this.account.start();
-        // const accountLogin = await this.account.fanslyAuth();
+
         const accountLogin = await this.platformAuthSelection();
 
         if (accountLogin?.success) {
@@ -43,7 +42,6 @@ export default class AccountManager {
     }
 
     async platformAuthSelection () {
-        // this.account = new Account(this.token, freeProfile.id, this.login, this.password );
         await this.account.start();
         switch (this.platform) {
             case 'fansly':

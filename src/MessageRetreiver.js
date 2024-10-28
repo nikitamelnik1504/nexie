@@ -12,16 +12,16 @@ export default class MessageRetriever {
         this.browser = null;
         this.cookie = null;
         this.sitesList = [
-            // {
-            //     'name': 'Ton',
-            //     'url': 'ton.place',
-            //     'messages_url': '/im'
-            // },
-            // {
-            //     'name': 'Fancentro',
-            //     'url': 'fancentro.com',
-            //     'messages_url': '/messages'
-            // },
+            {
+                'name': 'Ton',
+                'url': 'ton.place',
+                'messages_url': '/im'
+            },
+            {
+                'name': 'Fancentro',
+                'url': 'fancentro.com',
+                'messages_url': '/messages'
+            },
             {
                 'name': 'Fansly',
                 'url': 'fansly.com',
@@ -45,25 +45,106 @@ export default class MessageRetriever {
 
     async getMessagesFromTon(page) {
         try {
-            await page.waitForSelector('.Dialog__cont');
             await page.screenshot({ path: 'test.png' })
+            await page.waitForSelector('.Dialog__cont');
+            console.log('Poshlo')
 
             return await page.evaluate(async () => {
                 const wrappers = document.querySelectorAll('.Dialog__cont');
                 let results = [];
 
                 wrappers.forEach(wrapper => {
-                    if (wrapper.nextElementSibling && wrapper.nextElementSibling.classList.contains('Dialog__unread')) {
-                        results.push({
-                            name: wrapper.querySelector('.Dialog__name').innerText,
-                            message: wrapper.querySelector('.Dialog__text').innerText
-                        });
-                    }
+                    results.push({
+                        name: wrapper.querySelector('.Dialog__name').innerText,
+                        message: wrapper.querySelector('.Dialog__text').innerText,
+                        viewed: wrapper.nextElementSibling && wrapper.nextElementSibling.classList.contains('Dialog__unread') ? false : true
+                    });
+                    // if (wrapper.nextElementSibling && wrapper.nextElementSibling.classList.contains('Dialog__unread')) {
+                    //     results.push({
+                    //         name: wrapper.querySelector('.Dialog__name').innerText,
+                    //         message: wrapper.querySelector('.Dialog__text').innerText
+                    //     });
+                    // }
                 });
+                await this.browser.disconnect();
+                await this.profile.stopProfile();
+                console.log('yeas');
                 return results;
             });
         } catch (error) {
             console.error('Error get message with Ton:', error);
+            console.log('restart');
+            await this.browser.disconnect();
+            await this.profile.stopProfile();
+            await this.start();
+            return await this.getMessagesFromTon(page);
+        }
+    }
+
+    async getMessagesFromFansly() {
+        try {
+            const cookies = await this.cookie.exportCookies();
+            this.page = await this.browser.newPage();
+            await this.page.setViewport({width: 414, height: 896})
+            await this.page.setCookie(...cookies);
+
+            this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+
+            await this.page.goto(`https://fansly.com/messages`, { waitUntil: 'networkidle0' });
+
+            console.log('start');
+            try {
+                await this.page.click('.modal-content .btn.margin-top-2');
+            } catch {}
+
+            try {
+                await this.page.click('.modal-content .button-wrapper .btn.solid-green');
+            } catch {}
+
+            try {
+                await this.page.waitForSelector('.right-side div[routerlink="/messages"]');
+                await this.page.click('.right-side div[routerlink="/messages"]');
+            } catch {}
+
+            await this.page.waitForSelector('.message-list a');
+            console.log('test')
+
+            const result = await this.page.evaluate(() => {
+                const messagesElements = document.querySelectorAll('.message-list > a');
+                let result = [];
+                for (const messageEl of messagesElements) {
+                    const dialogId = messageEl.getAttribute('href').replace('/messages/', '');
+                    const message = messageEl.querySelector('.eclipse').textContent;
+                    const name = messageEl.querySelector('.message-contact .display-name').textContent;
+                    
+                    const viewed = messageEl.querySelector('.badge-container') ? false : true;
+
+                    console.log('yeah');
+                    result.push({
+                        name,
+                        message,
+                        dialogId,
+                        viewed
+                    });
+                }
+                return result;
+            });
+
+            console.log('oks');
+            console.log(result);
+            await this.browser.disconnect();
+            await this.profile.stopProfile();
+            return result;
+        } catch (err) {
+            console.log(err);
+            console.log('restart');
+            await this.browser.disconnect();
+            await this.profile.stopProfile();
+            await this.start();
+            return await this.getMessagesFromFansly();
+        } finally {
+            await this.browser.disconnect();
+            await this.profile.stopProfile();
         }
     }
 
@@ -134,18 +215,30 @@ export default class MessageRetriever {
         }
     }
 
-    async getProfileMessage() {
-        for (const site of this.sitesList) {
-            const cookies = await this.cookie.getFilteredCookieByUrl(site.url);
-            this.page = await this.browser.newPage();
-            await this.page.setCookie(...cookies);
-            await this.page.goto(`https://${site.url}${site.messages_url}`, { waitUntil: 'networkidle2', timeout: 60000 });
-            switch (site.name) {
-                case 'Ton':
+    async getProfileMessage(platformName) {
+        try {
+        
+            // const cookies = await this.cookie.exportCookies();
+            // this.page = await this.browser.newPage();
+            // await this.page.setCookie(...cookies);
+            // return await this.getMessagesFromTon(this.page);
+            switch (platformName) {
+                case 'ton':
+                    await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
                     return await this.getMessagesFromTon(this.page);
+                case 'fansly':
+                    return await this.getMessagesFromFansly(this.page);;
                 default:
-                    console.log(`Undefined site: ${site.name}`);
+                    console.log(`Undefined platform: ${platformName}`);
             }
+        
+        } catch (err){
+            console.log(err);
+            console.log('restart')
+            await this.browser.disconnect();
+            await this.profile.stopProfile();
+            await this.start();
+            return await this.getProfileMessage(platformName);
         }
     }
 

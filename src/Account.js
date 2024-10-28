@@ -12,8 +12,6 @@ export default class Account {
         this.cookie = null;
         this.login = login;
         this.password = password;
-        // this.name = name;
-        // this.on2FaCode = on2FaCode;
     }
 
     async start() {
@@ -36,11 +34,12 @@ export default class Account {
             await this.page.close();
         }
         await this.browser.disconnect();
+        await this.profile.stopProfile();
     }
 
     async _is2FARequired() {
         try {
-            await this.page.waitForSelector('#fansly_twofa');
+            await this.page.waitForSelector('#fansly_twofa', {timeout: 40000});
         } catch {
             await this.page.screenshot({ path: 'testTwo.png' });
             console.log('twoFa undefined');
@@ -56,7 +55,10 @@ export default class Account {
 
             this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
 
-            await this.page.goto(`https://fansly.com/messages`, { waitUntil: 'networkidle0' });
+            await this.page.goto(`https://fansly.com/`, { waitUntil: 'networkidle2' });
+            try {
+                await this.page.waitForNavigation()
+            } catch {}
             await this.page.evaluate(() => {
                 // const elements = Array.from(document.querySelectorAll('span[data-i18context="snapcentro_authorize_login"]'));
                 const elements = Array.from(document.querySelectorAll('*'))
@@ -127,34 +129,66 @@ export default class Account {
         this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
 
         await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
+        // await this.page.screenshot({path: 'test_input.png'})
         
         await this.page.waitForSelector('.Input', {timeout: 60000, visible: true});
         await this.page.type('.Input', this.login);
         await this.page.click('.Form__item__cont .Button__text');
-        await this.page.screenshot({path: 'test1.png'})
+        // await this.page.screenshot({path: 'test1.png'})
+        console.log('test1');
 
-        // await this.page.waitForNavigation({timeout: 60000});
+        // try {
+        //     await this.page.waitForNavigation();
+        // } catch {}
+
+        try {
+            await this.page.waitForSelector('form ul li:last-child', {visible: true});
+            console.log(await this.page.$('form ul') !== null);
+            if (await this.page.$('form ul') !== null) {
+                await this.page.screenshot({path})
+                try {
+                    await this.page.waitForSelector('lfdlf', {timeout: 10000})
+                } catch {}
+                await this.page.click('form ul li:last-child > div');
+                await this.page.click('form ul li:last-child > div');
+                await this.page.click('form ul li:last-child > div');
+            }
+        } catch {}
+
+        // try {
+        //     await this.page.waitForNavigation();
+        // } catch {}
+        // try {
+        //     await this.page.waitForSelector('lflfl');
+        // } catch {
+        //     await this.page.screenshot({path: 'test.png'});
+        // }
         
 
-        await this.page.waitForSelector('#identifierId', {timeout: 60000});
+        await this.page.waitForSelector('#identifierId');
         await this.page.type('#identifierId', this.login);
         await this.page.waitForSelector('#identifierNext', {visible: true});
+        // await this.page.screenshot({path: 'test2.png'});
+        try {
+            await this.page.waitForSelector('lfdlf', {timeout: 10000})
+        } catch {}
         await this.page.click('#identifierNext');
         
-        // await this.page.waitForNavigation({timeout: 60000});
-        await this.page.screenshot({path: 'test2.png'});
+        console.log('test2');
 
         await this.page.waitForSelector('input[type=password]', {visible: true,});
         await this.page.type('input[type="password"]', this.password);
-        await this.page.screenshot({path: 'test.png'});
+        // await this.page.screenshot({path: 'test.png'});
+        await this.page.waitForSelector('#passwordNext', {visible: true});
+        try {
+            await this.page.waitForSelector('lfdlf', {timeout: 10000})
+        } catch {}
         await this.page.click('#passwordNext');
 
-        // await this.page.waitForNavigation({timeout: 90000});
         try {
-            await this.page.waitForSelector('lflfl');
-        } catch {
-            await this.page.screenshot({path: 'test3.png'});
-        }
+            await this.page.waitForNavigation();
+            await this.page.screenshot({path: 'result.png'})
+        } catch {}
 
         await this.stop();
         return { success: true, isCode: false };

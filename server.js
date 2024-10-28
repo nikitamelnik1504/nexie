@@ -9,9 +9,9 @@ import Account from "./src/Account.js";
 import AccountManager from "./src/managers/AccountManager.js";
 
 
-const bot = new Telegraf('7639460431:AAFv2g2y9wdz1GEb7gORgiugyJ8qWlYHkRg', { handlerTimeout: 300000 });
+const bot = new Telegraf('7639460431:AAFv2g2y9wdz1GEb7gORgiugyJ8qWlYHkRg', { handlerTimeout: 600000 });
 const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiODBlOGFjM2E4ZGY1NjZiZjkxYjU2MjU0NjM4NWE4NjI1NjlhMGEwMTE5OTVkZWVlZjNkMWU1YzM3ZjRjN2I1MDQ5NjFiZDA5MTgyMzkyMjIiLCJpYXQiOjE3MjcyOTI1OTcuNjExNTQ1LCJuYmYiOjE3MjcyOTI1OTcuNjExNTQ2LCJleHAiOjE3NTg4Mjg1OTcuNTk2OTYzLCJzdWIiOiIzNzUwNTE0Iiwic2NvcGVzIjpbXX0.cu3orWJhCEn2nqytQXTs7H6_7DhzlcSbZXxOTkbmkOzA_VpVRVuCrU3wtLGl-NSGhdi9yLTaE6Jo5i14NSqJTsUf3j2eWetUoHN3t-XIT_0dcHxFTUD1NvEF0JoJX6CPk05r6AOC7Dw4f10SPGVWbdVct2vJJDuvnWKdWDR8AAsvj-Uszgg8R8u80P1zh1o3OpQ5qSXsl1kHeacj4Nog1ZNKDZ6kGQ-6b1yR8bOItjW_FlIu37pfiiZNzWB6WIs_N7amRB9EAXXAl1AQxLHZHreJ0butYzn6nWIfW-2vvB5ZS8H6nDI-khpzAo4-Qomeg8qPELJmCDEoTbOdaQB-TISFATMGvAI2oYIbVDHpk0GxGGEh4RiM3A181IToypYdsxvsmSYrzgEsybekdQavuVIiVnhLcyNcZJRIfYYFj14pyk_oCwRl12yMUYylFU6q_LN7_Nj-zaEH0jAIHlRWM2gVZCCIgb_-37xgtwT6hOc_JGohhl1p_wIjW-HgJjgP-42l4JAmCcLJBKtVSS6PilGO9tPfldfqgK0Z4fHpBOgJkkpNxcqhlykf91hbU4h85eIqD1UH5bhVdr5608mN1_FC_VRqX8W_RvDskQi47_7Z0lSdj7lL6E-dZ4YJpIYfqc0BTXlXFJb0_uTSIlXFTAQFYSEs-Su7TR_ywbXFI4Y'
-const chatsUrl = 'https://dark-spooky-skull-qww9wqqp4w5hxgx-3000.app.github.dev/chats';
+const chatsUrl = 'https://3000-sooqqa-telegrambot-4u4g9qnhkh6.ws-eu116.gitpod.io/chats';
 
 bot.start((ctx) => {
     ctx.reply('Choose option:', Markup.keyboard([Markup.button.webApp('Chats', chatsUrl), 'Settings']).resize());
@@ -91,7 +91,7 @@ const addAccountScene = new Scenes.WizardScene(
         ctx.scene.session.name = ctx.message.text;
 
 
-        await ctx.reply('Choose platform:', Markup.inlineKeyboard(
+        await ctx.reply('Choose platform please:', Markup.inlineKeyboard(
             platforms.map(platform => Markup.button.callback(platform, platform))
         ));
 
@@ -113,10 +113,42 @@ const addAccountScene = new Scenes.WizardScene(
             return ctx.wizard.next();
         } else {
             if (result.success) {
-
-                accounts.push({ login, password, name, platform, profileId: result.profile.id });
+                await accounts.push({ login, password, name, platform, profileId: result.profile.id });
                 await writeArrayToFile('./private/accounts.json', accounts)
                 await ctx.reply(`The account ${name} is successfully linked to the platform`);
+
+                const messageRetreiver = new MessageRetriever(token, result.profile.id);
+                await messageRetreiver.start();
+                const messages = await messageRetreiver.getProfileMessage(platform);
+                console.log(messages);
+                const dialogs = await getArrayFromFile('./private/dialogs.json');
+
+                for (const message of messages) {
+                    let dialogFound = false;
+                    for (const dialog of dialogs) {
+                        if (dialog.dialogId === message.dialogId) {
+                            await dialog.messages.push(message.message);
+                            dialogFound = true;
+                            break;
+                        }
+                    }
+                    if (!dialogFound) {
+                        await dialogs.push({
+                            dialogId: message.dialogId || null,
+                            profileId: result.profile.id,
+                            name: message.name,
+                            viewed: message.viewed,
+                            messages: [
+                                {
+                                    message: message.message,
+                                    sender: 'inbox'
+                                }
+                            ]
+                        });
+                    }
+                    console.log(dialogs)
+                    await writeArrayToFile('./private/dialogs.json', dialogs);
+                }
             } else {
                 await ctx.reply(result.message);
             }
@@ -135,7 +167,40 @@ const addAccountScene = new Scenes.WizardScene(
         if (result.success) {
             accounts.push({ login, password, name, platform, profileId: result.profile.id });
             await writeArrayToFile('./private/accounts.json', accounts)
-            await ctx.reply(`Аккаунт ${name} успешно привязан к профилю`);
+            await ctx.reply(`The account ${name} is successfully linked to the platform`);
+
+            const messageRetreiver = new MessageRetriever(token, result.profile.id);
+                await messageRetreiver.start();
+                const messages = await messageRetreiver.getProfileMessage(platform);
+                console.log(messages);
+                const dialogs = await getArrayFromFile('./private/dialogs.json');
+
+                for (const message of messages) {
+                    let dialogFound = false;
+                    for (const dialog of dialogs) {
+                        if (dialog.dialogId === message.dialogId) {
+                            await dialog.messages.push(message.message);
+                            dialogFound = true;
+                            break;
+                        }
+                    }
+                    if (!dialogFound) {
+                        await dialogs.push({
+                            dialogId: message.dialogId || null,
+                            profileId: result.profile.id,
+                            name: message.name,
+                            viewed: message.viewed,
+                            messages: [
+                                {
+                                    message: message.message,
+                                    sender: 'inbox'
+                                }
+                            ]
+                        });
+                    }
+                    console.log(dialogs)
+                    await writeArrayToFile('./private/dialogs.json', dialogs);
+                }
         } else {
             await ctx.reply(result.message);
         }
@@ -232,6 +297,10 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log('server running');
     const profiles = await ProfileManager.getProfiles(token);
+
+    // const messageRetreiver = new MessageRetriever(token, 491070732);
+    //     await messageRetreiver.start();
+    //     const messages = await messageRetreiver.getProfileMessage('fansly');
     // console.log(profiles)
     // for (const profile of profiles.data) {
     //     const messageRetreiver = new MessageRetriever(token, profile.id);

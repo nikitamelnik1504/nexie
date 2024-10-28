@@ -39,7 +39,8 @@ export default class Chat {
             })
             this.handleWebSocketNewMessage();
             this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
-            await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle0', timeout: 60000 });
+            await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle0' });
+            console.log('start');
             await this.page.waitForSelector('.Dialog__name');
 
             const isChat = await this.page.evaluate((userName) => {
@@ -91,13 +92,16 @@ export default class Chat {
                 messages: this.chat
             });
             await writeArrayToFile('./private/dialogs.json');
+            console.log('oks');
             return;
         } catch (error) {
             console.log(error);
             if (this.browser) {
+                // await this.page.close();
                 console.log('destroy browser')
-                await this.browser.browser.close()
+                await this.browser.disconnect();
             }
+            await this.profile.stopProfile();
             await this.startChat(userName);
         }
     }

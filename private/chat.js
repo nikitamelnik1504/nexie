@@ -1,7 +1,7 @@
 const elementChatBody = document.querySelector('.chat-body');
-const profileId = new URLSearchParams(window.location.search).get('profile_id');
+const profileId = new URLSearchParams(window.location.search).get('profileId');
 const userName = new URLSearchParams(window.location.search).get('name');
-const socket = new WebSocket('wss://cuddly-happiness-jgqv546w7pp2j7px-8080.app.github.dev/');
+const socket = new WebSocket('wss://8080-sooqqa-telegrambot-4u4g9qnhkh6.ws-eu116.gitpod.io/');
 
 socket.onopen = () => {
     socket.send(JSON.stringify({userName, profileId}));
