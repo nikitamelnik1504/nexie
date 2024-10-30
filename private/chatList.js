@@ -18,7 +18,7 @@ function renderChatList(dialogs) {
         const viewedStatus = dialog.viewed ? 'viewed' : 'not-viewed';
         chatItem.classList.add(`chat-item`);
         chatItem.classList.add(`${viewedStatus}`);
-        chatItem.setAttribute('href', `/chat?dialogId=${dialog.dialogId}&profileId=${dialog.profileId}&name=${dialog.name}`);
+        chatItem.setAttribute('href', `/chat?dialogId=${dialog.dialogId}&profileId=${dialog.profileId}&name=${dialog.name}&platform=${dialog.platform}`);
 
 
         chatItem.innerHTML = `

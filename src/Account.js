@@ -34,7 +34,7 @@ export default class Account {
             await this.page.close();
         }
         await this.browser.disconnect();
-        await this.profile.stopProfile();
+        // await this.profile.stopProfile();
     }
 
     async _is2FARequired() {
@@ -48,17 +48,23 @@ export default class Account {
     }
 
     async fanslyAuth() {
+        // await this.stop();
+        // return { success: true, isCode: false };
         try {
             const cookies = await this.cookie.exportCookies();
             this.page = await this.browser.newPage();
             await this.page.setCookie(...cookies);
 
-            this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+            await this.page.setViewport({width: 414, height: 896})
+
+            //this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
 
             await this.page.goto(`https://fansly.com/`, { waitUntil: 'networkidle2' });
             try {
                 await this.page.waitForNavigation()
             } catch {}
+
+            await this.page.screenshot({path: 'test!.png'})
             await this.page.evaluate(() => {
                 // const elements = Array.from(document.querySelectorAll('span[data-i18context="snapcentro_authorize_login"]'));
                 const elements = Array.from(document.querySelectorAll('*'))

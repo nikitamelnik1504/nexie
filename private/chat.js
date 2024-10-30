@@ -1,10 +1,16 @@
 const elementChatBody = document.querySelector('.chat-body');
 const profileId = new URLSearchParams(window.location.search).get('profileId');
 const userName = new URLSearchParams(window.location.search).get('name');
+const dialogId = new URLSearchParams(window.location.search).get('dialogId');
+const platform = new URLSearchParams(window.location.search).get('platform');
 const socket = new WebSocket('wss://8080-sooqqa-telegrambot-4u4g9qnhkh6.ws-eu116.gitpod.io/');
 
 socket.onopen = () => {
-    socket.send(JSON.stringify({userName, profileId}));
+    socket.send(JSON.stringify({userName, profileId, dialogId, platform}));
+
+    const pingInterval = setInterval(() => {
+        socket.send(JSON.stringify('ping'));
+    }, 30000);
 }
 socket.onmessage = (message) => {
     console.log(JSON.parse(message.data));
@@ -32,6 +38,14 @@ socket.onmessage = (message) => {
     </div>`;
     }
 }
+
+fetch ('/dialogs.json')
+    .then(response => {
+
+    })
+    .then(data => {
+        console.log(data);
+    })
 
 const sendButton = document.querySelector('.send-button');
 const messageValue = document.querySelector('.chat-input');

@@ -45,7 +45,15 @@ export default class MessageRetriever {
 
     async getMessagesFromTon(page) {
         try {
-            await page.screenshot({ path: 'test.png' })
+            const cookies = await this.cookie.exportCookies();
+            this.page = await this.browser.newPage();
+            await this.page.setViewport({width: 414, height: 896})
+            await this.page.setCookie(...cookies);
+
+            this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+
+            await this.page.goto(`https://fansly.com/messages`, { waitUntil: 'networkidle0' });
+            // await page.screenshot({ path: 'test.png' })
             await page.waitForSelector('.Dialog__cont');
             console.log('Poshlo')
 
@@ -106,7 +114,7 @@ export default class MessageRetriever {
                 await this.page.click('.right-side div[routerlink="/messages"]');
             } catch {}
 
-            await this.page.waitForSelector('.message-list a');
+            await this.page.waitForSelector('.message-list a', {timeout: 60000});
             console.log('test')
 
             const result = await this.page.evaluate(() => {
@@ -133,13 +141,13 @@ export default class MessageRetriever {
             console.log('oks');
             console.log(result);
             await this.browser.disconnect();
-            await this.profile.stopProfile();
+            // await this.profile.stopProfile();
             return result;
         } catch (err) {
             console.log(err);
             console.log('restart');
             await this.browser.disconnect();
-            await this.profile.stopProfile();
+            // await this.profile.stopProfile();
             await this.start();
             return await this.getMessagesFromFansly();
         } finally {

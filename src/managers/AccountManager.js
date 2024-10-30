@@ -14,7 +14,9 @@ export default class AccountManager {
     async bindAccount () {
         let freeProfile = null;
         if (this.accounts.length > 0) {
-            const linkedProfilesIds = this.accounts.map((account) => account.profileId);
+            const linkedProfilesIds = this.accounts.map((account) => {
+                return account.profileId
+            });
             // freeProfile = this.profiles.find(profile => linkedProfilesIds.find(id => profile.id !== id));
             
             const freeProfiles = this.profiles.filter(profile => !linkedProfilesIds.includes(profile.id))

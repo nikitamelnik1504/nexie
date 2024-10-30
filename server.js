@@ -14,8 +14,12 @@ const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiODBl
 const chatsUrl = 'https://3000-sooqqa-telegrambot-4u4g9qnhkh6.ws-eu116.gitpod.io/chats';
 
 bot.start((ctx) => {
-    ctx.reply('Choose option:', Markup.keyboard([Markup.button.webApp('Chats', chatsUrl), 'Settings']).resize());
+    showMenu(ctx);
 });
+
+function showMenu(ctx) {
+    ctx.reply('Choose option:', Markup.keyboard([Markup.button.webApp('Chats', chatsUrl), 'Settings']).resize());
+}
 
 bot.hears('Chats', async (ctx) => {
     Markup.button.webApp('Open chat', `${chatsUrl}/chats`)
@@ -31,6 +35,10 @@ bot.hears('Chats', async (ctx) => {
 bot.hears('Settings', (ctx) => {
     ctx.reply('Settings:', Markup.keyboard(['Access', 'Accounts', 'Back']).resize());
 });
+
+bot.hears('Back', (ctx) => {
+    showMenu(ctx);
+})
 
 bot.hears('Access', (ctx) => {
     ctx.reply('Enter the user ID');
@@ -60,7 +68,7 @@ bot.hears('Accounts', async (ctx) => {
     ctx.reply('Choose option', {
         reply_markup: {
             keyboard: [
-                [{ text: 'Add account' }]
+                [{ text: 'Add account' }, { text: 'Back' }]
             ],
             resize_keyboard: true
         }
@@ -119,6 +127,7 @@ const addAccountScene = new Scenes.WizardScene(
 
                 const messageRetreiver = new MessageRetriever(token, result.profile.id);
                 await messageRetreiver.start();
+
                 const messages = await messageRetreiver.getProfileMessage(platform);
                 console.log(messages);
                 const dialogs = await getArrayFromFile('./private/dialogs.json');
@@ -138,6 +147,7 @@ const addAccountScene = new Scenes.WizardScene(
                             profileId: result.profile.id,
                             name: message.name,
                             viewed: message.viewed,
+                            platform: platform,
                             messages: [
                                 {
                                     message: message.message,
@@ -179,7 +189,20 @@ const addAccountScene = new Scenes.WizardScene(
                     let dialogFound = false;
                     for (const dialog of dialogs) {
                         if (dialog.dialogId === message.dialogId) {
-                            await dialog.messages.push(message.message);
+                            // await dialog.messages.push({message: message.message, sender: message.sender});
+                            dialog = {
+                                dialogId: message.dialogId || null,
+                                profileId: result.profile.id,
+                                name: message.name,
+                                viewed: message.viewed,
+                                platform,
+                                messages: [
+                                    {
+                                        message: message.message,
+                                        sender: 'inbox'
+                                    }
+                                ]
+                            }
                             dialogFound = true;
                             break;
                         }
@@ -190,6 +213,7 @@ const addAccountScene = new Scenes.WizardScene(
                             profileId: result.profile.id,
                             name: message.name,
                             viewed: message.viewed,
+                            platform,
                             messages: [
                                 {
                                     message: message.message,
@@ -321,10 +345,10 @@ wss.on('connection', (ws) => {
     ws.on('message', async (message) => {
         const data = JSON.parse(message);
         if (data.userName && data.profileId) {
-            ws.chat = new Chat(token, data.profileId, (newMessage) => {
+            ws.chat = new Chat(token, data.profileId, data.platform, (newMessage) => {
                 ws.send(JSON.stringify({ newMessage }));
             });
-            await ws.chat.startChat(data.userName);
+            await ws.chat.startChat(data.userName, data.dialogId, data.platform);
             const chat = await ws.chat.chat;
             ws.send(JSON.stringify({ chat }));
         }
