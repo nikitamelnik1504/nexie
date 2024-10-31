@@ -23,7 +23,9 @@ export default class Account {
             await this.browser.connect();
         } catch (error) {
             console.log(error);
-            await this.browser.disconnect();
+            if (this.browser) {
+                await this.browser.disconnect();
+            }
             // await this.profile.stopProfile();
             await this.start();
         }
