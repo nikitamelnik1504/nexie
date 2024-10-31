@@ -244,7 +244,7 @@ const addAccountScene = new Scenes.WizardScene(
                 console.log(dialogs)
                 await writeArrayToFile('./private/dialogs.json', dialogs);
 
-                messageRetreiver.getMessageFromWebSocket(platform);
+                // messageRetreiver.getMessageFromWebSocket(platform);
             }
         } else {
             await ctx.reply(result.message);
