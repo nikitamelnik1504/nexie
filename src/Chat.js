@@ -73,20 +73,18 @@ export default class Chat {
             console.log('oks');
 
 
-            // const client = await this.page.target().createCDPSession();
-            // await client.send('Network.enable')
-            // client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
-            //     const data = JSON.parse(response.payloadData);
-            //     // if (data.body?.dialog?.id === this.dialogId && data.body.message) {
-            //     //     await this.handleNewMessageCallback(data.body.message.text);
-            //     // }
-            // });
+            const client = await this.page.target().createCDPSession();
+            await client.send('Network.enable')
+            client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
+                const data = JSON.parse(response.payloadData.d);
+                const event = JSON.parse(data);
+                if (event.message.groupId === this.dialogId && event.message.content) {
+                    await this.handleNewMessageCallback(event.message.content);
+                }
+            });
         } catch (err) {
             console.log(err);
             console.log('restart');
-            // if (this.page) {
-            //     await this.page.close();
-            // }
             await this.browser.disconnect();
             await this.startChatFansly(userName, dialogId);
         }

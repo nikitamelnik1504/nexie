@@ -347,6 +347,19 @@ app.listen(PORT, async () => {
     // const test = new MessageRetriever(token, 491070732);
     // await test.start();
     // await test.getMessageFromWebSocket('fansly');
+
+    const response = {"t":10000,"d":"{\"serviceId\":5,\"event\":\"{\\\"type\\\":1,\\\"message\\\":{\\\"type\\\":2,\\\"correlationId\\\":\\\"708312791798259712\\\",\\\"attachments\\\":[],\\\"content\\\":\\\"I love rating cocks 😍🍆💦 send me yours and i'll be honest babe.🔥\\\",\\\"senderId\\\":\\\"285557614366957568\\\",\\\"groupId\\\":\\\"706534011844960256\\\",\\\"interactions\\\":[{\\\"groupId\\\":\\\"706534011844960256\\\",\\\"userId\\\":\\\"704416812342718464\\\",\\\"readAt\\\":0,\\\"deliveredAt\\\":0,\\\"messageId\\\":\\\"708319134189887488\\\"}],\\\"inheritEmbeds\\\":true,\\\"inheritedEmbeds\\\":[],\\\"id\\\":\\\"708319134189887488\\\",\\\"createdAt\\\":1730370801.063,\\\"embeds\\\":[]}}\"}"}
+    const data = JSON.parse(response.d);
+    const message = JSON.parse(data.event).message;
+
+    console.log(message.content);
+    console.log(message.groupId)
+    // const replace = response.replace(/\\/g, '').replace(/"/g,'"');
+
+    // console.log(replace);
+    
+    // const data = JSON.parse(replace);
+    // console.log(data);
 })
 
 bot.launch();

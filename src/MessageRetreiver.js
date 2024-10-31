@@ -158,6 +158,47 @@ export default class MessageRetriever {
         }
     }
 
+    async getMessageFromWebSocketFromFansly(response) {
+        try {
+        const data = await JSON.parse(response?.payloadData?.d);
+        // const parseData = await JSON.parse(data);
+        const event = JSON.parse(data.event);
+        const message = event.message?.content;
+        const dialogId = event.message?.groupId;
+
+        if (message) {
+            const dialogs = await getArrayFromFile('./private/dialogs.json');
+            let dialogFound = false;
+            for (const dialog of dialogs) {
+                if (dialog.dialogId === data.body.dialog.id) {
+                    await dialog.messages.push(data.body.message.text);
+                    dialogFound = true;
+                    break;
+                }
+            }
+            if (!dialogFound) {
+                await dialogs.push({
+                    dialogId: data.body.dialog.id,
+                    profileId: this.profileId,
+                    name: `${data.body.user.firstName} ${data.body.user.lastName}`,
+                    viewed: false,
+                    messages:
+                        [{
+                            message: data.body.message.text,
+                            sender: 'inbox'
+                        }],
+                });
+            }
+            await writeArrayToFile('./private/dialogs.json', dialogs);
+
+        }
+        } catch (error) {
+            console.log(error);
+            await this.getMessageFromWebSocketFromFansly(response);
+        }
+
+    }
+
     async getMessageFromWebSocketFromTon(response) {
         try {
             const data = await JSON.parse(response.payloadData);
@@ -205,7 +246,7 @@ export default class MessageRetriever {
             await client.send('Network.enable');
 
             client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
-                console.log(response.payloadData);
+                console.log(JSON.parse(response.payloadData));
 
                 switch (platform) {
                     case 'ton':
@@ -225,10 +266,6 @@ export default class MessageRetriever {
                     await this.page.goto(`https://fansly.com/messages`);
                     break;
             }
-            
-            try {
-                await this.page.waitForSelector('lfdlfd', {timeout: 180000})
-            } catch { await this.page.screenshot({ path: 'test.png' }) }
 
         } catch (error) {
             console.log(error);
@@ -242,11 +279,6 @@ export default class MessageRetriever {
 
     async getProfileMessage(platformName) {
         try {
-
-            // const cookies = await this.cookie.exportCookies();
-            // this.page = await this.browser.newPage();
-            // await this.page.setCookie(...cookies);
-            // return await this.getMessagesFromTon(this.page);
             switch (platformName) {
                 case 'ton':
                     await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
@@ -265,24 +297,5 @@ export default class MessageRetriever {
             await this.start();
             return await this.getProfileMessage(platformName);
         }
-    }
-
-    async AuthAccount() {
-        try {
-            await this.page.evaluate(() => {
-                // const elements = Array.from(document.querySelectorAll('span[data-i18context="snapcentro_authorize_login"]'));
-                const elements = Array.from(document.querySelectorAll('*'))
-                const btn = elements.find(el => el.textContent === 'Sign in' || el.textContent === 'Login');
-                btn.click()
-                return;
-            })
-            await this.page.waitForSelector('#fansly_login');
-
-            await this.page.type('#fansly_login', 'skripchakandreywork@gmail.com');
-            await this.page.type('#fansly_password', '123QAZzaq');
-            await this.page.click('.modal-content app-button.btn xd-localization-string')
-            await this.page.waitForSelector('modal-content');
-            await this.page.click('.modal-content .btn');
-        } catch (error) { console.log(error) }
     }
 }
