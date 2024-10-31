@@ -3,7 +3,7 @@ const profileId = new URLSearchParams(window.location.search).get('profileId');
 const userName = new URLSearchParams(window.location.search).get('name');
 const dialogId = new URLSearchParams(window.location.search).get('dialogId');
 const platform = new URLSearchParams(window.location.search).get('platform');
-const socket = new WebSocket('wss://8080-sooqqa-telegrambot-4u4g9qnhkh6.ws-eu116.gitpod.io/');
+const socket = new WebSocket('ws://194.62.105.58:8080');
 
 socket.onopen = () => {
     socket.send(JSON.stringify({userName, profileId, dialogId, platform}));
