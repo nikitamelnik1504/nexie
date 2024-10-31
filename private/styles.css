@@ -85,6 +85,8 @@ body {
   display: flex;
   padding: 10px;
   background-color: #2F3238;
+  padding-bottom: 15px;
+  padding-top: 15px;
 }
 
 .chat-input {
@@ -125,14 +127,6 @@ body {
 
   .message {
       max-width: 90%;
-  }
-
-  .chat-footer {
-      padding: 5px;
-  }
-
-  .chat-input {
-      padding: 8px;
   }
 
   .send-button {
