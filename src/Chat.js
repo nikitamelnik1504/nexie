@@ -47,7 +47,6 @@ export default class Chat {
             await this.page.screenshot({path: 'test.png'});
 
             await this.page.waitForSelector('.message-collection', {timeout: 60000});
-            // await this.page.screenshot({path: 'test.png'});
 
             this.chat = await this.page.evaluate(() => {
                 const messages = document.querySelectorAll('.message-collection app-group-message.message');
@@ -74,14 +73,14 @@ export default class Chat {
             console.log('oks');
 
 
-            const client = await this.page.target().createCDPSession();
-            await client.send('Network.enable')
-            client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
-                const data = JSON.parse(response.payloadData);
-                // if (data.body?.dialog?.id === this.dialogId && data.body.message) {
-                //     await this.handleNewMessageCallback(data.body.message.text);
-                // }
-            });
+            // const client = await this.page.target().createCDPSession();
+            // await client.send('Network.enable')
+            // client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
+            //     const data = JSON.parse(response.payloadData);
+            //     // if (data.body?.dialog?.id === this.dialogId && data.body.message) {
+            //     //     await this.handleNewMessageCallback(data.body.message.text);
+            //     // }
+            // });
         } catch (err) {
             console.log(err);
             console.log('restart');
@@ -140,7 +139,6 @@ export default class Chat {
                         return true;
                     }
                 }
-                console.log('Netu elementa');
                 return false;
             }, userName);
             if (!isChat) {
@@ -172,14 +170,27 @@ export default class Chat {
             });
             this.dialogId = this.page.url().match(/\d+/g).join('');
             const chats = await getArrayFromFile('./private/dialogs.json');
-            await chats.push({
-                dialogId: this.dialogId,
-                profileId: this.profileId,
-                name: userName,
-                viewed: true,
-                platform: 'ton',
-                messages: this.chat
-            });
+
+            let isFound = false;
+
+            for (const chat of chats) {
+                if (chat.profileId === this.profileId && chat.name === userName && chat.platform === 'ton') {
+                    isFound = true;
+                    chat.messages = this.chat;
+                    break;
+                }
+            }
+
+            if (!isFound) {
+                await chats.push({
+                    dialogId: this.dialogId,
+                    profileId: this.profileId,
+                    name: userName,
+                    viewed: true,
+                    platform: 'ton',
+                    messages: this.chat
+                });
+            }
             await writeArrayToFile('./private/dialogs.json', chats);
             console.log('oks');
             return;
@@ -190,7 +201,7 @@ export default class Chat {
                 console.log('destroy browser')
                 await this.browser.disconnect();
             }
-            await this.profile.stopProfile();
+            // await this.profile.stopProfile();
             await this.startChat(userName);
         }
     }
@@ -223,8 +234,8 @@ export default class Chat {
 
             await this.page.type('app-group-message-input .message-input-container .message-input', message);
             await this.page.waitForSelector('.send-button.can-send');
-            // await this.page.click('.send-button.can-send');
-            await this.page.screenshot({path: 'test.png'});
+            await this.page.click('.send-button.can-send');
+            // await this.page.screenshot({path: 'test.png'});
         } catch {
             await this.sendMessageFansly(message);
         }

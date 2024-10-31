@@ -48,6 +48,8 @@ export async function writeArrayToFile(filePath, array) {
     try {
         if (Array.isArray(array) && array.length > 0) {
             return fs.writeFileSync(filePath, JSON.stringify(array));
+        } else if (Array.isArray(array) && array.length === 0) {
+            return fs.writeFileSync(filePath, '');
         }
     } catch (error) {
         console.error('Error write file', error)

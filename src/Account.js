@@ -64,7 +64,6 @@ export default class Account {
                 await this.page.waitForNavigation()
             } catch {}
 
-            await this.page.screenshot({path: 'test!.png'})
             await this.page.evaluate(() => {
                 // const elements = Array.from(document.querySelectorAll('span[data-i18context="snapcentro_authorize_login"]'));
                 const elements = Array.from(document.querySelectorAll('*'))
@@ -72,8 +71,6 @@ export default class Account {
                 btn.click()
                 return;
             })
-
-
 
             await this.page.waitForSelector('#fansly_login', { timeout: 60000 });
             console.log(this.login);
@@ -120,7 +117,6 @@ export default class Account {
                 await this.stop();
                 return {success: false, message: "Incorrectly code. Account not added"};
             }
-            try {await this.page.waitForSelector('fdfd')} catch{await this.page.screenshot({path: 'test.png'})}
             await this.stop();
             return {success: true}
         } catch (error){console.log(error) }
@@ -140,61 +136,26 @@ export default class Account {
         await this.page.waitForSelector('.Input', {timeout: 60000, visible: true});
         await this.page.type('.Input', this.login);
         await this.page.click('.Form__item__cont .Button__text');
-        // await this.page.screenshot({path: 'test1.png'})
-        console.log('test1');
-
-        // try {
-        //     await this.page.waitForNavigation();
-        // } catch {}
 
         try {
             await this.page.waitForSelector('form ul li:last-child', {visible: true});
             console.log(await this.page.$('form ul') !== null);
             if (await this.page.$('form ul') !== null) {
-                await this.page.screenshot({path})
-                try {
-                    await this.page.waitForSelector('lfdlf', {timeout: 10000})
-                } catch {}
-                await this.page.click('form ul li:last-child > div');
-                await this.page.click('form ul li:last-child > div');
                 await this.page.click('form ul li:last-child > div');
             }
         } catch {}
 
-        // try {
-        //     await this.page.waitForNavigation();
-        // } catch {}
-        // try {
-        //     await this.page.waitForSelector('lflfl');
-        // } catch {
-        //     await this.page.screenshot({path: 'test.png'});
-        // }
-        
-
         await this.page.waitForSelector('#identifierId');
         await this.page.type('#identifierId', this.login);
         await this.page.waitForSelector('#identifierNext', {visible: true});
-        // await this.page.screenshot({path: 'test2.png'});
-        try {
-            await this.page.waitForSelector('lfdlf', {timeout: 10000})
-        } catch {}
         await this.page.click('#identifierNext');
         
         console.log('test2');
 
         await this.page.waitForSelector('input[type=password]', {visible: true,});
         await this.page.type('input[type="password"]', this.password);
-        // await this.page.screenshot({path: 'test.png'});
         await this.page.waitForSelector('#passwordNext', {visible: true});
-        try {
-            await this.page.waitForSelector('lfdlf', {timeout: 10000})
-        } catch {}
         await this.page.click('#passwordNext');
-
-        try {
-            await this.page.waitForNavigation();
-            await this.page.screenshot({path: 'result.png'})
-        } catch {}
 
         await this.stop();
         return { success: true, isCode: false };

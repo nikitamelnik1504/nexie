@@ -14,12 +14,22 @@ export default class AccountManager {
     async bindAccount () {
         let freeProfile = null;
         if (this.accounts.length > 0) {
-            const linkedProfilesIds = this.accounts.map((account) => {
-                return account.profileId
-            });
+            const linkedProfilesIds = this.accounts.map((account) => {account.profileId});
             // freeProfile = this.profiles.find(profile => linkedProfilesIds.find(id => profile.id !== id));
+
+            const freeProfiles = [];
+
+            for (const account of this.accounts) {
+                for (const profile of this.profiles) {
+                    if (account.profileId === profile.id && account.platform !== this.platform) {
+                        freeProfiles.push(profile);
+                    }
+                }
+            }
+            freeProfiles.push(this.profiles.filter(profile => {!linkedProfilesIds.includes(profile.id)}));
+
+
             
-            const freeProfiles = this.profiles.filter(profile => !linkedProfilesIds.includes(profile.id))
             freeProfile = freeProfiles[0];
         } else {
             freeProfile = this.profiles[0];
