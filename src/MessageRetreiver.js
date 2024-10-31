@@ -120,6 +120,9 @@ export default class MessageRetriever {
                 const messagesElements = document.querySelectorAll('.message-list > a');
                 let result = [];
                 for (const messageEl of messagesElements) {
+                    if (!messageEl.querySelector('.eclipse')) {
+                        continue;
+                    }
                     const dialogId = messageEl.getAttribute('href').replace('/messages/', '');
                     const message = messageEl.querySelector('.eclipse').textContent;
                     const name = messageEl.querySelector('.message-contact .display-name').textContent;

@@ -41,17 +41,14 @@ export default class Account {
 
     async _is2FARequired() {
         try {
-            await this.page.waitForSelector('#fansly_twofa', {timeout: 40000});
+            await this.page.waitForSelector('#fansly_twofa');
         } catch {
-            await this.page.screenshot({ path: 'testTwo.png' });
             console.log('twoFa undefined');
         }
         return await this.page.$('#fansly_twofa') !== null;
     }
 
     async fanslyAuth() {
-        // await this.stop();
-        // return { success: true, isCode: false };
         try {
             const cookies = await this.cookie.exportCookies();
             this.page = await this.browser.newPage();
@@ -82,7 +79,6 @@ export default class Account {
             await this.page.type('#fansly_password', this.password);
             await this.page.waitForSelector('.modal-content app-button xd-localization-string');
             await this.page.click('.modal-content app-button.btn xd-localization-string');
-            try {await this.page.click('.modal-content app-button.btn xd-localization-string')} catch {}
 
             const is2FARequired = await this._is2FARequired();
 
