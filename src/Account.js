@@ -48,6 +48,34 @@ export default class Account {
         return await this.page.$('#fansly_twofa') !== null;
     }
 
+    async fancentroAuth() {
+        try {
+            const cookies = await this.cookie.exportCookies();
+            this.page = await this.browser.newPage();
+            await this.page.setCookie(...cookies);
+
+            await this.page.setViewport({width: 414, height: 896});
+            await this.page.goto(`https://fancentro.com/login`, { waitUntil: 'networkidle2' });
+
+            await this.page.waitForSelector('input[type="email"]');
+            await this.page.type('input[type="email"]', this.login);
+            await this.page.waitForSelector('input[type="password"]');
+            await this.page.type('input[type="password"]', this.password);
+            await this.page.click('button.MuiButtonBase-root');
+
+            await this.page.waitForNavigation();
+            return { success: true, isCode: false };
+        } catch (err) {
+            console.log(err)
+            console.log('restart');
+            await this.browser.disconnect();
+            
+            // await this.profile.stopProfile();
+            await this.start();
+            return await this.fancentroAuth();
+        }
+    }
+
     async fanslyAuth() {
         try {
             const cookies = await this.cookie.exportCookies();

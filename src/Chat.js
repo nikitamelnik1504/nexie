@@ -99,6 +99,63 @@ export default class Chat {
             case 'fansly':
                 await this.startChatFansly(userName, dialogId);
                 break;
+            case 'fancentro':
+                await this.startChatFancentro(userName, dialogId);
+                break;
+        }
+    }
+
+    async startChatFancentro (userName) {
+        try {
+            this.profile = new ProfileManager(this.token, this.profileId);
+            await this.profile.startProfile();
+            this.browser = new BrowserManager(this.token, this.profile);
+            const cookieManager = new CookieManager(this.token, this.profileId);
+            const cookies = await cookieManager.exportCookies();
+            await this.browser.connect();
+
+            this.page = await this.browser.newPage();
+            await this.page.setCookie(...cookies);
+            this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+            await this.page.goto(`https://fancentro.com/messages`, { waitUntil: 'networkidle0' });
+
+            await this.page.evaluate((userName) => {
+                const messages = document.querySelectorAll('#scrollableDiv .List > div > button');
+                for (const message of messages) {
+                    if (message.querySelector('h2').textContent === userName) {
+                        message.click();
+                    }
+                }
+            }, userName);
+
+            await this.page.waitForSelector('section');
+
+            this.chat = await this.page.evaluate(() => {
+                const messagesEl = document.querySelectorAll('section .customScroll > div > div');
+
+                const messages = [];
+                for (const messageEl of messagesEl) {
+                    const message = messageEl.querySelector('span.text').textContent;
+                    const senderEl = messageEl.querySelector('span.text').parentElement.parentElement.parentElement;
+                    const sender = window.getComputedStyle(senderEl).backgroundColor === 'rgb(29, 161, 242)' ? 'outbox' : 'inbox'
+
+                    messages.push({message, sender});
+                }
+
+                return messages;
+            });
+
+            // data_bucket_id = 6723...d7a5
+            //data_id = 6719...1def
+
+        } catch (error) {
+            console.log(error);
+            if (this.browser) {
+                console.log('destroy browser')
+                await this.browser.disconnect();
+            }
+            // await this.profile.stopProfile();
+            await this.startChat(userName);
         }
     }
 

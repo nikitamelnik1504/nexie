@@ -88,6 +88,54 @@ export default class MessageRetriever {
         }
     }
 
+    async getMessagesFromFancentro() {
+        try {
+            const cookies = await this.cookie.exportCookies();
+            this.page = await this.browser.newPage();
+            await this.page.setViewport({ width: 414, height: 896 })
+            await this.page.setCookie(...cookies);
+
+            this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+
+            await this.page.goto(`https://fancentro.com/messages`, { waitUntil: 'networkidle0' });
+
+            console.log('start');
+
+            const messages = await this.page.evaluate(() => {
+                const messagesElements = document.querySelectorAll('#scrollableDiv .List > div > button')
+                const messages = [];
+
+                for (const messageEl of messagesElements) {
+                    const name = messageEl.querySelector('h2').textContent;
+                    const message = messageEl.querySelector('p > span > span').textContent;
+                    const viewed = messageEl.querySelector('time')?.nextElementSibling?.querySelector('span') ? false : true;
+                    const dialogId = null;
+
+                    messages.push({
+                        name,
+                        message,
+                        dialogId,
+                        viewed
+                    });
+                }
+
+                return messages;
+            });
+
+            console.log('oks');
+
+            await this.browser.disconnect();
+            return messages;
+        } catch (err) {
+            console.log(err);
+            console.log('restart');
+            await this.browser.disconnect();
+            // await this.profile.stopProfile();
+            await this.start();
+            return await this.getMessagesFromFancentro();
+        }
+    }
+
     async getMessagesFromFansly() {
         try {
             const cookies = await this.cookie.exportCookies();
@@ -152,9 +200,6 @@ export default class MessageRetriever {
             // await this.profile.stopProfile();
             await this.start();
             return await this.getMessagesFromFansly();
-        } finally {
-            await this.browser.disconnect();
-            await this.profile.stopProfile();
         }
     }
 
@@ -253,6 +298,7 @@ export default class MessageRetriever {
                         await this.getMessageFromWebSocketFromTon(response);
                         break;
                     case 'fansly':
+                        await this.getMessageFromWebSocketFromFansly(response);
                         break;
                 }
 
@@ -284,7 +330,9 @@ export default class MessageRetriever {
                     await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
                     return await this.getMessagesFromTon(this.page);
                 case 'fansly':
-                    return await this.getMessagesFromFansly(this.page);;
+                    return await this.getMessagesFromFansly();
+                case 'fancentro':
+                    return await this.getMessagesFromFancentro();
                 default:
                     console.log(`Undefined platform: ${platformName}`);
             }

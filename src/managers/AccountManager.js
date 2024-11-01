@@ -61,7 +61,7 @@ export default class AccountManager {
             case 'ton':
                 return await this.account.tonAuth();
             case 'fancentro':
-                return;
+                return await this.account.fancentroAuth();
         }
     }
 
