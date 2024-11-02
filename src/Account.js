@@ -32,11 +32,11 @@ export default class Account {
     }
 
     async stop() {
-        if (this.page) {
-            await this.page.close();
-        }
+        // if (this.page) {
+        //     await this.page.close();
+        // }
         await this.browser.disconnect();
-        await this.profile.stopProfile();
+        // await this.profile.stopProfile();
     }
 
     async _is2FARequired() {

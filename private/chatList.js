@@ -13,10 +13,10 @@ function renderChatList(dialogs) {
     chatListContainer.innerHTML = '';
 
     dialogs.forEach(dialog => {
-        if (dialog.viewed) {
+        if (!dialog.viewed) {
             const lastMessage = dialog.messages.length > 0 ? dialog.messages[dialog.messages.length - 1].message : 'No messages';
             const chatItem = document.createElement('a');
-            const viewedStatus = 'viewed';
+            const viewedStatus = 'not-viewed';
             chatItem.classList.add(`chat-item`);
             chatItem.classList.add(`${viewedStatus}`);
             chatItem.setAttribute('href', `/chat?dialogId=${dialog.dialogId}&profileId=${dialog.profileId}&name=${dialog.name}&platform=${dialog.platform}`);
@@ -32,10 +32,10 @@ function renderChatList(dialogs) {
     });
 
     dialogs.forEach(dialog => {
-        if (!dialog.viewed) {
+        if (dialog.viewed) {
             const lastMessage = dialog.messages.length > 0 ? dialog.messages[dialog.messages.length - 1].message : 'No messages';
             const chatItem = document.createElement('a');
-            const viewedStatus = 'not-viewed';
+            const viewedStatus = 'viewed';
             chatItem.classList.add(`chat-item`);
             chatItem.classList.add(`${viewedStatus}`);
             chatItem.setAttribute('href', `/chat?dialogId=${dialog.dialogId}&profileId=${dialog.profileId}&name=${dialog.name}&platform=${dialog.platform}`);

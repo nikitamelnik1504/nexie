@@ -82,7 +82,7 @@ export default class MessageRetriever {
             console.error('Error get message with Ton:', error);
             console.log('restart');
             await this.browser.disconnect();
-            await this.profile.stopProfile();
+            // await this.profile.stopProfile();
             await this.start();
             return await this.getMessagesFromTon(page);
         }
@@ -343,7 +343,7 @@ export default class MessageRetriever {
             console.log(err);
             console.log('restart')
             await this.browser.disconnect();
-            await this.profile.stopProfile();
+            // await this.profile.stopProfile();
             await this.start();
             return await this.getProfileMessage(platformName);
         }
