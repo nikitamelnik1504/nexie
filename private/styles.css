@@ -28,6 +28,43 @@ body {
   overflow: hidden;
 }
 
+.back-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.back-button:hover {
+  color: #888;
+}
+
+/* Adjust header layout */
+.chat-header {
+  padding: 15px;
+  background-color: #2F3238;
+  color: white;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.chat-header h2 {
+  font-size: 1.2em;
+  margin: 0;
+}
+
+.back-button {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 /* Заголовок чата */
 .chat-header {
   padding: 15px;

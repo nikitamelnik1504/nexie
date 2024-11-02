@@ -145,41 +145,80 @@ const addAccountScene = new Scenes.WizardScene(
                 await ctx.reply(`The account ${name} is successfully linked to the platform`);
 
                 const messageRetreiver = new MessageRetriever(token, result.profile.id);
-                await messageRetreiver.start();
 
-                const messages = await messageRetreiver.getProfileMessage(platform);
-                console.log(messages);
-                const dialogs = await getArrayFromFile('./private/dialogs.json');
+                messageRetreiver.start().then(async () => {
+                    const messages = await messageRetreiver.getProfileMessage(platform);
+                    console.log(messages);
+                    const dialogs = await getArrayFromFile('./private/dialogs.json');
 
-                for (const message of messages) {
-                    let dialogFound = false;
-                    // for (const dialog of dialogs) {
-                    //     if (dialog.dialogId === message.dialogId) {
-                    //         await dialog.messages.push(message.message);
-                    //         dialogFound = true;
-                    //         break;
-                    //     }
-                    // }
-                    if (!dialogFound) {
-                        await dialogs.push({
-                            dialogId: message.dialogId || null,
-                            profileId: result.profile.id,
-                            name: message.name,
-                            viewed: message.viewed,
-                            platform: platform,
-                            messages: [
-                                {
-                                    message: message.message,
-                                    sender: message.viewed
-                                }
-                            ]
-                        });
+                    for (const message of messages) {
+                        let dialogFound = false;
+                        // for (const dialog of dialogs) {
+                        //     if (dialog.dialogId === message.dialogId) {
+                        //         await dialog.messages.push(message.message);
+                        //         dialogFound = true;
+                        //         break;
+                        //     }
+                        // }
+                        if (!dialogFound) {
+                            await dialogs.push({
+                                dialogId: message.dialogId || null,
+                                profileId: result.profile.id,
+                                name: message.name,
+                                viewed: message.viewed,
+                                platform: platform,
+                                messages: [
+                                    {
+                                        message: message.message,
+                                        sender: message.viewed
+                                    }
+                                ]
+                            });
+                        }
+                        console.log(dialogs)
+                        await writeArrayToFile('./private/dialogs.json', dialogs);
+
+                        await messageRetreiver.start();
+                        await messageRetreiver.getMessageFromWebSocket(platform);
                     }
-                    console.log(dialogs)
-                    await writeArrayToFile('./private/dialogs.json', dialogs);
+                });
 
-                    messageRetreiver.getMessageFromWebSocket(platform);
-                }
+
+                // await messageRetreiver.start();
+
+                // const messages = await messageRetreiver.getProfileMessage(platform);
+                // console.log(messages);
+                // const dialogs = await getArrayFromFile('./private/dialogs.json');
+
+                // for (const message of messages) {
+                //     let dialogFound = false;
+                //     // for (const dialog of dialogs) {
+                //     //     if (dialog.dialogId === message.dialogId) {
+                //     //         await dialog.messages.push(message.message);
+                //     //         dialogFound = true;
+                //     //         break;
+                //     //     }
+                //     // }
+                //     if (!dialogFound) {
+                //         await dialogs.push({
+                //             dialogId: message.dialogId || null,
+                //             profileId: result.profile.id,
+                //             name: message.name,
+                //             viewed: message.viewed,
+                //             platform: platform,
+                //             messages: [
+                //                 {
+                //                     message: message.message,
+                //                     sender: message.viewed
+                //                 }
+                //             ]
+                //         });
+                //     }
+                //     console.log(dialogs)
+                //     await writeArrayToFile('./private/dialogs.json', dialogs);
+
+                //     await messageRetreiver.getMessageFromWebSocket(platform);
+                // }
             } else {
                 await ctx.reply(result.message);
             }
@@ -201,17 +240,35 @@ const addAccountScene = new Scenes.WizardScene(
             await ctx.reply(`The account ${name} is successfully linked to the platform`);
 
             const messageRetreiver = new MessageRetriever(token, result.profile.id);
-            await messageRetreiver.start();
-            const messages = await messageRetreiver.getProfileMessage(platform);
-            console.log(messages);
-            const dialogs = await getArrayFromFile('./private/dialogs.json');
+            await messageRetreiver.start().then(async () => {
+                const messages = await messageRetreiver.getProfileMessage(platform);
+                console.log(messages);
+                const dialogs = await getArrayFromFile('./private/dialogs.json');
 
-            for (const message of messages) {
-                let dialogFound = false;
-                for (const dialog of dialogs) {
-                    if (dialog.dialogId === message.dialogId) {
-                        // await dialog.messages.push({message: message.message, sender: message.sender});
-                        dialog = {
+                for (const message of messages) {
+                    let dialogFound = false;
+                    for (const dialog of dialogs) {
+                        if (dialog.dialogId === message.dialogId) {
+                            // await dialog.messages.push({message: message.message, sender: message.sender});
+                            dialog = {
+                                dialogId: message.dialogId || null,
+                                profileId: result.profile.id,
+                                name: message.name,
+                                viewed: message.viewed,
+                                platform,
+                                messages: [
+                                    {
+                                        message: message.message,
+                                        sender: 'inbox'
+                                    }
+                                ]
+                            }
+                            dialogFound = true;
+                            break;
+                        }
+                    }
+                    if (!dialogFound) {
+                        await dialogs.push({
                             dialogId: message.dialogId || null,
                             profileId: result.profile.id,
                             name: message.name,
@@ -223,31 +280,61 @@ const addAccountScene = new Scenes.WizardScene(
                                     sender: 'inbox'
                                 }
                             ]
-                        }
-                        dialogFound = true;
-                        break;
+                        });
                     }
-                }
-                if (!dialogFound) {
-                    await dialogs.push({
-                        dialogId: message.dialogId || null,
-                        profileId: result.profile.id,
-                        name: message.name,
-                        viewed: message.viewed,
-                        platform,
-                        messages: [
-                            {
-                                message: message.message,
-                                sender: 'inbox'
-                            }
-                        ]
-                    });
-                }
-                console.log(dialogs)
-                await writeArrayToFile('./private/dialogs.json', dialogs);
+                    console.log(dialogs)
+                    await writeArrayToFile('./private/dialogs.json', dialogs);
 
-                messageRetreiver.getMessageFromWebSocket(platform);
-            }
+                    await messageRetreiver.start();
+                    await messageRetreiver.getMessageFromWebSocket(platform);
+                }
+            });
+            // const messages = await messageRetreiver.getProfileMessage(platform);
+            // console.log(messages);
+            // const dialogs = await getArrayFromFile('./private/dialogs.json');
+
+            // for (const message of messages) {
+            //     let dialogFound = false;
+            //     for (const dialog of dialogs) {
+            //         if (dialog.dialogId === message.dialogId) {
+            //             // await dialog.messages.push({message: message.message, sender: message.sender});
+            //             dialog = {
+            //                 dialogId: message.dialogId || null,
+            //                 profileId: result.profile.id,
+            //                 name: message.name,
+            //                 viewed: message.viewed,
+            //                 platform,
+            //                 messages: [
+            //                     {
+            //                         message: message.message,
+            //                         sender: 'inbox'
+            //                     }
+            //                 ]
+            //             }
+            //             dialogFound = true;
+            //             break;
+            //         }
+            //     }
+            //     if (!dialogFound) {
+            //         await dialogs.push({
+            //             dialogId: message.dialogId || null,
+            //             profileId: result.profile.id,
+            //             name: message.name,
+            //             viewed: message.viewed,
+            //             platform,
+            //             messages: [
+            //                 {
+            //                     message: message.message,
+            //                     sender: 'inbox'
+            //                 }
+            //             ]
+            //         });
+            //     }
+            //     console.log(dialogs)
+            //     await writeArrayToFile('./private/dialogs.json', dialogs);
+
+            //     messageRetreiver.getMessageFromWebSocket(platform);
+            // }
         } else {
             await ctx.reply(result.message);
         }
@@ -318,7 +405,8 @@ app.get('/chat', async (req, res) => {
 
         <div class="chat-container">
             <div class="chat-header">
-            <h2>Chat with ${userName}</h2>
+                <button class="back-button" onclick="location.href='/chats'">Back</button>
+                <h2>Chat with ${userName}</h2>
             </div>
             
             <div class="chat-body">
@@ -348,11 +436,6 @@ app.listen(PORT, async () => {
         const profileManager = new ProfileManager(token, profile.id);
         await profileManager.stopProfile();
     }
-    // console.log(profiles);
-
-    // const test = new MessageRetriever(token, 491070732);
-    // await test.start();
-    // await test.getMessageFromWebSocket('fansly');
 })
 
 bot.launch();

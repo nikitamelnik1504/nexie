@@ -13,22 +13,42 @@ function renderChatList(dialogs) {
     chatListContainer.innerHTML = '';
 
     dialogs.forEach(dialog => {
-        const lastMessage = dialog.messages.length > 0 ? dialog.messages[dialog.messages.length - 1].message : 'No messages';
-        const chatItem = document.createElement('a');
-        const viewedStatus = dialog.viewed ? 'viewed' : 'not-viewed';
-        chatItem.classList.add(`chat-item`);
-        chatItem.classList.add(`${viewedStatus}`);
-        chatItem.setAttribute('href', `/chat?dialogId=${dialog.dialogId}&profileId=${dialog.profileId}&name=${dialog.name}&platform=${dialog.platform}`);
+        if (dialog.viewed) {
+            const lastMessage = dialog.messages.length > 0 ? dialog.messages[dialog.messages.length - 1].message : 'No messages';
+            const chatItem = document.createElement('a');
+            const viewedStatus = 'viewed';
+            chatItem.classList.add(`chat-item`);
+            chatItem.classList.add(`${viewedStatus}`);
+            chatItem.setAttribute('href', `/chat?dialogId=${dialog.dialogId}&profileId=${dialog.profileId}&name=${dialog.name}&platform=${dialog.platform}`);
 
 
-        chatItem.innerHTML = `
-            <h3>${dialog.name}</h3>
-            <p>${lastMessage}</p>
-        `;
+            chatItem.innerHTML = `
+                <h3>${dialog.name}</h3>
+                <p>${lastMessage}</p>
+            `;
 
-        chatListContainer.appendChild(chatItem);
+            chatListContainer.appendChild(chatItem);
+        }
+    });
+
+    dialogs.forEach(dialog => {
+        if (!dialog.viewed) {
+            const lastMessage = dialog.messages.length > 0 ? dialog.messages[dialog.messages.length - 1].message : 'No messages';
+            const chatItem = document.createElement('a');
+            const viewedStatus = 'not-viewed';
+            chatItem.classList.add(`chat-item`);
+            chatItem.classList.add(`${viewedStatus}`);
+            chatItem.setAttribute('href', `/chat?dialogId=${dialog.dialogId}&profileId=${dialog.profileId}&name=${dialog.name}&platform=${dialog.platform}`);
+
+
+            chatItem.innerHTML = `
+                <h3>${dialog.name}</h3>
+                <p>${lastMessage}</p>
+            `;
+
+            chatListContainer.appendChild(chatItem);
+        }
     });
 }
 
-// Запускаем загрузку диалогов при загрузке страницы
 window.onload = loadDialogs;

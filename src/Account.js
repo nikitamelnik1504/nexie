@@ -55,10 +55,9 @@ export default class Account {
             await this.page.setCookie(...cookies);
 
             await this.page.setViewport({ width: 414, height: 896 });
-            await this.page.goto(`https://fancentro.com/login`, { waitUntil: 'networkidle2' });
+            await this.page.goto(`https://fancentro.com/login`, { waitUntil: 'networkidle0' });
 
             try {
-                await this.page.waitForNavigation();
                 await this.page.evaluate(() => {
                     if (document.querySelector('span[data-i18context="PromoSearchSuggestionsInput"]')) {
                         const menuBtn = document.querySelector('button[data-testid="header-mobile-menu-open-button"]')
@@ -67,7 +66,7 @@ export default class Account {
                         logoutBtn.click();
                     }
                 });
-            } catch {}
+            } catch (err){console.log(err)}
 
             await this.page.waitForSelector('input[type="email"]');
             await this.page.type('input[type="email"]', this.login);
@@ -75,7 +74,7 @@ export default class Account {
             await this.page.type('input[type="password"]', this.password);
             await this.page.click('button.MuiButtonBase-root');
 
-            await this.page.waitForNavigation();
+            // await this.page.waitForNavigation();
             return { success: true, isCode: false };
         } catch (err) {
             console.log(err)
@@ -98,22 +97,20 @@ export default class Account {
 
             //this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
 
-            await this.page.goto(`https://fansly.com/`, { waitUntil: 'networkidle2' });
+            await this.page.goto(`https://fansly.com/`, { waitUntil: 'networkidle0' });
             try {
-                await this.page.waitForNavigation()
+                await this.page.evaluate(() => {
+                    const avatar = document.querySelector(".avatar-container.pointer");
+                    if (avatar) {
+                        avatar.click();
+                        const navMenuButtons = document.querySelectorAll('app-nav-menu-side .list .dropdown-item');
+                        navMenuButtons[navMenuButtons.length -1].click();
+                    }
+                });
             } catch { }
 
-            await this.page.evaluate(() => {
-                const avatar = document.querySelector(".avatar-container.pointer");
-                if (avatar) {
-                    avatar.click();
-                    const navMenuButtons = document.querySelectorAll('app-nav-menu-side .list .dropdown-item');
-                    navMenuButtons[navMenuButtons.length - 1].click();
-                }
-            });
 
             await this.page.evaluate(() => {
-                // const elements = Array.from(document.querySelectorAll('span[data-i18context="snapcentro_authorize_login"]'));
                 const elements = Array.from(document.querySelectorAll('*'))
                 const btn = elements.find(el => el.textContent === 'Sign in' || el.textContent === 'Login');
                 btn.click()
@@ -180,10 +177,13 @@ export default class Account {
             await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
 
             try {
-                if (this.page.$('.Tabbar')) {
+                if (await this.page.$('.Tabbar')) {
                     await this.page.goto(`https://ton.place/settings`, { waitUntil: 'networkidle2' });
+                    await this.page.waitForSelector('.Settings')
                     await this.page.click('.Settings .List:last-child .ListItem');
-                    await this.page.click('.BottomSheet_content .CellButton');
+                    await ths.page.waitForSelector('.BottomSheet__content .CellButton');
+                    await this.page.click('.BottomSheet__content .CellButton');
+                    console.log('logout');
                 }
             } catch {}
 

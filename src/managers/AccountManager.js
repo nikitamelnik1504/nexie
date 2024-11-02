@@ -23,10 +23,12 @@ export default class AccountManager {
                 for (const profile of this.profiles) {
                     if (account.profileId === profile.id && account.platform !== this.platform) {
                         freeProfiles.push(profile);
+                    } else if (profile.id !== account.profileId) {
+                        freeProfiles.push(profile);
                     }
                 }
             }
-            freeProfiles.push(this.profiles.filter(profile => {!linkedProfilesIds.includes(profile.id)}));
+            //freeProfiles.push(this.profiles.filter(profile => !linkedProfilesIds.includes(profile.id))[0]);
 
 
             

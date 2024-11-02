@@ -52,7 +52,7 @@ export default class MessageRetriever {
 
             this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
 
-            await this.page.goto(`https://fansly.com/messages`, { waitUntil: 'networkidle0' });
+            await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle0' });
 
             await page.waitForSelector('.Dialog__cont');
 
@@ -97,9 +97,11 @@ export default class MessageRetriever {
 
             this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
 
-            await this.page.goto(`https://fancentro.com/messages`, { waitUntil: 'networkidle0' });
+            await this.page.goto(`https://fancentro.com/admin/messages`, { waitUntil: 'networkidle0' });
 
             console.log('start');
+
+            await this.page.waitForSelector('#scrollableDiv .List > div > button');
 
             const messages = await this.page.evaluate(() => {
                 const messagesElements = document.querySelectorAll('#scrollableDiv .List > div > button')
@@ -239,7 +241,7 @@ export default class MessageRetriever {
         }
         } catch (error) {
             console.log(error);
-            await this.getMessageFromWebSocketFromFansly(response);
+            // await this.getMessageFromWebSocketFromFansly(response);
         }
 
     }
@@ -275,7 +277,7 @@ export default class MessageRetriever {
                 await writeArrayToFile('./private/dialogs.json', dialogs);
             }
         } catch {
-            await this.getMessageFromWebSocketFromTon();
+            //await this.getMessageFromWebSocketFromTon();
         }
     }
 
