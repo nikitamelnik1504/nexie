@@ -36,7 +36,7 @@ export default class Account {
             await this.page.close();
         }
         await this.browser.disconnect();
-        // await this.profile.stopProfile();
+        await this.profile.stopProfile();
     }
 
     async _is2FARequired() {
@@ -75,6 +75,7 @@ export default class Account {
             await this.page.click('button.MuiButtonBase-root');
 
             // await this.page.waitForNavigation();
+            await this.stop();
             return { success: true, isCode: false };
         } catch (err) {
             console.log(err)

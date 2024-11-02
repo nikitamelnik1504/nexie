@@ -181,6 +181,7 @@ const addAccountScene = new Scenes.WizardScene(
                         await messageRetreiver.start();
                         await messageRetreiver.getMessageFromWebSocket(platform);
                     }
+                    console.log('leave');
                 });
 
 
@@ -222,7 +223,6 @@ const addAccountScene = new Scenes.WizardScene(
             } else {
                 await ctx.reply(result.message);
             }
-            console.log('leave');
             return ctx.scene.leave();
         }
     },
