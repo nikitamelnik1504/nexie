@@ -111,7 +111,6 @@ export default class Account {
                     navMenuButtons[navMenuButtons.length - 1].click();
                 }
             });
-            await this.page.waitForNavigation();
 
             await this.page.evaluate(() => {
                 // const elements = Array.from(document.querySelectorAll('span[data-i18context="snapcentro_authorize_login"]'));
