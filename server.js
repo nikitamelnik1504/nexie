@@ -343,7 +343,11 @@ app.get('/chat', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log('server running');
-    // const profiles = await ProfileManager.getProfiles(token);
+    const profiles = await ProfileManager.getProfiles(token);
+    for (const profile of profiles.data) {
+        const profileManager = new ProfileManager(token, profile.id);
+        await profileManager.stopProfile();
+    }
     // console.log(profiles);
 
     // const test = new MessageRetriever(token, 491070732);
