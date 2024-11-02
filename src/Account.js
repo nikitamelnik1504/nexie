@@ -31,7 +31,7 @@ export default class Account {
         }
     }
 
-    async stop () {
+    async stop() {
         if (this.page) {
             await this.page.close();
         }
@@ -54,8 +54,20 @@ export default class Account {
             this.page = await this.browser.newPage();
             await this.page.setCookie(...cookies);
 
-            await this.page.setViewport({width: 414, height: 896});
+            await this.page.setViewport({ width: 414, height: 896 });
             await this.page.goto(`https://fancentro.com/login`, { waitUntil: 'networkidle2' });
+
+            try {
+                await this.page.waitForNavigation();
+                await this.page.evaluate(() => {
+                    if (document.querySelector('span[data-i18context="PromoSearchSuggestionsInput"]')) {
+                        const menuBtn = document.querySelector('button[data-testid="header-mobile-menu-open-button"]')
+                        menuBtn.click();
+                        const logoutBtn = document.querySelector('span[data-i18alias="signout"]');
+                        logoutBtn.click();
+                    }
+                });
+            } catch {}
 
             await this.page.waitForSelector('input[type="email"]');
             await this.page.type('input[type="email"]', this.login);
@@ -69,7 +81,7 @@ export default class Account {
             console.log(err)
             console.log('restart');
             await this.browser.disconnect();
-            
+
             // await this.profile.stopProfile();
             await this.start();
             return await this.fancentroAuth();
@@ -82,14 +94,24 @@ export default class Account {
             this.page = await this.browser.newPage();
             await this.page.setCookie(...cookies);
 
-            await this.page.setViewport({width: 414, height: 896})
+            await this.page.setViewport({ width: 414, height: 896 })
 
             //this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
 
             await this.page.goto(`https://fansly.com/`, { waitUntil: 'networkidle2' });
             try {
                 await this.page.waitForNavigation()
-            } catch {}
+            } catch { }
+
+            await this.page.evaluate(() => {
+                const avatar = document.querySelector(".avatar-container.pointer");
+                if (avatar) {
+                    avatar.click();
+                    const navMenuButtons = document.querySelectorAll('app-nav-menu-side .list .dropdown-item');
+                    navMenuButtons[navMenuButtons.length - 1].click();
+                }
+            });
+            await this.page.waitForNavigation();
 
             await this.page.evaluate(() => {
                 // const elements = Array.from(document.querySelectorAll('span[data-i18context="snapcentro_authorize_login"]'));
@@ -122,7 +144,7 @@ export default class Account {
             console.log(error)
             console.log('restart');
             await this.browser.disconnect();
-            
+
             // await this.profile.stopProfile();
             await this.start();
             return await this.fanslyAuth();
@@ -136,55 +158,62 @@ export default class Account {
             await this.page.type('#fansly_twofa', code);
             await this.page.click('.modal-content app-button xd-localization-string');
             try {
-                await this.page.waitForSelector('.modal-content .error', {timeout: 5000});
-            } catch {}
-            
+                await this.page.waitForSelector('.modal-content .error', { timeout: 5000 });
+            } catch { }
+
             if (await this.page.$('.modal-content .error') !== null) {
                 await this.stop();
-                return {success: false, message: "Incorrectly code. Account not added"};
+                return { success: false, message: "Incorrectly code. Account not added" };
             }
             await this.stop();
-            return {success: true}
-        } catch (error){console.log(error) }
+            return { success: true }
+        } catch (error) { console.log(error) }
     }
 
-    async tonAuth () {
+    async tonAuth() {
         try {
-        const cookies = await this.cookie.exportCookies();
-        this.page = await this.browser.newPage();
-        await this.page.setCookie(...cookies);
+            const cookies = await this.cookie.exportCookies();
+            this.page = await this.browser.newPage();
+            await this.page.setCookie(...cookies);
 
-        this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+            this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
 
-        await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
-        // await this.page.screenshot({path: 'test_input.png'})
-        
-        await this.page.waitForSelector('.Input', {timeout: 60000, visible: true});
-        await this.page.type('.Input', this.login);
-        await this.page.click('.Form__item__cont .Button__text');
+            await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
 
-        try {
-            await this.page.waitForSelector('form ul li:last-child', {visible: true});
-            console.log(await this.page.$('form ul') !== null);
-            if (await this.page.$('form ul') !== null) {
-                await this.page.click('form ul li:last-child > div');
-            }
-        } catch {}
+            try {
+                if (this.page.$('.Tabbar')) {
+                    await this.page.goto(`https://ton.place/settings`, { waitUntil: 'networkidle2' });
+                    await this.page.click('.Settings .List:last-child .ListItem');
+                    await this.page.click('.BottomSheet_content .CellButton');
+                }
+            } catch {}
 
-        await this.page.waitForSelector('#identifierId');
-        await this.page.type('#identifierId', this.login);
-        await this.page.waitForSelector('#identifierNext', {visible: true});
-        await this.page.click('#identifierNext');
-        
-        console.log('test2');
+            await this.page.waitForSelector('.Input', { timeout: 60000, visible: true });
+            await this.page.type('.Input', this.login);
+            await this.page.click('.Form__item__cont .Button__text');
 
-        await this.page.waitForSelector('input[type=password]', {visible: true,});
-        await this.page.type('input[type="password"]', this.password);
-        await this.page.waitForSelector('#passwordNext', {visible: true});
-        await this.page.click('#passwordNext');
+            try {
+                await this.page.waitForSelector('form ul li:last-child', { visible: true });
+                console.log(await this.page.$('form ul') !== null);
+                if (await this.page.$('form ul') !== null) {
+                    await this.page.click('form ul li:last-child > div');
+                }
+            } catch { }
 
-        await this.stop();
-        return { success: true, isCode: false };
+            await this.page.waitForSelector('#identifierId');
+            await this.page.type('#identifierId', this.login);
+            await this.page.waitForSelector('#identifierNext', { visible: true });
+            await this.page.click('#identifierNext');
+
+            console.log('test2');
+
+            await this.page.waitForSelector('input[type=password]', { visible: true, });
+            await this.page.type('input[type="password"]', this.password);
+            await this.page.waitForSelector('#passwordNext', { visible: true });
+            await this.page.click('#passwordNext');
+
+            await this.stop();
+            return { success: true, isCode: false };
 
         } catch (err) {
             console.log(err);
