@@ -43,7 +43,7 @@ export default class MessageRetriever {
         }
     }
 
-    async getMessagesFromTon(page) {
+    async getMessagesFromTon() {
         try {
             const cookies = await this.cookie.exportCookies();
             this.page = await this.browser.newPage();
@@ -54,9 +54,9 @@ export default class MessageRetriever {
 
             await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle0' });
 
-            await page.waitForSelector('.Dialog__cont');
+            await this.page.waitForSelector('.Dialog__cont');
 
-            const messages = await page.evaluate(async () => {
+            const messages = await this.page.evaluate(async () => {
                 const wrappers = document.querySelectorAll('.Dialog__cont');
                 let results = [];
 
@@ -73,8 +73,7 @@ export default class MessageRetriever {
                     //     });
                     // }
                 });
-                await this.browser.disconnect();
-                await this.profile.stopProfile();
+                
                 console.log('yeas');
                 return results;
             });
@@ -356,7 +355,7 @@ export default class MessageRetriever {
         try {
             switch (platformName) {
                 case 'ton':
-                    await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
+                    //await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
                     return await this.getMessagesFromTon(this.page);
                 case 'fansly':
                     return await this.getMessagesFromFansly();

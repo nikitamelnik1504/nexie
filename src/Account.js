@@ -181,7 +181,7 @@ export default class Account {
                 await this.page.goto(`https://ton.place/settings`, { waitUntil: 'networkidle2' });
                 await this.page.waitForSelector('.Settings')
                 await this.page.click('.Settings .List:last-child .ListItem');
-                await ths.page.waitForSelector('.BottomSheet__content .CellButton');
+                await this.page.waitForSelector('.BottomSheet__content .CellButton');
                 await this.page.click('.BottomSheet__content .CellButton');
                 console.log('logout');
             } catch {}
