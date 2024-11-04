@@ -56,7 +56,7 @@ export default class MessageRetriever {
 
             await page.waitForSelector('.Dialog__cont');
 
-            return await page.evaluate(async () => {
+            const messages = await page.evaluate(async () => {
                 const wrappers = document.querySelectorAll('.Dialog__cont');
                 let results = [];
 
@@ -78,10 +78,14 @@ export default class MessageRetriever {
                 console.log('yeas');
                 return results;
             });
+            await this.page.close();
+            return messages;
         } catch (error) {
             console.error('Error get message with Ton:', error);
             console.log('restart');
-            await this.browser.disconnect();
+            if (this.page) {
+                await this.page.close();
+            }
             // await this.profile.stopProfile();
             await this.start();
             return await this.getMessagesFromTon(page);
@@ -126,12 +130,14 @@ export default class MessageRetriever {
 
             console.log('oks');
 
-            await this.browser.disconnect();
+            await this.page.close()
             return messages;
         } catch (err) {
             console.log(err);
             console.log('restart');
-            await this.browser.disconnect();
+            if (this.page) {
+                await this.page.close()
+            }
             // await this.profile.stopProfile();
             await this.start();
             return await this.getMessagesFromFancentro();
@@ -192,6 +198,7 @@ export default class MessageRetriever {
 
             console.log('oks');
             console.log(result);
+            await this.page.close();
             // await this.browser.disconnect();
             // await this.profile.stopProfile();
             return result;

@@ -70,17 +70,13 @@ bot.action(/account_delete_(\d+)/, async (ctx) => {
 bot.hears('Accounts', async (ctx) => {
     let accounts = await getArrayFromFile('./private/accounts.json');
     if (accounts.length > 0) {
+        let index = 0;
         for (const account of accounts) {
             await ctx.reply(`Account name: ${account.name} \nPlatform: ${account.platform}`, Markup.inlineKeyboard([
                 Markup.button.callback('Delete account', `account_delete_${index}`)
             ]));
+            index++;
         }
-        // accounts.forEach((account, index) => {
-        //     ctx.reply(`Account name: ${account.name} \nPlatform: ${account.platform}`, Markup.inlineKeyboard([
-        //         Markup.button.callback('Delete account', `account_delete_${index}`)
-        //     ])
-        //     );
-        // })
     }
     ctx.reply('Choose option', {
         reply_markup: {

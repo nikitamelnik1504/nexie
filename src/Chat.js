@@ -85,7 +85,9 @@ export default class Chat {
         } catch (err) {
             console.log(err);
             console.log('restart');
-            await this.browser.disconnect();
+            if (this.page) {
+                await this.page.close();
+            }
             await this.startChatFansly(userName, dialogId);
         }
 
@@ -152,7 +154,10 @@ export default class Chat {
             console.log(error);
             if (this.browser) {
                 console.log('destroy browser')
-                await this.browser.disconnect();
+                // await this.browser.disconnect();
+                if (this.page) {
+                    await this.page.close();
+                }
             }
             // await this.profile.stopProfile();
             await this.startChat(userName);
@@ -252,9 +257,9 @@ export default class Chat {
         } catch (error) {
             console.log(error);
             if (this.browser) {
-                // await this.page.close();
+                await this.page.close();
                 console.log('destroy browser')
-                await this.browser.disconnect();
+                // await this.browser.disconnect();
             }
             // await this.profile.stopProfile();
             await this.startChat(userName);
