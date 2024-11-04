@@ -64,25 +64,23 @@ bot.action(/account_delete_(\d+)/, async (ctx) => {
     let accounts = await getArrayFromFile('./private/accounts.json');
     await accounts.splice(index, 1);
     await writeArrayToFile('./private/accounts.json', accounts);
-    if (accounts.length > 0) {
-        accounts.forEach((account, index) => {
-            ctx.reply(`Account name: ${account.name} \nPlatform: ${account.platform}`, Markup.inlineKeyboard([
-                Markup.button.callback('Delete account', `account_delete_${index}`)
-            ])
-            );
-        });
-    }
+    ctx.reply('The account has been successfully deleted');
 });
 
 bot.hears('Accounts', async (ctx) => {
     let accounts = await getArrayFromFile('./private/accounts.json');
     if (accounts.length > 0) {
-        accounts.forEach((account, index) => {
-            ctx.reply(`Account name: ${account.name} \nPlatform: ${account.platform}`, Markup.inlineKeyboard([
+        for (const account of accounts) {
+            await ctx.reply(`Account name: ${account.name} \nPlatform: ${account.platform}`, Markup.inlineKeyboard([
                 Markup.button.callback('Delete account', `account_delete_${index}`)
-            ])
-            );
-        })
+            ]));
+        }
+        // accounts.forEach((account, index) => {
+        //     ctx.reply(`Account name: ${account.name} \nPlatform: ${account.platform}`, Markup.inlineKeyboard([
+        //         Markup.button.callback('Delete account', `account_delete_${index}`)
+        //     ])
+        //     );
+        // })
     }
     ctx.reply('Choose option', {
         reply_markup: {
@@ -148,7 +146,6 @@ const addAccountScene = new Scenes.WizardScene(
 
                 messageRetreiver.start().then(async () => {
                     const messages = await messageRetreiver.getProfileMessage(platform);
-                    console.log(messages);
                     const dialogs = await getArrayFromFile('./private/dialogs.json');
 
                     for (const message of messages) {
@@ -183,43 +180,6 @@ const addAccountScene = new Scenes.WizardScene(
                     }
                     console.log('leave');
                 });
-
-
-                // await messageRetreiver.start();
-
-                // const messages = await messageRetreiver.getProfileMessage(platform);
-                // console.log(messages);
-                // const dialogs = await getArrayFromFile('./private/dialogs.json');
-
-                // for (const message of messages) {
-                //     let dialogFound = false;
-                //     // for (const dialog of dialogs) {
-                //     //     if (dialog.dialogId === message.dialogId) {
-                //     //         await dialog.messages.push(message.message);
-                //     //         dialogFound = true;
-                //     //         break;
-                //     //     }
-                //     // }
-                //     if (!dialogFound) {
-                //         await dialogs.push({
-                //             dialogId: message.dialogId || null,
-                //             profileId: result.profile.id,
-                //             name: message.name,
-                //             viewed: message.viewed,
-                //             platform: platform,
-                //             messages: [
-                //                 {
-                //                     message: message.message,
-                //                     sender: message.viewed
-                //                 }
-                //             ]
-                //         });
-                //     }
-                //     console.log(dialogs)
-                //     await writeArrayToFile('./private/dialogs.json', dialogs);
-
-                //     await messageRetreiver.getMessageFromWebSocket(platform);
-                // }
             } else {
                 await ctx.reply(result.message);
             }
@@ -240,9 +200,8 @@ const addAccountScene = new Scenes.WizardScene(
             await ctx.reply(`The account ${name} is successfully linked to the platform`);
 
             const messageRetreiver = new MessageRetriever(token, result.profile.id);
-            await messageRetreiver.start().then(async () => {
+            messageRetreiver.start().then(async () => {
                 const messages = await messageRetreiver.getProfileMessage(platform);
-                console.log(messages);
                 const dialogs = await getArrayFromFile('./private/dialogs.json');
 
                 for (const message of messages) {

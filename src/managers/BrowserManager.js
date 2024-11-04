@@ -15,7 +15,7 @@ export default class BrowserManager {
 
     async disconnect() {
         if (this.browser) {
-            await this.browser.disconnect();
+            await this.browser.close();
         }
     }
 

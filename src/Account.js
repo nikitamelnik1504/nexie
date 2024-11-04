@@ -35,13 +35,14 @@ export default class Account {
         // if (this.page) {
         //     await this.page.close();
         // }
-        await this.browser.disconnect();
-        // await this.profile.stopProfile();
+        if (this.browser) {
+            await this.browser.disconnect();
+        }
     }
 
     async _is2FARequired() {
         try {
-            await this.page.waitForSelector('#fansly_twofa');
+            await this.page.waitForSelector('#fansly_twofa', {timeout: 5000});
         } catch {
             console.log('twoFa undefined');
         }
@@ -107,6 +108,7 @@ export default class Account {
                         const navMenuButtons = document.querySelectorAll('app-nav-menu-side .list .dropdown-item');
                         navMenuButtons[navMenuButtons.length -1].click();
                     }
+                    console.log('logout');
                 });
             } catch { }
 
@@ -176,19 +178,19 @@ export default class Account {
             this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
 
             await this.page.goto(`https://ton.place/im`, { waitUntil: 'networkidle2' });
+            await this.page.screenshot({path: 'tonAuth.png'});
 
             try {
-                if (await this.page.$('.Tabbar')) {
-                    await this.page.goto(`https://ton.place/settings`, { waitUntil: 'networkidle2' });
-                    await this.page.waitForSelector('.Settings')
-                    await this.page.click('.Settings .List:last-child .ListItem');
-                    await ths.page.waitForSelector('.BottomSheet__content .CellButton');
-                    await this.page.click('.BottomSheet__content .CellButton');
-                    console.log('logout');
-                }
+                await this.page.waitForSelector('.Tabbar', {timeout: 5000});
+                await this.page.goto(`https://ton.place/settings`, { waitUntil: 'networkidle2' });
+                await this.page.waitForSelector('.Settings')
+                await this.page.click('.Settings .List:last-child .ListItem');
+                await ths.page.waitForSelector('.BottomSheet__content .CellButton');
+                await this.page.click('.BottomSheet__content .CellButton');
+                console.log('logout');
             } catch {}
 
-            await this.page.waitForSelector('.Input', { timeout: 60000, visible: true });
+            await this.page.waitForSelector('.Input', { visible: true });
             await this.page.type('.Input', this.login);
             await this.page.click('.Form__item__cont .Button__text');
 

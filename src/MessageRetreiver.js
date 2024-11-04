@@ -207,43 +207,57 @@ export default class MessageRetriever {
 
     async getMessageFromWebSocketFromFansly(response) {
         try {
-        const data = await JSON.parse(response?.payloadData?.d);
-        // const parseData = await JSON.parse(data);
-        const event = JSON.parse(data.event);
-        const message = event.message?.content;
-        const dialogId = event.message?.groupId;
+            const data = await JSON.parse(JSON.parse(response?.payloadData).d);
+            // const parseData = await JSON.parse(data);
+            if (data.event) {
+                const event = JSON.parse(data.event);
+                const message = event.message?.content;
+                const dialogId = event.message?.groupId;
 
-        if (message) {
-            const dialogs = await getArrayFromFile('./private/dialogs.json');
-            let dialogFound = false;
-            for (const dialog of dialogs) {
-                if (dialog.dialogId === data.body.dialog.id) {
-                    await dialog.messages.push(data.body.message.text);
-                    dialogFound = true;
-                    break;
+                if (message) {
+                    const dialogs = await getArrayFromFile('./private/dialogs.json');
+                    let dialogFound = false;
+                    for (const dialog of dialogs) {
+                        if (dialog.dialogId === dialogId) {
+                            await dialog.messages.push(message);
+                            dialogFound = true;
+                            break;
+                        }
+                    }
+                    if (!dialogFound) {
+                        const name = await this.getNameForFanslyBySenderId(event.message.senderId);
+                        await dialogs.push({
+                            dialogId: dialogId,
+                            profileId: this.profileId,
+                            name,
+                            viewed: false,
+                            messages:
+                                [{
+                                    message: message,
+                                    sender: 'inbox'
+                                }],
+                        });
+                    }
+                    await writeArrayToFile('./private/dialogs.json', dialogs);
+
                 }
             }
-            if (!dialogFound) {
-                await dialogs.push({
-                    dialogId: data.body.dialog.id,
-                    profileId: this.profileId,
-                    name: `${data.body.user.firstName} ${data.body.user.lastName}`,
-                    viewed: false,
-                    messages:
-                        [{
-                            message: data.body.message.text,
-                            sender: 'inbox'
-                        }],
-                });
-            }
-            await writeArrayToFile('./private/dialogs.json', dialogs);
-
-        }
         } catch (error) {
             console.log(error);
             // await this.getMessageFromWebSocketFromFansly(response);
         }
 
+    }
+
+    async getNameForFanslyBySenderId(senderId) {
+        try {
+            await this.page.goto(`https://fansly.com/${senderId}`, {waitUntil: 'networkidle0'});
+            await this.page.waitForSelector('.profile-name .display-name');
+            const name = await this.page.evaluate(() => document.querySelector('.profile-name .display-name').textContent);
+            return name;
+        } catch {
+            return this.getNameForFanslyBySenderId(senderId);
+        }
     }
 
     async getMessageFromWebSocketFromTon(response) {
