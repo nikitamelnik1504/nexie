@@ -101,15 +101,13 @@ export default class Account {
 
             await this.page.goto(`https://fansly.com/`, { waitUntil: 'networkidle0' });
             try {
-                await this.page.evaluate(() => {
-                    const avatar = document.querySelector(".avatar-container.pointer");
-                    if (avatar) {
-                        avatar.click();
-                        const navMenuButtons = document.querySelectorAll('app-nav-menu-side .list .dropdown-item');
-                        navMenuButtons[navMenuButtons.length -1].click();
-                    }
+                if (await this.page.$('.avatar-container.pointer')) {
+                    await this.page.click('.avatar-container.pointer');
+                    await this.page.waitForSelector('app-nav-menu-side .list .dropdown-item');
+                    const navMenuButtons = await this.page.$$('app-nav-menu-side .list .dropdown-item');
+                    await this.page.evaluate(el => el.click(), navMenuButtons[navMenuButtons.length -1]);
                     console.log('logout');
-                });
+                }
             } catch { }
 
 
