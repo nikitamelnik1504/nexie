@@ -23,21 +23,18 @@ export default class Account {
             await this.browser.connect();
         } catch (error) {
             console.log(error);
-            if (this.browser) {
-                await this.browser.disconnect();
-            }
             // await this.profile.stopProfile();
             await this.start();
         }
     }
 
     async stop() {
-        // if (this.page) {
-        //     await this.page.close();
-        // }
-        if (this.browser) {
-            await this.browser.disconnect();
+        if (this.page) {
+            await this.page.close();
         }
+        // if (this.browser) {
+        //     await this.browser.disconnect();
+        // }
     }
 
     async _is2FARequired() {
@@ -81,7 +78,7 @@ export default class Account {
         } catch (err) {
             console.log(err)
             console.log('restart');
-            await this.browser.disconnect();
+            await this.stop();
 
             // await this.profile.stopProfile();
             await this.start();
@@ -140,7 +137,8 @@ export default class Account {
         } catch (error) {
             console.log(error)
             console.log('restart');
-            await this.browser.disconnect();
+            // await this.browser.disconnect();
+            await this.stop();
 
             // await this.profile.stopProfile();
             await this.start();
@@ -219,8 +217,8 @@ export default class Account {
             console.log(err);
             console.log('restart');
             await this.page.close();
-            await this.browser.disconnect();
-            await this.profile.stopProfile();
+            // await this.browser.disconnect();
+            // await this.profile.stopProfile();
             await this.start();
             return await this.tonAuth();
         }

@@ -333,8 +333,10 @@ export default class Chat {
 
     async close() {
         if (!this.messageSending) {
-            // await this.page.close();
-            await this.browser.disconnect();
+            try {
+                await this.page.close();
+            } catch {}
+            // await this.browser.disconnect();
         } else {
             await new Promise(resolve => setTimeout(resolve, 10000));
             await this.close();

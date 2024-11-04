@@ -192,13 +192,16 @@ export default class MessageRetriever {
 
             console.log('oks');
             console.log(result);
-            await this.browser.disconnect();
+            // await this.browser.disconnect();
             // await this.profile.stopProfile();
             return result;
         } catch (err) {
             console.log(err);
             console.log('restart');
-            await this.browser.disconnect();
+            if (this.page) {
+                await this.page.close();
+            }
+            // await this.browser.disconnect();
             // await this.profile.stopProfile();
             await this.start();
             return await this.getMessagesFromFansly();
@@ -333,7 +336,10 @@ export default class MessageRetriever {
             console.log(error);
             console.log('restart');
             // await this.profile.stopProfile();
-            await this.browser.disconnect();
+            // await this.browser.disconnect();
+            if (this.page) {
+                await this.page.close();
+            }
             await this.start();
             await this.getMessageFromWebSocket()
         }
@@ -356,7 +362,10 @@ export default class MessageRetriever {
         } catch (err) {
             console.log(err);
             console.log('restart')
-            await this.browser.disconnect();
+            if (this.page) {
+                await this.page.close()
+            }
+            // await this.browser.disconnect();
             // await this.profile.stopProfile();
             await this.start();
             return await this.getProfileMessage(platformName);
