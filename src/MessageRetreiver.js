@@ -87,7 +87,7 @@ export default class MessageRetriever {
             }
             // await this.profile.stopProfile();
             await this.start();
-            return await this.getMessagesFromTon(page);
+            return await this.getMessagesFromTon();
         }
     }
 
