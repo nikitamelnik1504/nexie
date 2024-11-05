@@ -30,6 +30,21 @@ export default class MessageRetriever {
         ];
     }
 
+    async test(url, index) {
+        const cookies = await this.cookie.exportCookies();
+            this.page = await this.browser.newPage();
+            await this.page.setViewport({ width: 414, height: 896 })
+            await this.page.setCookie(...cookies);
+
+            this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+
+            await this.page.goto(url, { waitUntil: 'networkidle0' });
+            try {
+                await this.page.waitForSelector('dfdfdf', {timeout: 15000});
+            } catch {}
+            await this.page.screenshot({path: `Test${index}.png`});
+    }
+
     async start() {
         try {
             this.profile = new ProfileManager(this.token, this.profileId);
@@ -66,12 +81,6 @@ export default class MessageRetriever {
                         message: wrapper.querySelector('.Dialog__text').innerText,
                         viewed: wrapper.nextElementSibling && wrapper.nextElementSibling.classList.contains('Dialog__unread') ? false : true
                     });
-                    // if (wrapper.nextElementSibling && wrapper.nextElementSibling.classList.contains('Dialog__unread')) {
-                    //     results.push({
-                    //         name: wrapper.querySelector('.Dialog__name').innerText,
-                    //         message: wrapper.querySelector('.Dialog__text').innerText
-                    //     });
-                    // }
                 });
                 
                 console.log('yeas');

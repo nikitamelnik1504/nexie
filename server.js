@@ -244,52 +244,6 @@ const addAccountScene = new Scenes.WizardScene(
                     await messageRetreiver.getMessageFromWebSocket(platform);
                 }
             });
-            // const messages = await messageRetreiver.getProfileMessage(platform);
-            // console.log(messages);
-            // const dialogs = await getArrayFromFile('./private/dialogs.json');
-
-            // for (const message of messages) {
-            //     let dialogFound = false;
-            //     for (const dialog of dialogs) {
-            //         if (dialog.dialogId === message.dialogId) {
-            //             // await dialog.messages.push({message: message.message, sender: message.sender});
-            //             dialog = {
-            //                 dialogId: message.dialogId || null,
-            //                 profileId: result.profile.id,
-            //                 name: message.name,
-            //                 viewed: message.viewed,
-            //                 platform,
-            //                 messages: [
-            //                     {
-            //                         message: message.message,
-            //                         sender: 'inbox'
-            //                     }
-            //                 ]
-            //             }
-            //             dialogFound = true;
-            //             break;
-            //         }
-            //     }
-            //     if (!dialogFound) {
-            //         await dialogs.push({
-            //             dialogId: message.dialogId || null,
-            //             profileId: result.profile.id,
-            //             name: message.name,
-            //             viewed: message.viewed,
-            //             platform,
-            //             messages: [
-            //                 {
-            //                     message: message.message,
-            //                     sender: 'inbox'
-            //                 }
-            //             ]
-            //         });
-            //     }
-            //     console.log(dialogs)
-            //     await writeArrayToFile('./private/dialogs.json', dialogs);
-
-            //     messageRetreiver.getMessageFromWebSocket(platform);
-            // }
         } else {
             await ctx.reply(result.message);
         }
@@ -387,9 +341,15 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log('server running');
     const profiles = await ProfileManager.getProfiles(token);
+    let index = 0;
     for (const profile of profiles.data) {
-        const profileManager = new ProfileManager(token, profile.id);
-        await profileManager.stopProfile();
+        // const profileManager = new ProfileManager(token, profile.id);
+        // await profileManager.stopProfile();
+
+        const test = new MessageRetriever(token, profile.id);
+        await test.start();
+        await test.test('https://ton.place/im', index);
+        index++;
     }
 })
 

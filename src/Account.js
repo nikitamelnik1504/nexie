@@ -56,6 +56,7 @@ export default class Account {
             await this.page.goto(`https://fancentro.com/login`, { waitUntil: 'networkidle0' });
 
             try {
+                await this.page.waitForSelector('span[data-i18context="PromoSearchSuggestionsInput"]', {timeout: 5000});
                 await this.page.evaluate(() => {
                     if (document.querySelector('span[data-i18context="PromoSearchSuggestionsInput"]')) {
                         const menuBtn = document.querySelector('button[data-testid="header-mobile-menu-open-button"]')
@@ -64,6 +65,7 @@ export default class Account {
                         logoutBtn.click();
                     }
                 });
+                console.log('logout');
             } catch (err){console.log(err)}
 
             await this.page.waitForSelector('input[type="email"]');
