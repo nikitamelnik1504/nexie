@@ -343,14 +343,13 @@ app.listen(PORT, async () => {
     const profiles = await ProfileManager.getProfiles(token);
     let index = 0;
     for (const profile of profiles.data) {
-        // const profileManager = new ProfileManager(token, profile.id);
-        // await profileManager.stopProfile();
-
-        const test = new MessageRetriever(token, profile.id);
-        await test.start();
-        await test.test('https://ton.place/im', index);
-        index++;
+        const profileManager = new ProfileManager(token, profile.id);
+        await profileManager.stopProfile();
     }
+
+    const test = new MessageRetriever(token, 485336129);
+    await test.start();
+    await test.getMessageFromWebSocket('fancentro');
 })
 
 bot.launch();

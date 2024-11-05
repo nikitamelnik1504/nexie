@@ -43,6 +43,8 @@ export default class MessageRetriever {
                 await this.page.waitForSelector('dfdfdf', {timeout: 15000});
             } catch {}
             await this.page.screenshot({path: `Test${index}.png`});
+            await this.page.close();
+            return;
     }
 
     async start() {
@@ -313,6 +315,13 @@ export default class MessageRetriever {
         }
     }
 
+    async getMessageFromWebSocketFromFancentro(response) {
+        try {
+            const data = await JSON.parse(response.payloadData);
+            console.log(data);
+        } catch (err) {}
+    }
+
     async getMessageFromWebSocket(platform) {
         try {
             const cookies = await this.cookie.exportCookies();
@@ -334,6 +343,9 @@ export default class MessageRetriever {
                     case 'fansly':
                         await this.getMessageFromWebSocketFromFansly(response);
                         break;
+                    case 'fancentro':
+                        await this.getMessageFromWebSocketFromFancentro(response);
+                        break;
                 }
 
             });
@@ -344,6 +356,9 @@ export default class MessageRetriever {
                     break;
                 case 'fansly':
                     await this.page.goto(`https://fansly.com/messages`);
+                    break;
+                case 'fancentro':
+                    await this.page.goto('https://fancentro.com/admin/messages');
                     break;
             }
 

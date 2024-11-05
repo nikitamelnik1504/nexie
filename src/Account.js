@@ -74,7 +74,7 @@ export default class Account {
             await this.page.type('input[type="password"]', this.password);
             await this.page.click('button.MuiButtonBase-root');
 
-            // await this.page.waitForNavigation();
+            await this.page.waitForNavigation();
             await this.stop();
             return { success: true, isCode: false };
         } catch (err) {
