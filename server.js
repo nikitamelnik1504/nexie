@@ -347,9 +347,6 @@ app.listen(PORT, async () => {
         await profileManager.stopProfile();
     }
 
-    const test = new MessageRetriever(token, 485336129);
-    await test.start();
-    await test.getMessageFromWebSocket('fancentro');
 })
 
 bot.launch();

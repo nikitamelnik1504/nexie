@@ -239,7 +239,7 @@ export default class MessageRetriever {
                     let dialogFound = false;
                     for (const dialog of dialogs) {
                         if (dialog.dialogId === dialogId) {
-                            await dialog.messages.push(message);
+                            await dialog.messages.push({message, sender: 'inbox'});
                             dialogFound = true;
                             break;
                         }
@@ -290,7 +290,7 @@ export default class MessageRetriever {
                 let dialogFound = false;
                 for (const dialog of dialogs) {
                     if (dialog.dialogId === data.body.dialog.id) {
-                        await dialog.messages.push(data.body.message.text);
+                        await dialog.messages.push({message: data.body.message.text, sender: 'inbox'});
                         dialogFound = true;
                         break;
                     }
@@ -315,10 +315,66 @@ export default class MessageRetriever {
         }
     }
 
+    async getNameForFancentroByMessage(message) {
+        try {
+            await this.page.goto(`https://fancentro.com/admin/messages`, {waitUntil: 'networkidle0'});
+            await this.page.waitForSelector('#scrollableDiv .List > div > button');
+
+            const messages = await this.page.evaluate((message) => {
+                    const messagesElements = document.querySelectorAll('#scrollableDiv .List > div > button')
+                    const messages = [];
+
+                    for (const messageEl of messagesElements) {
+                        const name = messageEl.querySelector('h2').textContent;
+                        const messageText = messageEl.querySelector('p > span > span').textContent;
+
+                        if (message == messageText) {
+                            return name;
+                        }
+                    }
+                    return null;
+            }, message);
+        } catch {
+            return null;
+        }
+    }
+
     async getMessageFromWebSocketFromFancentro(response) {
         try {
-            const data = await JSON.parse(response.payloadData);
-            console.log(data);
+            console.log(response);
+            const data = await JSON.parse(response.payloadData.replace(/^42\/fc,/, ''));
+            if (data[0] === 'message') {
+                const message = data[1];
+                const messageText = message.data.text;
+                const dialogId = message.bucketId;
+                const name = await this.getNameForFancentroByMessage(messageText);
+
+                const dialogs = await getArrayFromFile('./private/dialogs.json');
+                let dialogFound = false;
+                for (const dialog of dialogs) {
+                    if (dialog.dialogId === dialogId) {
+                        await dialog.messages.push({message: messageText, sender: 'inbox'});
+                        dialogFound = true;
+                        break;
+                    }
+                }
+                if (!dialogFound) {
+                    await dialogs.push({
+                        dialogId,
+                        profileId: this.profileId,
+                        name,
+                        viewed: false,
+                        messages:
+                            [{
+                                message: messageText,
+                                sender: 'inbox'
+                            }],
+                    });
+                }
+                await writeArrayToFile('./private/dialogs.json', dialogs);
+                
+            }
+            
         } catch (err) {}
     }
 
@@ -334,7 +390,6 @@ export default class MessageRetriever {
             await client.send('Network.enable');
 
             client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
-                console.log(JSON.parse(response.payloadData));
 
                 switch (platform) {
                     case 'ton':
