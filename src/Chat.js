@@ -40,6 +40,16 @@ export default class Chat {
                 }
             })
 
+            const client = await this.page.target().createCDPSession();
+            await client.send('Network.enable')
+            client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
+                const data = await JSON.parse(JSON.parse(response?.payloadData).d);
+                const event = JSON.parse(data.event);
+                if (event.message.groupId === this.dialogId && event.message.content) {
+                    await this.handleNewMessageCallback(event.message.content);
+                }
+            });
+
             // this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
             await this.page.goto(`https://fansly.com/messages/${dialogId}`, { waitUntil: 'networkidle2' });
             console.log('start');
@@ -72,16 +82,6 @@ export default class Chat {
             await writeArrayToFile('./private/dialogs.json', dialogs);
             console.log('oks');
 
-
-            const client = await this.page.target().createCDPSession();
-            await client.send('Network.enable')
-            client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
-                const data = JSON.parse(response.payloadData.d);
-                const event = JSON.parse(data);
-                if (event.message.groupId === this.dialogId && event.message.content) {
-                    await this.handleNewMessageCallback(event.message.content);
-                }
-            });
         } catch (err) {
             console.log(err);
             console.log('restart');
@@ -103,6 +103,7 @@ export default class Chat {
                 break;
             case 'fancentro':
                 await this.startChatFancentro(userName, dialogId);
+                console.log('Chat STARTED');
                 break;
         }
     }
@@ -118,6 +119,23 @@ export default class Chat {
 
             this.page = await this.browser.newPage();
             await this.page.setCookie(...cookies);
+
+            const client = await this.page.target().createCDPSession();
+            await client.send('Network.enable')
+            client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
+                try {
+                    const data = await JSON.parse(response.payloadData.replace(/^42\/fc,/, ''));
+                    if (data[0] === 'message') {
+                        const message = data[1];
+                        const messageText = message.data.text;
+                        const dialogId = message.bucketId;
+                        if (dialogId === this.dialogId) {
+                            await this.handleNewMessageCallback(messageText);
+                        }
+                    }
+                } catch {}
+            });
+            
             this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
             await this.page.goto(`https://fancentro.com/messages`, { waitUntil: 'networkidle0' });
 
@@ -131,6 +149,9 @@ export default class Chat {
             }, userName);
 
             await this.page.waitForSelector('section');
+            try {
+                this.dialogId = await this.page.$('[data_bucket_id]').getAttribute('data_bucket_id');
+            } catch {}
 
             this.chat = await this.page.evaluate(() => {
                 const messagesEl = document.querySelectorAll('section .customScroll > div > div');
@@ -299,7 +320,13 @@ export default class Chat {
         } catch {
             await this.sendMessageFansly(message);
         }
+    }
 
+    async sendMessageFancentro(message) {
+        try {
+            await this.page.screenshot({path: 'testSendMessage.png'});
+            console.log('sendMessage')
+        } catch {}
     }
 
     async addMessageToQueue(message = null) {
@@ -314,13 +341,15 @@ export default class Chat {
                         await this.sendMessage(msg);
                     case 'fansly':
                         await this.sendMessageFansly(msg);
+                    case 'fancentro':
+                        await this.sendMessageFancentro(msg);
                 }
                 
                 this.queue = this.queue.filter(el => el !== msg);
             }
             this.messageSending = false;
         } else {
-            await new Promise(resolve => setTimeout(resolve, 10000));
+            await new Promise(resolve => setTimeout(resolve, 5000));
             await this.addMessageToQueue();
         }
     }

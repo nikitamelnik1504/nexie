@@ -343,6 +343,7 @@ app.listen(PORT, async () => {
     const profiles = await ProfileManager.getProfiles(token);
     let index = 0;
     for (const profile of profiles.data) {
+        console.log(profile.id)
         const profileManager = new ProfileManager(token, profile.id);
         await profileManager.stopProfile();
     }
