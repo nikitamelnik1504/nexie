@@ -72,7 +72,8 @@ export default class Account {
             await this.page.type('input[type="email"]', this.login);
             await this.page.waitForSelector('input[type="password"]');
             await this.page.type('input[type="password"]', this.password);
-            await this.page.click('button.MuiButtonBase-root');
+            // await this.page.click('button.MuiButtonBase-root');
+            await this.page.evaluate(() => { document.querySelectorAll('button span[data-i18context="snapcentro_authorize_login"]')[1].parentElement.click()})
 
             await this.page.waitForNavigation();
             await this.stop();

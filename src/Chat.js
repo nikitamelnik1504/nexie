@@ -150,7 +150,7 @@ export default class Chat {
 
             await this.page.waitForSelector('section');
             try {
-                this.dialogId = await this.page.$('[data_bucket_id]').getAttribute('data_bucket_id');
+                this.dialogId = await this.page.$('[data-bucketid]').getAttribute('data-bucketid');
             } catch {}
 
             this.chat = await this.page.evaluate(() => {

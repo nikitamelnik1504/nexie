@@ -32,19 +32,19 @@ export default class MessageRetriever {
 
     async test(url, index) {
         const cookies = await this.cookie.exportCookies();
-            this.page = await this.browser.newPage();
-            await this.page.setViewport({ width: 414, height: 896 })
-            await this.page.setCookie(...cookies);
+        this.page = await this.browser.newPage();
+        await this.page.setViewport({ width: 414, height: 896 })
+        await this.page.setCookie(...cookies);
 
-            this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+        this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
 
-            await this.page.goto(url, { waitUntil: 'networkidle0' });
-            try {
-                await this.page.waitForSelector('dfdfdf', {timeout: 15000});
-            } catch {}
-            await this.page.screenshot({path: `Test${index}.png`});
-            await this.page.close();
-            return;
+        await this.page.goto(url, { waitUntil: 'networkidle0' });
+        try {
+            await this.page.waitForSelector('dfdfdf', { timeout: 15000 });
+        } catch { }
+        await this.page.screenshot({ path: `Test${index}.png` });
+        await this.page.close();
+        return;
     }
 
     async start() {
@@ -84,7 +84,7 @@ export default class MessageRetriever {
                         viewed: wrapper.nextElementSibling && wrapper.nextElementSibling.classList.contains('Dialog__unread') ? false : true
                     });
                 });
-                
+
                 console.log('yeas');
                 return results;
             });
@@ -109,7 +109,62 @@ export default class MessageRetriever {
             await this.page.setViewport({ width: 414, height: 896 })
             await this.page.setCookie(...cookies);
 
-            this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+            //this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+
+            const client = await this.page.target().createCDPSession();
+            await client.send('Network.enable');
+
+            let roomsData = [];
+            await client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
+                if (response.payloadData.includes('room')) {
+                    const data = await JSON.parse(response.payloadData.replace(/^42\/fc,/, ''));
+                    if (data[0] === 'room_list') {
+                        roomsData = data[1].roomsData;
+                    }
+                }
+            });
+            this.page.on('response', async (response) => {
+                if (response.url().includes('chat.getInterlocutors')) {
+                    const responseBody = await response.text();
+                    const data = JSON.parse(responseBody);
+                    try {
+                        const messages = [];
+                        for (const room of test) {
+                            try {
+                                if (data.response.collection[room.members[0].externalId]) {
+                                    room.members[0].name = data.response.collection[room.members[0].externalId].name;
+                                } else {
+                                    room.members[0].name = 'Unactive user';
+                                }
+
+                                const name = room.members[0].name;
+                                const viewed = room.currentMember.unread;
+                                const message = room.messages[0].type === 'text' ? room.messages[0].data.text : 'Photo'
+                                const dialogId = room._id;
+
+                                messages.push({
+                                    name,
+                                    message,
+                                    dialogId,
+                                    viewed
+                                })
+                            } catch (err){
+                                console.log(err);
+                            }
+                        }
+
+                        console.log('oks');
+
+                        if (this.page) {
+                            await this.page.close();
+                        }
+                        return messages;
+                    } catch (err){
+                        console.log(err);
+                    }
+                }
+            });
+
 
             await this.page.goto(`https://fancentro.com/admin/messages`, { waitUntil: 'networkidle0' });
 
@@ -239,7 +294,7 @@ export default class MessageRetriever {
                     let dialogFound = false;
                     for (const dialog of dialogs) {
                         if (dialog.dialogId === dialogId) {
-                            await dialog.messages.push({message, sender: 'inbox'});
+                            await dialog.messages.push({ message, sender: 'inbox' });
                             dialogFound = true;
                             break;
                         }
@@ -271,7 +326,7 @@ export default class MessageRetriever {
 
     async getNameForFanslyBySenderId(senderId) {
         try {
-            await this.page.goto(`https://fansly.com/${senderId}`, {waitUntil: 'networkidle0'});
+            await this.page.goto(`https://fansly.com/${senderId}`, { waitUntil: 'networkidle0' });
             await this.page.waitForSelector('.profile-name .display-name');
             const name = await this.page.evaluate(() => document.querySelector('.profile-name .display-name').textContent);
             return name;
@@ -290,7 +345,7 @@ export default class MessageRetriever {
                 let dialogFound = false;
                 for (const dialog of dialogs) {
                     if (dialog.dialogId === data.body.dialog.id) {
-                        await dialog.messages.push({message: data.body.message.text, sender: 'inbox'});
+                        await dialog.messages.push({ message: data.body.message.text, sender: 'inbox' });
                         dialogFound = true;
                         break;
                     }
@@ -317,22 +372,22 @@ export default class MessageRetriever {
 
     async getNameForFancentroByMessage(message) {
         try {
-            await this.page.goto(`https://fancentro.com/admin/messages`, {waitUntil: 'networkidle0'});
+            await this.page.goto(`https://fancentro.com/admin/messages`, { waitUntil: 'networkidle0' });
             await this.page.waitForSelector('#scrollableDiv .List > div > button');
 
             const messages = await this.page.evaluate((message) => {
-                    const messagesElements = document.querySelectorAll('#scrollableDiv .List > div > button')
-                    const messages = [];
+                const messagesElements = document.querySelectorAll('#scrollableDiv .List > div > button')
+                const messages = [];
 
-                    for (const messageEl of messagesElements) {
-                        const name = messageEl.querySelector('h2').textContent;
-                        const messageText = messageEl.querySelector('p > span > span').textContent;
+                for (const messageEl of messagesElements) {
+                    const name = messageEl.querySelector('h2').textContent;
+                    const messageText = messageEl.querySelector('p > span > span').textContent;
 
-                        if (message == messageText) {
-                            return name;
-                        }
+                    if (message == messageText) {
+                        return name;
                     }
-                    return null;
+                }
+                return null;
             }, message);
         } catch {
             return null;
@@ -341,7 +396,6 @@ export default class MessageRetriever {
 
     async getMessageFromWebSocketFromFancentro(response) {
         try {
-            console.log(response);
             const data = await JSON.parse(response.payloadData.replace(/^42\/fc,/, ''));
             if (data[0] === 'message') {
                 const message = data[1];
@@ -353,7 +407,7 @@ export default class MessageRetriever {
                 let dialogFound = false;
                 for (const dialog of dialogs) {
                     if (dialog.dialogId === dialogId) {
-                        await dialog.messages.push({message: messageText, sender: 'inbox'});
+                        await dialog.messages.push({ message: messageText, sender: 'inbox' });
                         dialogFound = true;
                         break;
                     }
@@ -372,10 +426,10 @@ export default class MessageRetriever {
                     });
                 }
                 await writeArrayToFile('./private/dialogs.json', dialogs);
-                
+
             }
-            
-        } catch (err) {}
+
+        } catch (err) { }
     }
 
     async getMessageFromWebSocket(platform) {
