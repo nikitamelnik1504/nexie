@@ -127,40 +127,42 @@ export default class MessageRetriever {
                 if (response.url().includes('chat.getInterlocutors')) {
                     const responseBody = await response.text();
                     const data = JSON.parse(responseBody);
-                    try {
-                        const messages = [];
-                        for (const room of test) {
-                            try {
-                                if (data.response.collection[room.members[0].externalId]) {
-                                    room.members[0].name = data.response.collection[room.members[0].externalId].name;
-                                } else {
-                                    room.members[0].name = 'Unactive user';
+                    if (data.response.meta.total > 0) {
+                        try {
+                            const messages = [];
+                            for (const room of roomsData) {
+                                try {
+                                    if (data.response.collection[room.members[0].externalId]) {
+                                        room.members[0].name = data.response.collection[room.members[0].externalId].name;
+                                    } else {
+                                        room.members[0].name = 'Unactive user';
+                                    }
+
+                                    const name = room.members[0].name;
+                                    const viewed = room.currentMember.unread;
+                                    const message = room.messages[0].type === 'text' ? room.messages[0].data.text : 'Photo'
+                                    const dialogId = room._id;
+
+                                    messages.push({
+                                        name,
+                                        message,
+                                        dialogId,
+                                        viewed
+                                    })
+                                } catch (err){
+                                    console.log(err);
                                 }
-
-                                const name = room.members[0].name;
-                                const viewed = room.currentMember.unread;
-                                const message = room.messages[0].type === 'text' ? room.messages[0].data.text : 'Photo'
-                                const dialogId = room._id;
-
-                                messages.push({
-                                    name,
-                                    message,
-                                    dialogId,
-                                    viewed
-                                })
-                            } catch (err){
-                                console.log(err);
                             }
-                        }
 
-                        console.log('oks');
+                            console.log('oks');
 
-                        if (this.page) {
-                            await this.page.close();
+                            if (this.page) {
+                                await this.page.close();
+                            }
+                            return messages;
+                        } catch (err){
+                            console.log(err);
                         }
-                        return messages;
-                    } catch (err){
-                        console.log(err);
                     }
                 }
             });

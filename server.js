@@ -16,9 +16,37 @@ bot.start((ctx) => {
     showMenu(ctx);
 });
 
+
+let roles = await getArrayFromFile('./private/bot_access.json');
+const accessRequests = {};
+
 function showMenu(ctx) {
     ctx.reply('Choose option:', Markup.keyboard([Markup.button.webApp('Chats', chatsUrl), 'Settings']).resize());
 }
+
+bot.use((ctx, next) => {
+    const userId = ctx.from.id;
+    const role = roles.find(role => Number(role.id) == userId);
+    // console.log(role)
+
+    if (ctx.callbackQuery && ctx.callbackQuery.data === 'request_access') {
+        return next();
+    }
+
+    if (!role) {
+        return ctx.reply("You don't have enough access rights",
+            Markup.inlineKeyboard([Markup.button.callback('Request access', 'request_access')])
+        );
+    }
+    return next();
+})
+
+bot.action('request_access', (ctx) => {
+    const userId = ctx.from.id;
+    const username = ctx.from.username || ctx.from.first_name || 'guest';
+    accessRequests[userId] = username;
+    ctx.reply('The request has been sent to the admins');
+})
 
 bot.hears('Chats', async (ctx) => {
     Markup.button.webApp('Open chats', `${chatsUrl}/chats`)
@@ -39,18 +67,78 @@ bot.hears('Back', (ctx) => {
     showMenu(ctx);
 })
 
+bot.hears('Requests list', (ctx) => {
+    const userId = ctx.from.id;
+    const role = roles.find(role => Number(role.id) == userId);
+    if (role.role !== 'admin') return ctx.reply('You not admin');
+    if (Object.keys(accessRequests).length === 0) {
+        return ctx.reply('The list is empty');
+    }
+    Object.entries(accessRequests).map(([id, username]) => {
+        ctx.reply(`Request for @${username}`, 
+            Markup.inlineKeyboard([
+                Markup.button.callback('Approve', `approve_${id}`),
+                Markup.button.callback('Decline', `deny_${id}`)
+            ])
+        )
+    });
+    ctx.reply('Requests list:', Markup.keyboard(['Back']).resize());
+})
+
 bot.hears('Access', (ctx) => {
-    ctx.reply('Enter the user ID');
-    // bot.on('text', (msg) => {
-    //     const userId = msg.message.text;
-    //     if (!accesList.allowedUsers.includes(userId)) {
-    //         accesList.allowedUsers.push(userId);
-    //         saveAccessList(accesList);
-    //         ctx.reply(`Access granted`);
-    //     } else {
-    //         ctx.reply('This user already has access');
-    //     }
-    // })
+    const userId = ctx.from.id;
+    const role = roles.find(role => Number(role.id) == userId);
+    if (role.role !== 'admin') return ctx.reply('You not admin');
+    roles.forEach(role => {
+        ctx.reply(`User @${role.username} has ${role.role} rights`, 
+            Markup.inlineKeyboard([
+                Markup.button.callback('Remove rights', `remove_access_${role.id}`),
+                Markup.button.callback('Give admin rights', `update_access_${role.id}`)
+            ])
+        )
+    })
+
+    ctx.reply('Access:', Markup.keyboard(['Requests list', 'Back']).resize());
+});
+
+bot.action(/update_access_(\d+)/, (ctx) => {
+    const userId = ctx.match[1];
+    const role = roles.find(role => Number(role.id) == ctx.from.id);
+    if (role.role !== 'admin') return ctx.reply('You not admin')
+    roles.forEach(role => {
+        if (Number(role.id) == userId) role.role = 'admin';
+    });
+    writeArrayToFile('./private/bot_access.json', roles);
+    ctx.reply(`Rights removed`);;
+});
+
+bot.action(/remove_access_(\d+)/, (ctx) => {
+    const userId = ctx.match[1];
+    const role = roles.find(role => Number(role.id) == ctx.from.id);
+    if (role.role !== 'admin') return ctx.reply('You not admin')
+    roles = roles.filter(role => Number(role.id) != userId);
+    writeArrayToFile('./private/bot_access.json', rolesFiltered);
+    ctx.reply(`Rights removed`);;
+});
+
+bot.action(/approve_(\d+)/, (ctx) => {
+    const userId = ctx.match[1];
+    const role = roles.find(role => Number(role.id) == ctx.from.id);
+    if (role.role !== 'admin') return ctx.reply('You not admin')
+    const username = accessRequests[userId]
+    roles.push({id: userId, role: 'moderator', username: username})
+    writeArrayToFile('./private/bot_access.json', roles);
+    delete accessRequests[userId];
+    ctx.reply(`Access for @${username} is approved`);
+    bot.telegram.sendMessage(userId, 'Your request has been approved');
+});
+
+bot.action(/deny_(\d+)/, (ctx) => {
+    const userId = ctx.match[1];
+    const role = roles.find(role => Number(role.id) == ctx.from.id);
+    if (role.role !== 'admin') return ctx.reply('You not admin')
+    delete accessRequests[userId];
+    ctx.reply(`Access for @${username} is declined`);
 })
 
 
@@ -340,13 +428,13 @@ app.get('/chat', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log('server running');
-    const profiles = await ProfileManager.getProfiles(token);
-    let index = 0;
-    for (const profile of profiles.data) {
-        console.log(profile.id)
-        const profileManager = new ProfileManager(token, profile.id);
-        await profileManager.stopProfile();
-    }
+    // const profiles = await ProfileManager.getProfiles(token);
+    // let index = 0;
+    // for (const profile of profiles.data) {
+    //     console.log(profile.id)
+    //     const profileManager = new ProfileManager(token, profile.id);
+    //     await profileManager.stopProfile();
+    // }
 
 })
 
