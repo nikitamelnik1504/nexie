@@ -6,6 +6,7 @@ import Chat from "./src/Chat.js";
 import MessageRetriever from "./src/MessageRetreiver.js";
 import ProfileManager from "./src/managers/ProfileManager.js";
 import AccountManager from "./src/managers/AccountManager.js";
+import QueueManager from "./src/managers/QueueManager.js";
 
 
 const bot = new Telegraf('7639460431:AAFv2g2y9wdz1GEb7gORgiugyJ8qWlYHkRg', { handlerTimeout: 600000 });
@@ -175,28 +176,101 @@ bot.hears('Accounts', async (ctx) => {
     })
 });
 
+// bot.hears('Authorized accounts', async (ctx) => {
+//     ctx.reply('Please wait a few minutes...');
+//     let accounts = [];
+
+//     const promises = profiles.data.map(async (profile) => {
+//         for (const platform of platforms) {
+//             await AccountManager.getAuthorizedAccount(token, profile.id, platform).then(async auth => {
+//                 if (auth.success) {
+//                     accounts.push({name: auth.name, profileId: profile.id, platform: platform})
+//                 }
+//             });
+//         }
+//     });
+//     await Promise.all(promises);
+//     accounts = accounts.filter((account, index, self) => {
+//         const key = `${account.platform}-${account.name}`;
+//         return self.findIndex(obj => `${obj.platform}-${obj.name}` === key) === index;
+//     })
+//     console.log(accounts);
+//     await writeArrayToFile('./private/accounts.json', accounts);
+//     ctx.reply('Accounts have been successfully added');
+//     for (const account of accounts) {
+//         const messageRetreiver = new MessageRetriever(token, account.profileId);
+//         messageRetreiver.start().then(async () => {
+//             const messages = await messageRetreiver.getProfileMessage(account.platform);
+//             const dialogs = await getArrayFromFile('./private/dialogs.json');
+
+//             for (const message of messages) {
+//                 let dialogFound = false;
+//                 if (!dialogFound) {
+//                     await dialogs.push({
+//                         dialogId: message.dialogId || null,
+//                         profileId: account.profileId,
+//                         name: message.name,
+//                         viewed: message.viewed,
+//                         platform: account.platform,
+//                         messages: [
+//                             {
+//                                 message: message.message,
+//                                 sender: message.viewed
+//                             }
+//                         ]
+//                     });
+//                 }
+//                 console.log(dialogs)
+//                 await writeArrayToFile('./private/dialogs.json', dialogs);
+
+//                 await messageRetreiver.start();
+//                 await messageRetreiver.getMessageFromWebSocket(account.platform);
+//             }
+//             console.log('leave');
+//         });
+//     }
+// });
 bot.hears('Authorized accounts', async (ctx) => {
     ctx.reply('Please wait a few minutes...');
     let accounts = [];
 
-    const promises = profiles.data.map(async (profile) => {
-        for (const platform of platforms) {
-            await AccountManager.getAuthorizedAccount(token, profile.id, platform).then(async auth => {
-                if (auth.success) {
-                    accounts.push({name: auth.name, profileId: profile.id, platform: platform})
-                }
-            });
+    if (!profiles.data || profiles.data.length === 0) {
+        console.log('No profiles found');
+        return ctx.reply('No profiles found.');
+    }
+
+    const queueManager = new QueueManager(5);
+
+    const authorizeAccount = async (token, profileId, platform) => {
+        const auth = await AccountManager.getAuthorizedAccount(token, profileId, platform);
+        console.log('Auth result:', auth);
+        if (auth && auth.success) {
+            accounts.push({ name: auth.name, profileId, platform });
         }
-    });
-    await Promise.all(promises);
+    };
+
+    for (const profile of profiles.data) {
+        for (const platform of platforms) {
+            queueManager.addTask(() => authorizeAccount(token, profile.id, platform));
+        }
+    }
+
+    await queueManager.waitForCompletion();
+
+    if (accounts.length === 0) {
+        console.log('No authorized accounts found');
+        return ctx.reply('No authorized accounts found.');
+    }
+
     accounts = accounts.filter((account, index, self) => {
         const key = `${account.platform}-${account.name}`;
-        return self.findIndex(obj => `${obj.platform}-${obj.name}` === key) === index;
-    })
-    console.log(accounts);
-    await writeArrayToFile('./private/accounts.json', accounts);
-    ctx.reply('Accounts have been successfully added');
+        return index === self.findIndex((obj) => `${obj.platform}-${obj.name}` === key);
+    });
+
+    console.log('Accounts:', accounts);
+    ctx.reply('Accounts retrieved successfully');
 });
+
 
 const addAccountScene = new Scenes.WizardScene(
     'add-account-scene',
@@ -244,7 +318,7 @@ const addAccountScene = new Scenes.WizardScene(
             return ctx.wizard.next();
         } else {
             if (result.success) {
-                await accounts.push({ login, password, name, platform, profileId: result.profile.id });
+                await accounts.push({ name, platform, profileId: result.profile.id });
                 await writeArrayToFile('./private/accounts.json', accounts)
                 await ctx.reply(`The account ${name} is successfully linked to the platform`);
 
