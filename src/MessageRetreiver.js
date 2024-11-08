@@ -140,7 +140,7 @@ export default class MessageRetriever {
 
                                     const name = room.members[0].name;
                                     const viewed = room.currentMember.unread;
-                                    const message = room.messages[0].type === 'text' ? room.messages[0].data.text : 'Photo'
+                                    const message = room.messages[0]?.type === 'text' ? room.messages[0].data.text : 'Photo'
                                     const dialogId = room._id;
 
                                     messages.push({
@@ -156,9 +156,9 @@ export default class MessageRetriever {
 
                             console.log('oks');
 
-                            if (this.page) {
-                                await this.page.close();
-                            }
+                            // if (this.page) {
+                            //     await this.page.close();
+                            // }
                             return messages;
                         } catch (err){
                             console.log(err);
@@ -170,35 +170,35 @@ export default class MessageRetriever {
 
             await this.page.goto(`https://fancentro.com/admin/messages`, { waitUntil: 'networkidle0' });
 
-            console.log('start');
+            // console.log('start');
 
-            await this.page.waitForSelector('#scrollableDiv .List > div > button');
+            // await this.page.waitForSelector('#scrollableDiv .List > div > button');
 
-            const messages = await this.page.evaluate(() => {
-                const messagesElements = document.querySelectorAll('#scrollableDiv .List > div > button')
-                const messages = [];
+            // const messages = await this.page.evaluate(() => {
+            //     const messagesElements = document.querySelectorAll('#scrollableDiv .List > div > button')
+            //     const messages = [];
 
-                for (const messageEl of messagesElements) {
-                    const name = messageEl.querySelector('h2').textContent;
-                    const message = messageEl.querySelector('p > span > span').textContent;
-                    const viewed = messageEl.querySelector('time')?.nextElementSibling?.querySelector('span') ? false : true;
-                    const dialogId = null;
+            //     for (const messageEl of messagesElements) {
+            //         const name = messageEl.querySelector('h2').textContent;
+            //         const message = messageEl.querySelector('p > span > span').textContent;
+            //         const viewed = messageEl.querySelector('time')?.nextElementSibling?.querySelector('span') ? false : true;
+            //         const dialogId = null;
 
-                    messages.push({
-                        name,
-                        message,
-                        dialogId,
-                        viewed
-                    });
-                }
+            //         messages.push({
+            //             name,
+            //             message,
+            //             dialogId,
+            //             viewed
+            //         });
+            //     }
 
-                return messages;
-            });
+            //     return messages;
+            // });
 
-            console.log('oks');
+            // console.log('oks');
 
-            await this.page.close()
-            return messages;
+            // await this.page.close()
+            // return messages;
         } catch (err) {
             console.log(err);
             console.log('restart');
