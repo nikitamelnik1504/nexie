@@ -1,7 +1,7 @@
 import Account from "../Account.js";
 
 export default class AccountManager {
-    constructor(token, profiles, accounts, login, password, platform) {
+    constructor(token, profiles, accounts = null, login = null, password = null, platform = null) {
         this.profiles = profiles;
         this.token = token;
         this.accounts = accounts;
@@ -15,8 +15,6 @@ export default class AccountManager {
         let freeProfile = null;
         if (this.accounts.length > 0) {
             const linkedProfilesIds = this.accounts.map((account) => {account.profileId});
-            // freeProfile = this.profiles.find(profile => linkedProfilesIds.find(id => profile.id !== id));
-
             const freeProfiles = [];
 
             for (const account of this.accounts) {
@@ -28,10 +26,7 @@ export default class AccountManager {
                     }
                 }
             }
-            //freeProfiles.push(this.profiles.filter(profile => !linkedProfilesIds.includes(profile.id))[0]);
-
-
-            
+                        
             freeProfile = freeProfiles[0];
         } else {
             freeProfile = this.profiles[0];
@@ -69,5 +64,31 @@ export default class AccountManager {
 
     async setTwoFactorAuthCode(code) {
         return await this.account.twoFactorAuth(code);
+    }
+
+    async getAuthorizedAccounts(platforms) {
+        let accounts = [];
+        for (const profile of this.profiles) {
+            const account = new Account(this.token, profile.id);
+            await account.start();
+            for (const platform of platforms) {
+                let auth;
+                switch (platform) {
+                    case 'fansly':
+                        auth = await account.getAuthorizedAccountFansly();
+                        break;
+                    case 'ton':
+                        auth = await account.getAuthorizedAccountTon();
+                        break;
+                    case 'fancentro':
+                        auth = await account.getAuthorizedAccountFancentro();
+                        break;
+                }
+                if (auth.success) {
+                    accounts.push({name: auth.name, profileId: profile.id, platform: platform})
+                }
+            }
+        }
+        return accounts;
     }
 }

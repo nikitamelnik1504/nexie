@@ -234,13 +234,6 @@ const addAccountScene = new Scenes.WizardScene(
 
                     for (const message of messages) {
                         let dialogFound = false;
-                        // for (const dialog of dialogs) {
-                        //     if (dialog.dialogId === message.dialogId) {
-                        //         await dialog.messages.push(message.message);
-                        //         dialogFound = true;
-                        //         break;
-                        //     }
-                        // }
                         if (!dialogFound) {
                             await dialogs.push({
                                 dialogId: message.dialogId || null,
@@ -428,14 +421,16 @@ app.get('/chat', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log('server running');
-    // const profiles = await ProfileManager.getProfiles(token);
-    // let index = 0;
-    // for (const profile of profiles.data) {
-    //     console.log(profile.id)
-    //     const profileManager = new ProfileManager(token, profile.id);
-    //     await profileManager.stopProfile();
-    // }
+    const profiles = await ProfileManager.getProfiles(token);
+    for (const profile of profiles.data) {
+        console.log(profile.id)
+        const profileManager = new ProfileManager(token, profile.id);
+        await profileManager.stopProfile();
+    }
 
+    const accountManager = new AccountManager(token, profiles);
+    accounts = accountManager.getAuthorizedAccounts(platforms);
+    console.log(accounts);
 })
 
 bot.launch();
