@@ -234,7 +234,7 @@ export default class Account {
             await this.page.setCookie(...cookies);
 
             await this.page.setViewport({ width: 414, height: 896 });
-            await this.page.goto(`https://fancentro.com/`, { waitUntil: 'networkidle0' });
+            await this.page.goto(`https://fancentro.com/`, { waitUntil: 'networkidle0', timeout: 60000 });
             try {
                 await this.page.waitForSelector('button[data-testid="header-mobile-menu-open-button"]', { timeout: 10000 });
                 
@@ -266,13 +266,13 @@ export default class Account {
             await this.page.setCookie(...cookies);
 
             await this.page.setViewport({ width: 414, height: 896 });
-            await this.page.goto(`https://fansly.com/`, { waitUntil: 'networkidle0' });
+            await this.page.goto(`https://fansly.com/`, { waitUntil: 'networkidle0', timeout: 60000 });
 
             try {
                 await this.page.waitForSelector('.avatar-container.pointer');
                 if (await this.page.$('.avatar-container.pointer')) {
                     await this.page.click('.avatar-container.pointer');
-                    const modelName = await this.page.evaluate(() => { return document.querySelector('display-name').textContent()})
+                    const modelName = await this.page.evaluate(() => { return document.querySelector('.display-name').innerText});
                     await this.page?.close();
                     return {success: true, name: modelName};
                 }
@@ -294,12 +294,11 @@ export default class Account {
             const cookies = await this.cookie.exportCookies();
             this.page = await this.browser.newPage();
             await this.page.setCookie(...cookies);
-            this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
             await this.page.goto(`https://ton.place/other`, { waitUntil: 'networkidle2' });
 
             try {
                 await this.page.waitForSelector('.Other__profile');
-                const modelName = await this.page.evaluate(() => {return document.querySelector('Other__profile__name').textContent})
+                const modelName = await this.page.evaluate(() => {return document.querySelector('.Other__profile__name').textContent})
                 await this.page?.close();
                 return {success: true, name: modelName};
             } catch {

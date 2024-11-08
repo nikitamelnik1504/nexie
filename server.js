@@ -430,7 +430,7 @@ app.listen(PORT, async () => {
 
     const accountManager = new AccountManager(token, profiles.data);
     let accounts = await accountManager.getAuthorizedAccounts(platforms);
-    console.log(accounts);
+    writeArrayToFile('./private/accounts.json', accounts);
 })
 
 bot.launch();
