@@ -27,7 +27,6 @@ function showMenu(ctx) {
 bot.use((ctx, next) => {
     const userId = ctx.from.id;
     const role = roles.find(role => Number(role.id) == userId);
-    // console.log(role)
 
     if (ctx.callbackQuery && ctx.callbackQuery.data === 'request_access') {
         return next();
@@ -117,7 +116,7 @@ bot.action(/remove_access_(\d+)/, (ctx) => {
     const role = roles.find(role => Number(role.id) == ctx.from.id);
     if (role.role !== 'admin') return ctx.reply('You not admin')
     roles = roles.filter(role => Number(role.id) != userId);
-    writeArrayToFile('./private/bot_access.json', rolesFiltered);
+    writeArrayToFile('./private/bot_access.json', roles);
     ctx.reply(`Rights removed`);;
 });
 
@@ -169,11 +168,34 @@ bot.hears('Accounts', async (ctx) => {
     ctx.reply('Choose option', {
         reply_markup: {
             keyboard: [
-                [{ text: 'Add account' }, { text: 'Back' }]
+                [{ text: 'Add account' }, {text: 'Authorized accounts'}, { text: 'Back' }]
             ],
             resize_keyboard: true
         }
     })
+});
+
+bot.hears('Authorized accounts', async (ctx) => {
+    ctx.reply('Please wait a few minutes...');
+    let accounts = [];
+
+    const promises = profiles.data.map(async (profile) => {
+        for (const platform of platforms) {
+            await AccountManager.getAuthorizedAccount(token, profile.id, platform).then(async auth => {
+                if (auth.success) {
+                    accounts.push({name: auth.name, profileId: profile.id, platform: platform})
+                }
+            });
+        }
+    });
+    await Promise.all(promises);
+    accounts = accounts.filter((account, index, self) => {
+        const key = `${account.platform}-${account.name}`;
+        return self.findIndex(obj => `${obj.platform}-${obj.name}` === key) === index;
+    })
+    console.log(accounts);
+    await writeArrayToFile('./private/accounts.json', accounts);
+    ctx.reply('Accounts have been successfully added');
 });
 
 const addAccountScene = new Scenes.WizardScene(
@@ -428,9 +450,6 @@ app.listen(PORT, async () => {
         await profileManager.stopProfile();
     }
 
-    const accountManager = new AccountManager(token, profiles.data);
-    let accounts = await accountManager.getAuthorizedAccounts(platforms);
-    writeArrayToFile('./private/accounts.json', accounts);
 })
 
 bot.launch();

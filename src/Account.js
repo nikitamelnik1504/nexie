@@ -1,6 +1,7 @@
 import ProfileManager from "./managers/ProfileManager.js";
 import BrowserManager from "./managers/BrowserManager.js";
 import CookieManager from "./managers/CookieManager.js";
+import { timeout } from "puppeteer";
 
 
 export default class Account {
@@ -236,7 +237,7 @@ export default class Account {
             await this.page.setViewport({ width: 414, height: 896 });
             await this.page.goto(`https://fancentro.com/`, { waitUntil: 'networkidle0', timeout: 60000 });
             try {
-                await this.page.waitForSelector('button[data-testid="header-mobile-menu-open-button"]', { timeout: 10000 });
+                await this.page.waitForSelector('button[data-testid="header-mobile-menu-open-button"]', { timeout: 15000 });
                 
                 const modelName = await this.page.evaluate(() => {
                     const menuBtn = document.querySelector('button[data-testid="header-mobile-menu-open-button"]')
@@ -269,9 +270,10 @@ export default class Account {
             await this.page.goto(`https://fansly.com/`, { waitUntil: 'networkidle0', timeout: 60000 });
 
             try {
-                await this.page.waitForSelector('.avatar-container.pointer');
+                await this.page.waitForSelector('.avatar-container.pointer', {timeout: 15000});
                 if (await this.page.$('.avatar-container.pointer')) {
                     await this.page.click('.avatar-container.pointer');
+                    await this.page.waitForSelector('.display-name');
                     const modelName = await this.page.evaluate(() => { return document.querySelector('.display-name').innerText});
                     await this.page?.close();
                     return {success: true, name: modelName};
@@ -297,7 +299,7 @@ export default class Account {
             await this.page.goto(`https://ton.place/other`, { waitUntil: 'networkidle2' });
 
             try {
-                await this.page.waitForSelector('.Other__profile');
+                await this.page.waitForSelector('.Other__profile', {timeout: 15000});
                 const modelName = await this.page.evaluate(() => {return document.querySelector('.Other__profile__name').textContent})
                 await this.page?.close();
                 return {success: true, name: modelName};

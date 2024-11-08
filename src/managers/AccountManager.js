@@ -66,29 +66,16 @@ export default class AccountManager {
         return await this.account.twoFactorAuth(code);
     }
 
-    async getAuthorizedAccounts(platforms) {
-        let accounts = [];
-        for (const profile of this.profiles) {
-            const account = new Account(this.token, profile.id);
-            await account.start();
-            for (const platform of platforms) {
-                let auth;
-                switch (platform) {
-                    case 'fansly':
-                        auth = await account.getAuthorizedAccountFansly();
-                        break;
-                    case 'ton':
-                        auth = await account.getAuthorizedAccountTon();
-                        break;
-                    case 'fancentro':
-                        auth = await account.getAuthorizedAccountFancentro();
-                        break;
-                }
-                if (auth.success) {
-                    accounts.push({name: auth.name, profileId: profile.id, platform: platform})
-                }
-            }
+    static async getAuthorizedAccount(token, profileId, platform) {
+        const account = new Account(token, profileId);
+        await account.start();
+        switch (platform) {
+            case 'fansly':
+                return await account.getAuthorizedAccountFansly();
+            case 'ton':
+                return await account.getAuthorizedAccountTon();
+            case 'fancentro':
+                return await account.getAuthorizedAccountFancentro();
         }
-        return accounts;
     }
 }
