@@ -228,66 +228,90 @@ export default class Account {
     }
 
     async getAuthorizedAccountFancentro() {
-        const cookies = await this.cookie.exportCookies();
-        this.page = await this.browser.newPage();
-        await this.page.setCookie(...cookies);
-
-        await this.page.setViewport({ width: 414, height: 896 });
-        await this.page.goto(`https://fancentro.com/`, { waitUntil: 'networkidle0' });
         try {
-            await this.page.waitForSelector('button[data-testid="header-mobile-menu-open-button"]', { timeout: 10000 });
-            
-            const modelName = await this.page.evaluate(() => {
-                const menuBtn = document.querySelector('button[data-testid="header-mobile-menu-open-button"]')
-                menuBtn.click();
-                const name = document.querySelector('a[href="/settings"] strong').textContent;
-                return name;
-            });
-            await this.page?.close();
-            return {success: true, name: modelName};
-        } catch {
-            await this.page?.close();
-            return {success: false}
+            const cookies = await this.cookie.exportCookies();
+            this.page = await this.browser.newPage();
+            await this.page.setCookie(...cookies);
+
+            await this.page.setViewport({ width: 414, height: 896 });
+            await this.page.goto(`https://fancentro.com/`, { waitUntil: 'networkidle0' });
+            try {
+                await this.page.waitForSelector('button[data-testid="header-mobile-menu-open-button"]', { timeout: 10000 });
+                
+                const modelName = await this.page.evaluate(() => {
+                    const menuBtn = document.querySelector('button[data-testid="header-mobile-menu-open-button"]')
+                    menuBtn.click();
+                    const name = document.querySelector('a[href="/settings"] strong').textContent;
+                    return name;
+                });
+                await this.page?.close();
+                return {success: true, name: modelName};
+            } catch {
+                await this.page?.close();
+                return {success: false}
+            }
+        } catch(err) {
+            console.log(err);
+            console.log('restart');
+            await this.page.close();
+            await this.start();
+            return await this.getAuthorizedAccountFancentro();
         }
     }
 
     async getAuthorizedAccountFansly() {
-        const cookies = await this.cookie.exportCookies();
-        this.page = await this.browser.newPage();
-        await this.page.setCookie(...cookies);
-
-        await this.page.setViewport({ width: 414, height: 896 });
-        await this.page.goto(`https://fansly.com/`, { waitUntil: 'networkidle0' });
-
         try {
-            await this.page.waitForSelector('.avatar-container.pointer');
-            if (await this.page.$('.avatar-container.pointer')) {
-                await this.page.click('.avatar-container.pointer');
-                const modelName = await this.page.evaluate(() => { return document.querySelector('display-name').textContent()})
+            const cookies = await this.cookie.exportCookies();
+            this.page = await this.browser.newPage();
+            await this.page.setCookie(...cookies);
+
+            await this.page.setViewport({ width: 414, height: 896 });
+            await this.page.goto(`https://fansly.com/`, { waitUntil: 'networkidle0' });
+
+            try {
+                await this.page.waitForSelector('.avatar-container.pointer');
+                if (await this.page.$('.avatar-container.pointer')) {
+                    await this.page.click('.avatar-container.pointer');
+                    const modelName = await this.page.evaluate(() => { return document.querySelector('display-name').textContent()})
+                    await this.page?.close();
+                    return {success: true, name: modelName};
+                }
+            } catch {
                 await this.page?.close();
-                return {success: true, name: modelName};
+                return {success: false}
             }
-        } catch {
-            await this.page?.close();
-            return {success: false}
+        } catch(err) {
+            console.log(err);
+            console.log('restart');
+            await this.page.close();
+            await this.start();
+            return await this.getAuthorizedAccountFansly();
         }
     }
 
     async getAuthorizedAccountTon() {
-        const cookies = await this.cookie.exportCookies();
-        this.page = await this.browser.newPage();
-        await this.page.setCookie(...cookies);
-        this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
-        await this.page.goto(`https://ton.place/other`, { waitUntil: 'networkidle2' });
-
         try {
-            await this.page.waitForSelector('.Other__profile');
-            const modelName = await this.page.evaluate(() => {return document.querySelector('Other__profile__name').textContent})
-            await this.page?.close();
-            return {success: true, name: modelName};
-        } catch {
-            await this.page?.close();
-            return {success: false};
+            const cookies = await this.cookie.exportCookies();
+            this.page = await this.browser.newPage();
+            await this.page.setCookie(...cookies);
+            this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
+            await this.page.goto(`https://ton.place/other`, { waitUntil: 'networkidle2' });
+
+            try {
+                await this.page.waitForSelector('.Other__profile');
+                const modelName = await this.page.evaluate(() => {return document.querySelector('Other__profile__name').textContent})
+                await this.page?.close();
+                return {success: true, name: modelName};
+            } catch {
+                await this.page?.close();
+                return {success: false};
+            }
+        } catch(err) {
+            console.log(err);
+            console.log('restart');
+            await this.page.close();
+            await this.start();
+            return await this.getAuthorizedAccountTon();
         }
     }
 

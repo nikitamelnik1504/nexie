@@ -428,8 +428,8 @@ app.listen(PORT, async () => {
         await profileManager.stopProfile();
     }
 
-    const accountManager = new AccountManager(token, profiles);
-    accounts = accountManager.getAuthorizedAccounts(platforms);
+    const accountManager = new AccountManager(token, profiles.data);
+    let accounts = await accountManager.getAuthorizedAccounts(platforms);
     console.log(accounts);
 })
 
