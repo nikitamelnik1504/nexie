@@ -176,60 +176,7 @@ bot.hears('Accounts', async (ctx) => {
     })
 });
 
-// bot.hears('Authorized accounts', async (ctx) => {
-//     ctx.reply('Please wait a few minutes...');
-//     let accounts = [];
 
-//     const promises = profiles.data.map(async (profile) => {
-//         for (const platform of platforms) {
-//             await AccountManager.getAuthorizedAccount(token, profile.id, platform).then(async auth => {
-//                 if (auth.success) {
-//                     accounts.push({name: auth.name, profileId: profile.id, platform: platform})
-//                 }
-//             });
-//         }
-//     });
-//     await Promise.all(promises);
-//     accounts = accounts.filter((account, index, self) => {
-//         const key = `${account.platform}-${account.name}`;
-//         return self.findIndex(obj => `${obj.platform}-${obj.name}` === key) === index;
-//     })
-//     console.log(accounts);
-//     await writeArrayToFile('./private/accounts.json', accounts);
-//     ctx.reply('Accounts have been successfully added');
-//     for (const account of accounts) {
-//         const messageRetreiver = new MessageRetriever(token, account.profileId);
-//         messageRetreiver.start().then(async () => {
-//             const messages = await messageRetreiver.getProfileMessage(account.platform);
-//             const dialogs = await getArrayFromFile('./private/dialogs.json');
-
-//             for (const message of messages) {
-//                 let dialogFound = false;
-//                 if (!dialogFound) {
-//                     await dialogs.push({
-//                         dialogId: message.dialogId || null,
-//                         profileId: account.profileId,
-//                         name: message.name,
-//                         viewed: message.viewed,
-//                         platform: account.platform,
-//                         messages: [
-//                             {
-//                                 message: message.message,
-//                                 sender: message.viewed
-//                             }
-//                         ]
-//                     });
-//                 }
-//                 console.log(dialogs)
-//                 await writeArrayToFile('./private/dialogs.json', dialogs);
-
-//                 await messageRetreiver.start();
-//                 await messageRetreiver.getMessageFromWebSocket(account.platform);
-//             }
-//             console.log('leave');
-//         });
-//     }
-// });
 bot.hears('Authorized accounts', async (ctx) => {
     ctx.reply('Please wait a few minutes...');
     let accounts = [];
@@ -268,7 +215,48 @@ bot.hears('Authorized accounts', async (ctx) => {
     });
 
     console.log('Accounts:', accounts);
+    await writeArrayToFile('./private/accounts.json', accounts);
     ctx.reply('Accounts retrieved successfully');
+    ctx.reply('Retrieving messages from accounts. Wait please...');
+
+    const messageQueueManager = new QueueManager(5);
+
+    for (const account of accounts) {
+        messageQueueManager.addTask(async () => {
+            const messageRetriever = new MessageRetriever(token, account.profileId);
+            await messageRetriever.start();
+
+            const messages = await messageRetriever.getProfileMessage(account.platform);
+            const dialogs = await getArrayFromFile('./private/dialogs.json');
+
+            for (const message of messages) {
+                let dialogFound = false;
+                if (!dialogFound) {
+                    dialogs.push({
+                        dialogId: message.dialogId || null,
+                        profileId: account.profileId,
+                        name: message.name,
+                        viewed: message.viewed,
+                        platform: account.platform,
+                        messages: [
+                            {
+                                message: message.message,
+                                sender: message.viewed
+                            }
+                        ]
+                    });
+                }
+                console.log(dialogs);
+                await writeArrayToFile('./private/dialogs.json', dialogs);
+
+                await messageRetriever.getMessageFromWebSocket(account.platform);
+            }
+            console.log('leave');
+        });
+    }
+
+    await messageQueueManager.waitForCompletion();
+    ctx.reply('Messages retrieved successfully');
 });
 
 
