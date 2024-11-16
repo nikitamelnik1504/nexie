@@ -216,19 +216,20 @@ bot.hears('Authorized accounts', async (ctx) => {
 
     console.log('Accounts:', accounts);
     await writeArrayToFile('./private/accounts.json', accounts);
-    ctx.reply('Accounts retrieved successfully');
-    ctx.reply('Retrieving messages from accounts. Wait please...');
+    await ctx.reply('Accounts retrieved successfully');
+    await ctx.reply('Retrieving messages from accounts. Wait please...');
 
     const messageQueueManager = new QueueManager(5);
 
     for (const account of accounts) {
         messageQueueManager.addTask(async () => {
+		console.log(account.profileId);
             const messageRetriever = new MessageRetriever(token, account.profileId);
             await messageRetriever.start();
 
             const messages = await messageRetriever.getProfileMessage(account.platform);
             const dialogs = await getArrayFromFile('./private/dialogs.json');
-
+console.log(messages[0]);
             for (const message of messages) {
                 let dialogFound = false;
                 if (!dialogFound) {
@@ -246,10 +247,9 @@ bot.hears('Authorized accounts', async (ctx) => {
                         ]
                     });
                 }
-                console.log(dialogs);
-                await writeArrayToFile('./private/dialogs.json', dialogs);
+                //await writeArrayToFile('./private/dialogs.json', dialogs);
 
-                await messageRetriever.getMessageFromWebSocket(account.platform);
+                //await messageRetriever.getMessageFromWebSocket(account.platform);
             }
             console.log('leave');
         });
@@ -506,12 +506,21 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log('server running');
     const profiles = await ProfileManager.getProfiles(token);
+let index = 0;
     for (const profile of profiles.data) {
         console.log(profile.id)
         const profileManager = new ProfileManager(token, profile.id);
         await profileManager.stopProfile();
-    }
 
+	//const testManager = new MessageRetriever(token, profile.id); //438410210
+        //await testManager.start();
+        //await testManager.test('https://fancentro.com/', index);
+index++;
+
+    }
+	//const testManager = new MessageRetriever(token, 438410210); //438410210
+	//await testManager.start();
+	//await testManager.test('https://fancentro.com/', 'test');
 })
 
 bot.launch();

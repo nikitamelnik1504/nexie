@@ -37,12 +37,24 @@ export default class MessageRetriever {
         await this.page.setCookie(...cookies);
 
         this.page.on('console', async (msg) => console.log('puppeteer:', await Promise.all(msg.args().map(arg => arg.jsonValue()))));
-
+await this.page.setViewport({ width: 414, height: 896 });
         await this.page.goto(url, { waitUntil: 'networkidle0' });
         try {
             await this.page.waitForSelector('dfdfdf', { timeout: 15000 });
         } catch { }
-        await this.page.screenshot({ path: `Test${index}.png` });
+await this.page.screenshot({ path: `Test${index}.png` });
+try{
+await this.page.waitForSelector('button[data-testid="header-mobile-menu-open-button"]', { timeout: 15000 });
+
+                const modelName = await this.page.evaluate(() => {
+                    const menuBtn = document.querySelector('button[data-testid="header-mobile-menu-open-button"]')
+                    menuBtn.click();
+                    const name = document.querySelector('a[href="/settings"] strong').textContent;
+                    return name;
+                });
+console.log(modelName);
+} catch {}
+        //await this.page.screenshot({ path: `Test${index}.png` });
         await this.page.close();
         return;
     }
@@ -115,6 +127,7 @@ export default class MessageRetriever {
             await client.send('Network.enable');
 
             let roomsData = [];
+	    let messages = [];
             await client.on('Network.webSocketFrameReceived', async ({ requestId, timestamp, response }) => {
                 if (response.payloadData.includes('room')) {
                     const data = await JSON.parse(response.payloadData.replace(/^42\/fc,/, ''));
@@ -124,12 +137,13 @@ export default class MessageRetriever {
                 }
             });
             this.page.on('response', async (response) => {
+try {
                 if (response.url().includes('chat.getInterlocutors')) {
                     const responseBody = await response.text();
                     const data = JSON.parse(responseBody);
                     if (data.response.meta.total > 0) {
                         try {
-                            const messages = [];
+                            //const messages = [];
                             for (const room of roomsData) {
                                 try {
                                     if (data.response.collection[room.members[0].externalId]) {
@@ -154,22 +168,22 @@ export default class MessageRetriever {
                                 }
                             }
 
-                            console.log('oks');
-
-                            // if (this.page) {
-                            //     await this.page.close();
-                            // }
-                            return messages;
+                            console.log('oks')
                         } catch (err){
                             console.log(err);
                         }
                     }
                 }
+}catch{}
             });
 
 
             await this.page.goto(`https://fancentro.com/admin/messages`, { waitUntil: 'networkidle0' });
 
+try {
+	await this.page.waitForSelector('undefined', {timeout: 60000});
+} catch {}
+return messages;
             // console.log('start');
 
             // await this.page.waitForSelector('#scrollableDiv .List > div > button');
