@@ -35,7 +35,7 @@ export default class ProfileManager {
     async startProfile() {
         try {
             await axios.post(`${this.apiBaseURL}/auth/login-with-token`, { token: this.token }, { headers: { 'Content-Type': 'application/json' } });
-            const { data } = await axios.get(`${this.apiBaseURL}/browser_profiles/${this.profileId}/start?automation=1&headless=${Number(this.headlessMode)}`);
+            const { data } = await axios.get(`${this.apiBaseURL}/browser_profiles/${this.profileId}/start?automation=1&headless=${Number(this.headlessMode)}`); 
             this.port = data.automation.port;
             this.wsEndpoint = data.automation.wsEndpoint;
             await writeArrayToFile('./private/profile.json', [{port: this.port, wsEndpoint: this.wsEndpoint}]);

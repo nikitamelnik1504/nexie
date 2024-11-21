@@ -8,7 +8,6 @@ import ProfileManager from "./src/managers/ProfileManager.js";
 import AccountManager from "./src/managers/AccountManager.js";
 import QueueManager from "./src/managers/QueueManager.js";
 
-
 const bot = new Telegraf('7639460431:AAFv2g2y9wdz1GEb7gORgiugyJ8qWlYHkRg', { handlerTimeout: 600000 });
 const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiODBlOGFjM2E4ZGY1NjZiZjkxYjU2MjU0NjM4NWE4NjI1NjlhMGEwMTE5OTVkZWVlZjNkMWU1YzM3ZjRjN2I1MDQ5NjFiZDA5MTgyMzkyMjIiLCJpYXQiOjE3MjcyOTI1OTcuNjExNTQ1LCJuYmYiOjE3MjcyOTI1OTcuNjExNTQ2LCJleHAiOjE3NTg4Mjg1OTcuNTk2OTYzLCJzdWIiOiIzNzUwNTE0Iiwic2NvcGVzIjpbXX0.cu3orWJhCEn2nqytQXTs7H6_7DhzlcSbZXxOTkbmkOzA_VpVRVuCrU3wtLGl-NSGhdi9yLTaE6Jo5i14NSqJTsUf3j2eWetUoHN3t-XIT_0dcHxFTUD1NvEF0JoJX6CPk05r6AOC7Dw4f10SPGVWbdVct2vJJDuvnWKdWDR8AAsvj-Uszgg8R8u80P1zh1o3OpQ5qSXsl1kHeacj4Nog1ZNKDZ6kGQ-6b1yR8bOItjW_FlIu37pfiiZNzWB6WIs_N7amRB9EAXXAl1AQxLHZHreJ0butYzn6nWIfW-2vvB5ZS8H6nDI-khpzAo4-Qomeg8qPELJmCDEoTbOdaQB-TISFATMGvAI2oYIbVDHpk0GxGGEh4RiM3A181IToypYdsxvsmSYrzgEsybekdQavuVIiVnhLcyNcZJRIfYYFj14pyk_oCwRl12yMUYylFU6q_LN7_Nj-zaEH0jAIHlRWM2gVZCCIgb_-37xgtwT6hOc_JGohhl1p_wIjW-HgJjgP-42l4JAmCcLJBKtVSS6PilGO9tPfldfqgK0Z4fHpBOgJkkpNxcqhlykf91hbU4h85eIqD1UH5bhVdr5608mN1_FC_VRqX8W_RvDskQi47_7Z0lSdj7lL6E-dZ4YJpIYfqc0BTXlXFJb0_uTSIlXFTAQFYSEs-Su7TR_ywbXFI4Y'
 const chatsUrl = 'https://194-62-105-58.sslip.io/chats';
@@ -58,7 +57,6 @@ bot.hears('Chats', async (ctx) => {
     // );
 });
 
-
 bot.hears('Settings', (ctx) => {
     ctx.reply('Settings:', Markup.keyboard(['Access', 'Accounts', 'Back']).resize());
 });
@@ -75,7 +73,7 @@ bot.hears('Requests list', (ctx) => {
         return ctx.reply('The list is empty');
     }
     Object.entries(accessRequests).map(([id, username]) => {
-        ctx.reply(`Request for @${username}`, 
+        ctx.reply(`Request for @${username}`,
             Markup.inlineKeyboard([
                 Markup.button.callback('Approve', `approve_${id}`),
                 Markup.button.callback('Decline', `deny_${id}`)
@@ -90,7 +88,7 @@ bot.hears('Access', (ctx) => {
     const role = roles.find(role => Number(role.id) == userId);
     if (role.role !== 'admin') return ctx.reply('You not admin');
     roles.forEach(role => {
-        ctx.reply(`User @${role.username} has ${role.role} rights`, 
+        ctx.reply(`User @${role.username} has ${role.role} rights`,
             Markup.inlineKeyboard([
                 Markup.button.callback('Remove rights', `remove_access_${role.id}`),
                 Markup.button.callback('Give admin rights', `update_access_${role.id}`)
@@ -144,7 +142,6 @@ bot.action(/deny_(\d+)/, (ctx) => {
 
 const profiles = await ProfileManager.getProfiles(token);
 const platforms = ['ton', 'fancentro', 'fansly'];
-
 
 
 bot.action(/account_delete_(\d+)/, async (ctx) => {
@@ -507,17 +504,18 @@ app.listen(PORT, async () => {
     console.log('server running');
     const profiles = await ProfileManager.getProfiles(token);
 let index = 0;
-    for (const profile of profiles.data) {
-        console.log(profile.id)
-        const profileManager = new ProfileManager(token, profile.id);
-        await profileManager.stopProfile();
+    // for (const profile of profiles.data) {
+    //     console.log(profile.id)
+    console.log(profiles.data[0].id);
+        const profileManager = new ProfileManager(token, profiles.data[0].id);
+        await profileManager.startProfile();
 
 	//const testManager = new MessageRetriever(token, profile.id); //438410210
         //await testManager.start();
         //await testManager.test('https://fancentro.com/', index);
-index++;
+// index++;
 
-    }
+    // }
 	//const testManager = new MessageRetriever(token, 438410210); //438410210
 	//await testManager.start();
 	//await testManager.test('https://fancentro.com/', 'test');
