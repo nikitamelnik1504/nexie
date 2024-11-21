@@ -1,12 +1,6 @@
 wget https://dolphin-anty-cdn.com/anty-app/dolphin-anty-linux-x86_64-latest.AppImage
 sudo apt update 
-sudo apt install fuse -y 
-sudo apt install xvfb -y 
-sudo apt install libatk1.0-0 -y 
-sudo apt install libatk-bridge2.0-0 -y 
-sudo apt install libcups2 -y 
-sudo apt install libgtk-3-0 -y 
-sudo apt install libgbm1 -y 
+sudo apt install fuse xvfb libatk1.0-0 libatk-bridge2.0-0 libcups2 libgtk-3-0 libgbm1 -y
 Xvfb :99 & export DISPLAY=:99 
 ./dolphin.AppImage
 

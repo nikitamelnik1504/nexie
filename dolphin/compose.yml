@@ -1,0 +1,9 @@
+services:
+  dolphin:
+    build: .
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    ports:
+      - 3001:3001
