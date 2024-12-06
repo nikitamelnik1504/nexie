@@ -40,6 +40,10 @@ class SocialsAgentService {
     return this.accounts;
   }
 
+  getAccount(id) {
+    return this.accounts.find(account => account.id === id);
+  }
+
   async saveAccount(account) {
     const accountsData = JSON.parse(await fs.readFile(this.storagePath + '/socialAccounts.json', {'encoding': 'utf8'}));
     const match = accountsData.filter(item => item.id === account.id);
@@ -60,17 +64,6 @@ class SocialsAgentService {
   getDolphinService() {
     return this.dolphinService;
   }
-
-  // async loadAccountsFromDolphin() {
-  //   const dolphinService = await DolphinService.init();
-  //
-  //   await fs.readFile(path + '/telegramUsers.json', {'encoding': 'utf8'});
-  //
-  //   const dolphinProfiles = await this.dolphinService.getProfiles(false);
-  //   await dolphinProfiles[0].start();
-  //
-  //   return this.accounts; // @todo Filter with authorized.
-  // }
 
 }
 

@@ -85,7 +85,7 @@ class DolphinProfile {
       browserWSEndpoint: `ws://127.0.0.1:${this.port}${this.wsEndpoint}`,
     })
 
-    return this.browser = new DolphinBrowser(browser);
+    return this.browser = new DolphinBrowser(this, browser);
   }
 
 }

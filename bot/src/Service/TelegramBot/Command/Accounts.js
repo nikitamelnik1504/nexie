@@ -35,7 +35,7 @@ class Accounts extends TelegramBotCommandBase {
 
       if (agentPlatformConnectionStatus === 2) {
         message.keyboard = Markup.inlineKeyboard(
-          [Markup.button.callback('Start Profile', 'start_profile_' + socialAgent.clientSettings.profile)],
+          [Markup.button.callback('Start Profile', 'start_profile_' + socialAgent.id)],
         );
       }
 

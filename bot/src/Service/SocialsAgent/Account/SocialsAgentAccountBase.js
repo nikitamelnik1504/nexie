@@ -46,6 +46,14 @@ class SocialsAgentAccountBase {
     return this.getClientConnectionStatus();
   }
 
+  async startPlatformConnection() {
+    switch (this.clientSettings.type) {
+      case 'dolphin':
+        (await (await this.service.getDolphinService().connect(this.clientSettings.apiUrl, this.clientSettings.authToken)).profile(this.clientSettings.profile)).start();
+        return true;
+    }
+  }
+
   async save() {
     return this.service.saveAccount(this);
   }

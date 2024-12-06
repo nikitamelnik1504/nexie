@@ -26,13 +26,13 @@ class DolphinBrowser {
     } else {
       switch (siteName) {
         case 'fancentro':
-          tab = await DolphinFancentroTab.open(await this.browser.newPage());
+          tab = await DolphinFancentroTab.open(this.profile, await this.browser.newPage());
           break;
         case 'fansly':
-          tab = new DolphinFanslyTab(await this.browser.newPage());
+          tab = new DolphinFanslyTab(this.profile, await this.browser.newPage());
           break;
         case 'ton':
-          tab = new DolphinTonTab(await this.browser.newPage());
+          tab = new DolphinTonTab(this.profile, await this.browser.newPage());
           break;
       }
       this.tabs.push(tab);
