@@ -1,4 +1,5 @@
 import TelegramBotCommandBase from "../TelegramBotCommandBase.js";
+import {Markup} from "telegraf";
 
 class Accounts extends TelegramBotCommandBase {
 
@@ -7,27 +8,42 @@ class Accounts extends TelegramBotCommandBase {
 
     const socialsAgentService = await this.service.getSocialsAgentService();
 
-    const accountsInfo = [];
+    const messages = [];
+
     for (const socialAgent of socialsAgentService.getAccounts()) {
-      accountsInfo.push({
+      const message = {text: null, keyboard: null};
+
+      const agentPlatformConnectionStatus = await socialAgent.getPlatformConnectionStatus();
+
+      const accountInfo = {
         'Account': '',
         'Client': socialAgent.getClientType(),
         'Client Connection Status': await socialAgent.getClientConnectionStatus() ? 'Connected' : 'Not Connected',
         'Platform': socialAgent.getPlatformType(),
-        'Platform Connection Status': await socialAgent.getPlatformConnectionStatus(),
+        'Platform Connection Status': socialAgent.PLATFORM_CONNECTION_STATUS[agentPlatformConnectionStatus],
         'Login': socialAgent.getPlatformLogin(),
         'Password': socialAgent.getPlatformPassword(),
         'Access Granted To': '',
-      });
-    }
+      };
 
-    for (const account of accountsInfo) {
       let accountInfoString = "";
-      for (const [key, value] of Object.entries(account)) {
+      for (const [key, value] of Object.entries(accountInfo)) {
         accountInfoString += `${key}: ${value}\n`;
       }
 
-      await this.context.reply(accountInfoString);
+      message.text = accountInfoString;
+
+      if (agentPlatformConnectionStatus === 2) {
+        message.keyboard = Markup.inlineKeyboard(
+          [Markup.button.callback('Start Profile', 'start_profile_' + socialAgent.clientSettings.profile)],
+        );
+      }
+
+      messages.push(message);
+    }
+
+    for (const message of messages) {
+      await this.context.reply(message.text, message.keyboard);
     }
   }
 }

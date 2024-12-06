@@ -2,7 +2,7 @@ import SocialsAgentAccountBase from "./SocialsAgentAccountBase.js";
 
 class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
 
-  static PLATFORM_CONNECTION_STATUS = {
+  PLATFORM_CONNECTION_STATUS = {
     0: 'Account is not authorized',
     1: 'Account is authorized',
     2: 'Profile is not started',
@@ -27,7 +27,7 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
             return 3;
           }
           else if (dolphinProfile.running === true && dolphinProfile.wsEndpoint !== null) {
-            await dolphinProfile.openBrowser('fancentro');
+            await (await (await dolphinProfile.openBrowser()).openTab('fancentro')).getAuthorizationStatus();
           }
 
           return true;

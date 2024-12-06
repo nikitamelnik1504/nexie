@@ -7,6 +7,7 @@ import TelegramBotStorage from "./TelegramBotStorage.js";
 import Start from "./Command/Start.js";
 import Settings from "./Command/Settings.js";
 import Accounts from "./Command/Accounts.js";
+import StartProfile from "./Callback/StartProfile.js";
 
 class TelegramBotService {
 
@@ -27,6 +28,7 @@ class TelegramBotService {
     instance.bot.start(async (ctx) => new Start(instance, ctx).run());
     instance.bot.hears('Settings', async (ctx) => new Settings(instance, ctx).run());
     instance.bot.hears('Accounts', async (ctx) => new Accounts(instance, ctx).run());
+    instance.bot.action(/start_profile_(\d+)/, async (ctx) => new StartProfile(instance, ctx).run());
     instance.bot.launch();
 
     return instance;

@@ -1,17 +1,23 @@
 class DolphinFancentroTab {
 
   page;
+  profile;
 
-  constructor(page) {
+  constructor(profile, page) {
+    this.profile = profile;
     this.page = page;
   }
 
-  static async open(page) {
+  static async open(profile, page) {
     await page.goto('https://fancentro.com');
-    return new this(page);
+    return new this(profile, page);
   }
 
-  getAuthorizationStatus() {
+  async getAuthorizationStatus() {
+    const cookies = await this.profile.exportCookies();
+    await this.page.setCookie(...cookies);
+    await this.page.setViewport({width: 414, height: 896});
+    await this.page.goto(`https://fancentro.com/login`, {waitUntil: 'networkidle0'});
   }
 
 }

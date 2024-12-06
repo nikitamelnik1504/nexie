@@ -24,7 +24,7 @@ class DolphinProfile {
     }
 
     try {
-      const profileData = (await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/start?automation=1&headless=1`)).data;
+      const profileData = (await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/start?automation=1`)).data;
       this.running = profileData.success;
       this.port = profileData.automation.port;
       this.wsEndpoint = profileData.automation.wsEndpoint;
@@ -45,7 +45,7 @@ class DolphinProfile {
 
   async refresh() {
     try {
-      await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/start?automation=1&headless=1`);
+      await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/start?automation=1`);
       await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/stop`);
       this.running = false;
       this.port = null;
@@ -57,6 +57,16 @@ class DolphinProfile {
     }
 
     return this;
+  }
+
+  async exportCookies() {
+    const {data} = await axios.post(`https://sync.anty-api.com/?actionType=getCookies&browserProfileId=` + this.id, {}, {headers: {'Authorization': `Bearer ${this.communicator.authToken}`, 'Content-Type': 'application/json'}});
+    return data.success ? data.data : false;
+  }
+
+  async importCookies(raw) {
+    raw = JSON.stringify(raw);
+    return await axios.post(`https://sync.anty-api.com/?actionType=importCookies&browserProfileId=` + this.id, raw, {headers: {'Authorization': `Bearer ${this.communicator.authToken}`, 'Content-Type': 'application/json'}});
   }
 
   stop() {
