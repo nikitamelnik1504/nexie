@@ -28,6 +28,7 @@ class DolphinProfile {
       this.running = profileData.success;
       this.port = profileData.automation.port;
       this.wsEndpoint = profileData.automation.wsEndpoint;
+      await this.openBrowser();
     } catch (error) {
       if (error.response.data.errorObject !== undefined && error.response.data.errorObject.code === 'E_BROWSER_RUN_DUPLICATE') {
         await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/stop`);
