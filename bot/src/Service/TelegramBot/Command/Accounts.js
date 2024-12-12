@@ -33,7 +33,7 @@ class Accounts extends TelegramBotCommandBase {
 
       message.text = accountInfoString;
 
-      if (agentPlatformConnectionStatus === 2) {
+      if (agentPlatformConnectionStatus === 3) {
         message.keyboard = Markup.inlineKeyboard(
           [Markup.button.callback('Start Profile', 'start_profile_' + socialAgent.id)],
         );

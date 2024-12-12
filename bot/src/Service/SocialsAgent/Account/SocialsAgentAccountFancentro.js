@@ -5,9 +5,10 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
   PLATFORM_CONNECTION_STATUS = {
     0: 'Account is not authorized',
     1: 'Account is authorized',
-    2: 'Profile is not started',
-    3: 'Profile is started out of bot',
-    4: 'Profile is not found'
+    2: 'Account is not authorized because another account already logged in',
+    3: 'Profile is not started',
+    4: 'Profile is started out of bot',
+    5: 'Profile is not found'
   }
 
   async getPlatformConnectionStatus() {
@@ -22,17 +23,15 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
           const dolphinProfile = await dolphinCommunicator.profile(this.clientSettings.profile);
 
           if (!dolphinProfile) {
-            return 4;
+            return 5;
           }
 
           if (dolphinProfile.running === false) {
-            return 2;
-          }
-          else if (dolphinProfile.running === true && dolphinProfile.wsEndpoint === null) {
             return 3;
-          }
-          else if (dolphinProfile.running === true && dolphinProfile.wsEndpoint !== null) {
-            await (await (await dolphinProfile.openBrowser()).openTab('fancentro')).getAuthorizationStatus();
+          } else if (dolphinProfile.running === true && dolphinProfile.wsEndpoint === null) {
+            return 4;
+          } else if (dolphinProfile.running === true && dolphinProfile.wsEndpoint !== null) {
+            return await (await (await dolphinProfile.openBrowser()).openTab('fancentro')).getAuthorizationStatus(this.platformSettings.username);
           }
 
           return true;
