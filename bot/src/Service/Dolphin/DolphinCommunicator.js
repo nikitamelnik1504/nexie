@@ -53,6 +53,10 @@ class DolphinCommunicator {
         this.profiles.push(profileInstance);
         return profileInstance.refresh();
       } catch (e) {
+        if (e.response.data.error !== undefined && e.response.data.error.code === 'E_BROWSER_PROFILE_ACCESS_DENIED') {
+          return false;
+        }
+
         console.error(e.response.data);
         return null;
       }

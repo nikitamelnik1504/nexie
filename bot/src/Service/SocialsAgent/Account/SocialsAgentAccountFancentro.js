@@ -6,7 +6,8 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
     0: 'Account is not authorized',
     1: 'Account is authorized',
     2: 'Profile is not started',
-    3: 'Profile is started out of bot'
+    3: 'Profile is started out of bot',
+    4: 'Profile is not found'
   }
 
   async getPlatformConnectionStatus() {
@@ -19,6 +20,10 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
         try {
           const dolphinCommunicator = await this.service.getDolphinService().connect(this.clientSettings.apiUrl, this.clientSettings.authToken);
           const dolphinProfile = await dolphinCommunicator.profile(this.clientSettings.profile);
+
+          if (!dolphinProfile) {
+            return 4;
+          }
 
           if (dolphinProfile.running === false) {
             return 2;
