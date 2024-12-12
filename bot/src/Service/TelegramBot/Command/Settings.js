@@ -3,6 +3,8 @@ import {Markup} from "telegraf";
 
 class Settings extends TelegramBotCommandBase {
 
+  static command = 'Settings';
+
   async run() {
     const user = await this.service.getStorage().getUser(this.context.from.username);
 

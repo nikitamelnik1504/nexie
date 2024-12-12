@@ -1,6 +1,6 @@
 import { socialsAgentService } from "../../../index.js";
 
-import {Telegraf, Markup, Scenes, session} from "telegraf";
+import {Telegraf} from "telegraf";
 
 import TelegramBotStorage from "./TelegramBotStorage.js";
 
@@ -8,6 +8,7 @@ import Start from "./Command/Start.js";
 import Settings from "./Command/Settings.js";
 import Accounts from "./Command/Accounts.js";
 import StartProfile from "./Callback/StartProfile.js";
+import RemoveAccount from "./Callback/RemoveAccount.js";
 
 class TelegramBotService {
 
@@ -26,9 +27,10 @@ class TelegramBotService {
 
     instance.bot = new Telegraf(token);
     instance.bot.start(async (ctx) => new Start(instance, ctx).run());
-    instance.bot.hears('Settings', async (ctx) => new Settings(instance, ctx).run());
-    instance.bot.hears('Accounts', async (ctx) => new Accounts(instance, ctx).run());
-    instance.bot.action(/start_profile_([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/, async (ctx) => new StartProfile(instance, ctx).run());
+    instance.bot.hears(Settings.command, async (ctx) => new Settings(instance, ctx).run());
+    instance.bot.hears(Accounts.command, async (ctx) => new Accounts(instance, ctx).run());
+    instance.bot.action(StartProfile.command, async (ctx) => new StartProfile(instance, ctx).run());
+    instance.bot.action(RemoveAccount.command, async (ctx) => new RemoveAccount(instance, ctx).run());
     instance.bot.launch();
 
     return instance;

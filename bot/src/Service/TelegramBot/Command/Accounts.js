@@ -3,6 +3,8 @@ import {Markup} from "telegraf";
 
 class Accounts extends TelegramBotCommandBase {
 
+  static command = 'Accounts';
+
   async run() {
     await this.context.reply('Please wait a few minutes...');
 
@@ -33,10 +35,40 @@ class Accounts extends TelegramBotCommandBase {
 
       message.text = accountInfoString;
 
-      if (agentPlatformConnectionStatus === 3) {
-        message.keyboard = Markup.inlineKeyboard(
-          [Markup.button.callback('Start Profile', 'start_profile_' + socialAgent.id)],
-        );
+      switch (agentPlatformConnectionStatus) {
+        case 0:
+          message.keyboard = Markup.inlineKeyboard(
+            [Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id)],
+          );
+          break;
+        case 1:
+          message.keyboard = Markup.inlineKeyboard(
+            [Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id)],
+          );
+          break;
+        case 2:
+          message.keyboard = Markup.inlineKeyboard(
+            [Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id)],
+          );
+          break;
+        case 3:
+          message.keyboard = Markup.inlineKeyboard(
+            [
+              Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id),
+              Markup.button.callback('Start Profile', 'start_profile_' + socialAgent.id)
+            ],
+          );
+          break;
+        case 4:
+          message.keyboard = Markup.inlineKeyboard(
+            [Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id)],
+          );
+          break;
+        case 5:
+          message.keyboard = Markup.inlineKeyboard(
+            [Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id)],
+          );
+          break;
       }
 
       messages.push(message);
