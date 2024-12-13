@@ -6,7 +6,7 @@ class AccountsListCommand extends TelegramBotCommandBase {
   static command = 'Accounts';
 
   async run() {
-    await this.context.reply('Loading accounts...', Markup.removeKeyboard());
+    await this.context.reply('Loading accounts...');
 
     const socialsAgentService = await this.service.getSocialsAgentService();
 

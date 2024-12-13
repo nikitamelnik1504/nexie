@@ -59,23 +59,39 @@ class SocialsAgentAccountBase {
     this.platformSettings.username = username;
   }
 
-  setPlatformParams(params) {
-    this.platformSettings.params = params;
+  setClientParams(params) {
+    this.clientSettings.params = params;
+  }
+
+  getClientParams() {
+    return this.clientSettings.params;
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      client: {
+        type: this.clientSettings.type,
+        params: this.platformSettings.params,
+      },
+      platform: this.platformSettings,
+    }
   }
 
   async getClient() {
     switch (this.clientSettings.type) {
       case 'dolphin':
-        try {
-          return await this.service.getDolphinService().connect(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
-        } catch (error) {
-          return false;
-        }
+        return await this.service.getDolphinService().connect(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
     }
   }
 
   async getClientConnectionStatus() {
-    return !!(await this.getClient());
+    try {
+      return !!(await this.getClient());
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   }
 
   async getPlatformConnectionStatus() {
