@@ -25,6 +25,7 @@ class DolphinFancentroTab {
   }
 
   async getAuthorizationStatus(username, login = null, password = null) {
+    // @todo Bug with missing page.
     await this.page.goto(`https://fancentro.com/login`, {waitUntil: 'networkidle0', timeout: 60000});
 
     try {

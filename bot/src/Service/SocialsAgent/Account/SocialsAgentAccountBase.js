@@ -101,7 +101,7 @@ class SocialsAgentAccountBase {
   async startPlatformConnection() {
     switch (this.clientSettings.type) {
       case 'dolphin':
-        ((await this.getClient()).profile(this.clientSettings.params.profile)).start();
+        await (await (await this.getClient()).profile(this.clientSettings.params.profile)).start();
         return true;
     }
   }
