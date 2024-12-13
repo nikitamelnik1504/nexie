@@ -18,7 +18,7 @@ class SettingsScene extends TelegramBotSceneBase {
   }
 
   static async enterCommand(service, context) {
-    await context.reply('Choose option:', Markup.keyboard(['Back', 'Accounts']).resize());
+    await context.reply('Choose option', Markup.keyboard(['Back', 'Accounts']).resize());
   }
 
   static async backCommand(service, context) {

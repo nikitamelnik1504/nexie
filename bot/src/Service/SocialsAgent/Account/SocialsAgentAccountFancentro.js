@@ -2,7 +2,7 @@ import SocialsAgentAccountBase from "./SocialsAgentAccountBase.js";
 
 class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
 
-  PLATFORM_CONNECTION_STATUS = {
+  static PLATFORM_CONNECTION_STATUS = {
     0: 'Account is not authorized',
     1: 'Account is authorized',
     2: 'Account is not authorized because another account already logged in',
@@ -19,8 +19,8 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
     switch (this.clientSettings.type) {
       case 'dolphin':
         try {
-          const dolphinCommunicator = await this.service.getDolphinService().connect(this.clientSettings.apiUrl, this.clientSettings.authToken);
-          const dolphinProfile = await dolphinCommunicator.profile(this.clientSettings.profile);
+          const dolphinCommunicator = await this.service.getDolphinService().connect(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
+          const dolphinProfile = await dolphinCommunicator.profile(this.clientSettings.params.profile);
 
           if (!dolphinProfile) {
             return 5;

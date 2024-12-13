@@ -36,6 +36,10 @@ class DolphinCommunicator {
     return data;
   }
 
+  getProfiles() {
+    return this.profiles;
+  }
+
   async profile(id) {
     let profileInstances = this.profiles.filter(profile => +profile.id === +id);
     if (profileInstances.length !== 0) {

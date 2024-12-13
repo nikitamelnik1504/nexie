@@ -26,7 +26,7 @@ class AccountsScene extends TelegramBotSceneBase {
 
   static async enterCommand(service, context) {
     await new AccountsListCommand(service, context).run();
-    await context.reply('Choose option:', Markup.keyboard(['Back', 'Refresh', 'Add Account']).resize());
+    await context.reply('Choose option', Markup.keyboard(['Back', 'Refresh', 'Add Account']).resize());
   }
 
   static async backCommand(service, context) {

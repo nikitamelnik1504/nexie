@@ -29,7 +29,7 @@ class AccountsListCommand extends TelegramBotCommandBase {
         'Client': socialAgent.getClientType(),
         'Client Connection Status': await socialAgent.getClientConnectionStatus() ? 'Connected' : 'Not Connected',
         'Platform': socialAgent.getPlatformType(),
-        'Platform Connection Status': socialAgent.PLATFORM_CONNECTION_STATUS[agentPlatformConnectionStatus],
+        'Platform Connection Status': socialAgent.constructor.PLATFORM_CONNECTION_STATUS[agentPlatformConnectionStatus],
         'Login': socialAgent.getPlatformLogin(),
         'Password': socialAgent.getPlatformPassword(),
         'Access Granted To': '',
