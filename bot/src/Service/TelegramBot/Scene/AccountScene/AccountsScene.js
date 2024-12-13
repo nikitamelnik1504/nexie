@@ -1,0 +1,62 @@
+import {BaseScene} from "telegraf/scenes";
+import {Markup} from "telegraf";
+
+import TelegramBotSceneBase from "../../TelegramBotSceneBase.js";
+import AccountsListCommand from "./AccountsListCommand.js";
+import AddAccount from "../../Command/AddAccount.js";
+import AddAccountScene from "../AddAccountScene.js";
+import SettingsScene from "../SettingsScene/SettingsScene.js";
+import StartCommand from "../../Command/StartCommand.js";
+import StartProfileCallback from "./StartProfileCallback.js";
+import RemoveAccountCallback from "./RemoveAccountCallback.js";
+
+class AccountsScene extends TelegramBotSceneBase {
+
+  static id = 'accounts';
+
+  async scene() {
+    const scene = new BaseScene(AccountsScene.id);
+    scene.enter((ctx) => AccountsScene.enterCommand(this.service, ctx));
+    scene.hears('Back', (ctx) => AccountsScene.backCommand(this.service, ctx));
+    scene.hears('Refresh', (ctx) => AccountsScene.refreshCommand(this.service, ctx))
+    scene.hears('Add Account', (ctx) => AccountsScene.addAccountCommand(this.service, ctx))
+    scene.action(StartProfileCallback.command, async (ctx) => AccountsScene.startProfileCallback(this.service, ctx));
+    scene.action(RemoveAccountCallback.command, async (ctx) => AccountsScene.removeAccountCallback(this.service, ctx));
+    return scene;
+  }
+
+  static async enterCommand(service, context) {
+    await new AccountsListCommand(service, context).run();
+    await context.reply('Choose option:', Markup.keyboard(['Back', 'Refresh', AddAccount.command]).resize());
+  }
+
+  static async backCommand(service, context) {
+    const previousScene = context.scene.state.from;
+
+    if (previousScene === SettingsScene.id) {
+      await context.scene.enter(SettingsScene.id)
+    } else {
+      await context.scene.leave();
+      await new StartCommand(service, context).run();
+    }
+  }
+
+  static async refreshCommand(service, context) {
+    await AccountsScene.enterCommand(service, context);
+  }
+
+  static async addAccountCommand(service, context) {
+    await context.scene.enter(AddAccountScene.id, {from: AccountsScene.id});
+  }
+
+  static async startProfileCallback(service, context) {
+    await new StartProfileCallback(service, context).run();
+  }
+
+  static async removeAccountCallback(service, context) {
+    await new RemoveAccountCallback(service, context).run();
+  }
+
+}
+
+export default AccountsScene;

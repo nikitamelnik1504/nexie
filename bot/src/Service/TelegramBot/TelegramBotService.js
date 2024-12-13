@@ -1,14 +1,16 @@
 import { socialsAgentService } from "../../../index.js";
 
-import {Telegraf} from "telegraf";
+import {Scenes, session, Telegraf} from "telegraf";
 
 import TelegramBotStorage from "./TelegramBotStorage.js";
 
-import Start from "./Command/Start.js";
-import Settings from "./Command/Settings.js";
-import Accounts from "./Command/Accounts.js";
-import StartProfile from "./Callback/StartProfile.js";
-import RemoveAccount from "./Callback/RemoveAccount.js";
+import StartCommand from "./Command/StartCommand.js";
+import SettingsCommand from "./Command/SettingsCommand.js";
+
+import {default as AddAccountScene} from "./Scene/AddAccountScene.js";
+
+import SettingsScene from "./Scene/SettingsScene/SettingsScene.js";
+import AccountsScene from "./Scene/AccountScene/AccountsScene.js";
 
 class TelegramBotService {
 
@@ -26,11 +28,18 @@ class TelegramBotService {
     instance.storage = await TelegramBotStorage.init(storagePath);
 
     instance.bot = new Telegraf(token);
-    instance.bot.start(async (ctx) => new Start(instance, ctx).run());
-    instance.bot.hears(Settings.command, async (ctx) => new Settings(instance, ctx).run());
-    instance.bot.hears(Accounts.command, async (ctx) => new Accounts(instance, ctx).run());
-    instance.bot.action(StartProfile.command, async (ctx) => new StartProfile(instance, ctx).run());
-    instance.bot.action(RemoveAccount.command, async (ctx) => new RemoveAccount(instance, ctx).run());
+
+    const stage = new Scenes.Stage([
+        await new SettingsScene(instance).scene(),
+        await new AccountsScene(instance).scene(),
+        // await new AddAccountScene(instance).scene(),
+    ]);
+
+    instance.bot.use(session());
+    instance.bot.use(stage.middleware());
+
+    instance.bot.start(async (ctx) => new StartCommand(instance, ctx).run());
+    instance.bot.hears(SettingsCommand.command, async (ctx) => new SettingsCommand(instance, ctx).run());
     instance.bot.launch();
 
     return instance;

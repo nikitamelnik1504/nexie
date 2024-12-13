@@ -1,7 +1,7 @@
-import TelegramBotCommandBase from "../TelegramBotCommandBase.js";
-import Accounts from "../Command/Accounts.js";
+import TelegramBotCommandBase from "../../TelegramBotCommandBase.js";
+import AccountsScene from "./AccountsScene.js";
 
-class RemoveAccount extends TelegramBotCommandBase {
+class RemoveAccountCallback extends TelegramBotCommandBase {
 
   static command = /remove_account_([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/;
 
@@ -16,14 +16,9 @@ class RemoveAccount extends TelegramBotCommandBase {
     } catch (error) {
     }
 
-    try {
-      await this.context.reply('Refreshing accounts...');
-      await new Accounts(this.service, this.context).run();
-    } catch (error) {
-    }
-
+    AccountsScene.refreshCommand(this.service, this.context);
   }
 
 }
 
-export default RemoveAccount;
+export default RemoveAccountCallback;

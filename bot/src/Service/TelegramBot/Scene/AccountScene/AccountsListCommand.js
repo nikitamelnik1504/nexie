@@ -1,11 +1,13 @@
-import TelegramBotCommandBase from "../TelegramBotCommandBase.js";
+import TelegramBotCommandBase from "../../TelegramBotCommandBase.js";
 import {Markup} from "telegraf";
 
-class Accounts extends TelegramBotCommandBase {
+class AccountsListCommand extends TelegramBotCommandBase {
 
   static command = 'Accounts';
 
   async run() {
+    await this.context.reply('Loading accounts...', Markup.removeKeyboard());
+
     const socialsAgentService = await this.service.getSocialsAgentService();
 
     const messages = [];
@@ -85,4 +87,4 @@ class Accounts extends TelegramBotCommandBase {
   }
 }
 
-export default Accounts;
+export default AccountsListCommand;

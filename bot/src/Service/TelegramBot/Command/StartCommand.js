@@ -1,9 +1,8 @@
 import TelegramBotCommandBase from "../TelegramBotCommandBase.js";
 import {Markup} from "telegraf";
+import SettingsCommand from "./SettingsCommand.js";
 
-class Settings extends TelegramBotCommandBase {
-
-  static command = 'Settings';
+class StartCommand extends TelegramBotCommandBase {
 
   async run() {
     const user = await this.service.getStorage().getUser(this.context.from.username);
@@ -13,9 +12,9 @@ class Settings extends TelegramBotCommandBase {
       return;
     }
 
-    this.context.reply('Choose option:', Markup.keyboard(['Accounts']).resize());
+    // Markup.button.webApp('Chats', chatsUrl),
+    this.context.reply('Welcome!', Markup.keyboard([SettingsCommand.command]).resize());
   }
-
 }
 
-export default Settings;
+export default StartCommand;
