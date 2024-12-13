@@ -6,13 +6,18 @@ class Accounts extends TelegramBotCommandBase {
   static command = 'Accounts';
 
   async run() {
-    await this.context.reply('Please wait a few minutes...');
-
     const socialsAgentService = await this.service.getSocialsAgentService();
 
     const messages = [];
 
-    for (const socialAgent of socialsAgentService.getAccounts()) {
+    const accounts = socialsAgentService.getAccounts();
+    if (accounts.length === 0) {
+      await this.context.reply('No accounts found.');
+      return;
+    }
+
+    await this.context.reply('Please wait a few minutes...');
+    for (const socialAgent of accounts) {
       const message = {text: null, keyboard: null};
 
       const agentPlatformConnectionStatus = await socialAgent.getPlatformConnectionStatus();

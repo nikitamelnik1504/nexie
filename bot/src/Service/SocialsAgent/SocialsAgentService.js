@@ -61,6 +61,13 @@ class SocialsAgentService {
     await this.saveAccount(account);
   }
 
+  async removeAccount(id) {
+    this.accounts.splice(this.accounts.findIndex(account => account.id === id),1);
+    const accountsData = JSON.parse(await fs.readFile(this.storagePath + '/socialAccounts.json', {'encoding': 'utf8'}));
+    accountsData.splice(accountsData.findIndex(account => account.id === id), 1);
+    await fs.writeFile(this.storagePath + '/socialAccounts.json', JSON.stringify(accountsData),{'encoding': 'utf8'});
+  }
+
   getDolphinService() {
     return this.dolphinService;
   }

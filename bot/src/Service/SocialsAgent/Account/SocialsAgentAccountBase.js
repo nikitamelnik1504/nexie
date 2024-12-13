@@ -54,10 +54,6 @@ class SocialsAgentAccountBase {
     }
   }
 
-  async save() {
-    return this.service.saveAccount(this);
-  }
-
 }
 
 export default SocialsAgentAccountBase;
