@@ -2,7 +2,7 @@ import TelegramBotSceneBase from "../../TelegramBotSceneBase.js";
 import {BaseScene} from "telegraf/scenes";
 import {Markup} from "telegraf";
 import StartCommand from "../../Command/StartCommand.js";
-import AccountsScene from "../AccountScene/AccountsScene.js";
+import AccountsScene from "../AccountsScene/AccountsScene.js";
 
 class SettingsScene extends TelegramBotSceneBase {
 

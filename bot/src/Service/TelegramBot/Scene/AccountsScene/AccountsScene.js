@@ -3,16 +3,15 @@ import {Markup} from "telegraf";
 
 import TelegramBotSceneBase from "../../TelegramBotSceneBase.js";
 import AccountsListCommand from "./AccountsListCommand.js";
-import AddAccount from "../../Command/AddAccount.js";
-import AddAccountScene from "../AddAccountScene.js";
 import SettingsScene from "../SettingsScene/SettingsScene.js";
 import StartCommand from "../../Command/StartCommand.js";
 import StartProfileCallback from "./StartProfileCallback.js";
 import RemoveAccountCallback from "./RemoveAccountCallback.js";
+import AddAccountScene from "../AddAccountScene/AddAccountScene.js";
 
 class AccountsScene extends TelegramBotSceneBase {
 
-  static id = 'accounts';
+  static id = 'accounts_list';
 
   async scene() {
     const scene = new BaseScene(AccountsScene.id);
@@ -27,7 +26,7 @@ class AccountsScene extends TelegramBotSceneBase {
 
   static async enterCommand(service, context) {
     await new AccountsListCommand(service, context).run();
-    await context.reply('Choose option:', Markup.keyboard(['Back', 'Refresh', AddAccount.command]).resize());
+    await context.reply('Choose option:', Markup.keyboard(['Back', 'Refresh', 'Add Account']).resize());
   }
 
   static async backCommand(service, context) {

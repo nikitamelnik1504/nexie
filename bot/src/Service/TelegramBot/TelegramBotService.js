@@ -7,10 +7,9 @@ import TelegramBotStorage from "./TelegramBotStorage.js";
 import StartCommand from "./Command/StartCommand.js";
 import SettingsCommand from "./Command/SettingsCommand.js";
 
-import {default as AddAccountScene} from "./Scene/AddAccountScene.js";
-
 import SettingsScene from "./Scene/SettingsScene/SettingsScene.js";
-import AccountsScene from "./Scene/AccountScene/AccountsScene.js";
+import AccountsScene from "./Scene/AccountsScene/AccountsScene.js";
+import AddAccountScene from "./Scene/AddAccountScene/AddAccountScene.js";
 
 class TelegramBotService {
 
@@ -32,7 +31,7 @@ class TelegramBotService {
     const stage = new Scenes.Stage([
         await new SettingsScene(instance).scene(),
         await new AccountsScene(instance).scene(),
-        // await new AddAccountScene(instance).scene(),
+        await new AddAccountScene(instance).scene(),
     ]);
 
     instance.bot.use(session());
