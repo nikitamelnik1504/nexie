@@ -27,13 +27,42 @@ class TelegramBotStorage {
     return match.length !== 0 ? match[0] : false;
   }
 
-  async addUser(id) {
-    await fs.readFile(this.path + '/telegramUsers.json');
+  async addUser(username, role) {
+    if (await this.getUser(username)) {
+      throw new Error('User already exists');
+    }
+
+    const db = JSON.parse(await fs.readFile(this.path + '/telegramUsers.json', {'encoding': 'utf8'}));
+    db.users.push({
+      username,
+      role
+    });
+
+    await fs.writeFile(this.path + '/telegramUsers.json', JSON.stringify(db), {'encoding': 'utf8'});
+  }
+
+  async updateUser(username, data = {}) {
+    if (!(await this.getUser(username))) {
+      throw new Error('User is not exist');
+    }
+
+    const db = JSON.parse(await fs.readFile(this.path + '/telegramUsers.json', {'encoding': 'utf8'}));
+    const userIndex = db.users.findIndex(user => user.id === id);
+
+    if (data.role !== undefined) {
+      db.users[userIndex].role = data.role;
+    }
+
+    if (data.social_agent_accounts !== undefined) {
+      db.users.social_agent_accounts = data.social_agent_accounts;
+    }
+
+    await fs.writeFile(this.path + '/telegramUsers.json', JSON.stringify(db), {'encoding': 'utf8'});
   }
 
   async addSocialAgentAccount(id, name) {
     const db = JSON.parse(await fs.readFile(this.path + '/telegramUsers.json', {'encoding': 'utf8'}));
-    if (db.social_agent_accounts.find(item => item.id === id)) {
+    if (await this.getSocialAgentAccount({id})) {
       throw new Error('Social agent account with ' + id + ' id already exist');
     }
 
@@ -67,14 +96,16 @@ class TelegramBotStorage {
     const db = JSON.parse(await fs.readFile(this.path + '/telegramUsers.json', {encoding: 'utf8'}));
     const accountIndex = db.social_agent_accounts.findIndex(account => account.id === id);
     if (accountIndex === -1) {
-      throw new Error('Account not found.');
+      throw new Error('Account not found');
     }
 
     db.social_agent_accounts.splice(accountIndex, 1);
     await fs.writeFile(this.path + '/telegramUsers.json', JSON.stringify(db), {'encoding': 'utf8'});
   }
 
-  updateUser() {
+  async setUserAccessToSocialAgentAccount(username, socialAgentAccountId) {
+    const user = await this.getUser(username);
+    return await this.updateUser(username, {social_agent_accounts: [...user.social_agent_accounts, socialAgentAccountId]})
   }
 
   removeUser() {

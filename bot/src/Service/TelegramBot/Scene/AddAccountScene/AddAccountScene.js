@@ -19,6 +19,7 @@ class AddAccountScene extends TelegramBotSceneBase {
       async (context) => AddAccountScene.setPlatformPasswordStep(this.service, context, instance_vars),
       async (context) => AddAccountScene.setName(this.service, context, instance_vars),
       async (context) => AddAccountScene.setUsersToAccess(this.service, context, instance_vars),
+      async (context) => AddAccountScene.finish(this.service, context, instance_vars),
     );
 
     scene.hears('Cancel', async (context) => AddAccountScene.cancelCommand(this.service, context, instance_vars));
@@ -221,6 +222,20 @@ class AddAccountScene extends TelegramBotSceneBase {
       await context.reply('Error! ' + error.message);
       return this.cancelCommand(service, context, vars, true);
     }
+
+    await context.reply('Write telegram username that will have access to account to chat with\n\nExample: telegramUser');
+    return context.wizard.next();
+  }
+
+  static async finish(service, context, vars, back = false) {
+    const storage = await service.getStorage();
+    const userText = context.message.text;
+    const {socialAgentAccount} = vars;
+
+    if (!(await storage.getUser(userText))) {
+      await storage.addUser(userText, 'default');
+    }
+    await storage.setUserAccessToSocialAgentAccount(userText, socialAgentAccount.id);
 
     return context.scene.enter(context.wizard.state.from);
   }

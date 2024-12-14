@@ -19,12 +19,3 @@ TelegramBotService.init(telegramBotToken, __dirname + '/data');
 
 export {dolphinService, socialsAgentService}
 
-// await socialsAgentService.loadAccountFromDolphin({});
-
-// for (const profile of await dolphinService.getProfiles()) {
-//   await profile.start();
-//   const browser = await profile.startBrowser();
-//   const tab = await browser.openTab('fancentro');
-//   await tab.screenshot();
-// }
-
