@@ -5,7 +5,7 @@ class SettingsCommand extends TelegramBotCommandBase {
   static command = 'Settings';
 
   async run() {
-    const user = await this.service.getStorage().getUser(this.context.from.username);
+    const user = await (await this.service.getStorage()).getUser(this.context.from.username);
 
     if (!user || user.role !== 'admin') {
       this.context.reply('You do not have permission to use this command.');

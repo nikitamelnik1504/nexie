@@ -44,7 +44,7 @@ class TelegramBotService {
     return instance;
   }
 
-  getStorage() {
+  async getStorage() {
     return this.storage;
   }
 

@@ -12,10 +12,13 @@ class AddAccountScene extends TelegramBotSceneBase {
 
     const scene = new WizardScene(AddAccountScene.id,
       async (context) => AddAccountScene.selectClientStep(this.service, context, instance_vars),
-      async (context) => AddAccountScene.selectSocialServiceStep(this.service, context, instance_vars),
+      async (context) => AddAccountScene.selectPlatformStep(this.service, context, instance_vars),
       async (context) => AddAccountScene.selectDolphinProfileStep(this.service, context, instance_vars),
       async (context) => AddAccountScene.setPlatformUsernameStep(this.service, context, instance_vars),
       async (context) => AddAccountScene.setPlatformLoginStep(this.service, context, instance_vars),
+      async (context) => AddAccountScene.setPlatformPasswordStep(this.service, context, instance_vars),
+      async (context) => AddAccountScene.setName(this.service, context, instance_vars),
+      async (context) => AddAccountScene.setUsersToAccess(this.service, context, instance_vars),
     );
 
     scene.hears('Cancel', async (context) => AddAccountScene.cancelCommand(this.service, context, instance_vars));
@@ -52,7 +55,7 @@ class AddAccountScene extends TelegramBotSceneBase {
   }
 
   // @todo Hardcoded hosts.
-  static async selectSocialServiceStep(service, context, vars, back = false) {
+  static async selectPlatformStep(service, context, vars, back = false) {
     await context.reply('Select social service', Markup.keyboard([
       ['Fancentro', 'Fansly', 'Ton'],
       ['Cancel'],
@@ -118,6 +121,7 @@ class AddAccountScene extends TelegramBotSceneBase {
       try {
         await socialsAgentService.validateAccount(socialAgentAccount);
       } catch (error) {
+        console.log(error);
         await context.reply('Error! ' + error.message);
         context.wizard.cursor = 2;
         return this.selectDolphinProfileStep(service, context, vars, true);
@@ -129,21 +133,96 @@ class AddAccountScene extends TelegramBotSceneBase {
   }
 
   static async setPlatformLoginStep(service, context, vars, back = false) {
-    const {socialAgentAccount} = vars;
-    const userText = context.message.text;
+    if (!back) {
+      const {socialAgentAccount} = vars;
+      const userText = context.message.text;
 
-    socialAgentAccount.setPlatformUsername(userText);
-    const socialsAgentService = await service.getSocialsAgentService();
-    try {
-      await socialsAgentService.validateAccount(socialAgentAccount);
-    } catch (error) {
-      await context.reply('Error! ' + error.message);
-      context.wizard.cursor = 3;
-      return this.setPlatformUsernameStep(service, context, vars, true);
+      socialAgentAccount.setPlatformUsername(userText);
+      const socialsAgentService = await service.getSocialsAgentService();
+      try {
+        await socialsAgentService.validateAccount(socialAgentAccount);
+      } catch (error) {
+        console.log(error);
+        await context.reply('Error! ' + error.message);
+        context.wizard.cursor = 3;
+        return this.setPlatformUsernameStep(service, context, vars, true);
+      }
     }
 
     await context.reply('Write account login. It could be email, phone or username. Please skip this step if you prefer to pass authorization out of bot.', Markup.keyboard([['Skip'], ['Cancel']]).resize().oneTime());
     return context.wizard.next();
+  }
+
+  static async setPlatformPasswordStep(service, context, vars, back = false) {
+    if (!back) {
+      const userText = context.message.text;
+      if (userText === 'Skip') {
+        context.wizard.cursor = 6;
+        return this.setName(service, context, vars, true);
+      }
+
+      const {socialAgentAccount} = vars;
+      socialAgentAccount.setPlatformLogin(userText);
+      const socialsAgentService = await service.getSocialsAgentService();
+      try {
+        await socialsAgentService.validateAccount(socialAgentAccount);
+      } catch (error) {
+        console.log(error);
+        await context.reply('Error! ' + error.message);
+        context.wizard.cursor = 4;
+        return this.setPlatformLoginStep(service, context, vars, true);
+      }
+    }
+
+    await context.reply('Write account password', Markup.keyboard(['Cancel']).resize().oneTime());
+    return context.wizard.next();
+  }
+
+  static async setName(service, context, vars, back = false) {
+    if (!back) {
+      const {socialAgentAccount} = vars;
+      const userText = context.message.text;
+
+      socialAgentAccount.setPlatformPassword(userText);
+      const socialsAgentService = await service.getSocialsAgentService();
+      try {
+        await socialsAgentService.validateAccount(socialAgentAccount);
+      } catch (error) {
+        console.log(error);
+        await context.reply('Error! ' + error.message);
+        context.wizard.cursor = 5;
+        return this.setPlatformPasswordStep(service, context, vars, true);
+      }
+    }
+
+    await context.reply('Write custom name for the account, which will be used in Telegram UI.', Markup.keyboard(['Cancel']).resize().oneTime());
+    return context.wizard.next();
+  }
+
+  static async setUsersToAccess(service, context, vars, back = false) {
+    const storage = await service.getStorage();
+    const userText = context.message.text;
+
+    if (await storage.getSocialAgentAccount({name: userText})) {
+      await context.reply('Account with that name is already exist. Please use another one.');
+      context.wizard.cursor = 6;
+      return this.setName(service, context, vars, true);
+    }
+
+    await context.reply('Adding account...');
+    const {socialAgentAccount} = vars;
+    const socialsAgentService = await service.getSocialsAgentService();
+
+    try {
+      await socialsAgentService.addAccount(socialAgentAccount);
+      await storage.addSocialAgentAccount(socialAgentAccount.id, userText);
+    } catch (error) {
+      console.log(error);
+      await context.reply('Error! ' + error.message);
+      return this.cancelCommand(service, context, vars, true);
+    }
+
+    return context.scene.enter(context.wizard.state.from);
   }
 
 }

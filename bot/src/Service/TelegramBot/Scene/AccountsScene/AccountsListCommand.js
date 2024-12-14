@@ -25,11 +25,12 @@ class AccountsListCommand extends TelegramBotCommandBase {
       const agentPlatformConnectionStatus = await socialAgent.getPlatformConnectionStatus();
 
       const accountInfo = {
-        'Account': '',
+        'Account': (await (await this.service.getStorage()).getSocialAgentAccount({id: socialAgent.id })).name,
         'Client': socialAgent.getClientType(),
         'Client Connection Status': await socialAgent.getClientConnectionStatus() ? 'Connected' : 'Not Connected',
         'Platform': socialAgent.getPlatformType(),
         'Platform Connection Status': socialAgent.constructor.PLATFORM_CONNECTION_STATUS[agentPlatformConnectionStatus],
+        'Username': socialAgent.getPlatformUsername(),
         'Login': socialAgent.getPlatformLogin(),
         'Password': socialAgent.getPlatformPassword(),
         'Access Granted To': '',
