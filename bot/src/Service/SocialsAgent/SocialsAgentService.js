@@ -45,16 +45,16 @@ class SocialsAgentService {
   }
 
   async saveAccount(account) {
-    const accountsData = JSON.parse(await fs.readFile(this.storagePath + '/socialAccounts.json', {'encoding': 'utf8'}));
+    const accountsData = JSON.parse(await fs.readFile(this.storagePath + '/socialAccounts.json', { encoding: 'utf8' }));
 
-    const existingAccount = this.accounts.find(item => item.id === account.id);
-    if (existingAccount) {
-      Object.assign(existingAccount, account.toJSON());
+    const accountIndex = accountsData.findIndex(item => item.id === account.id);
+
+    if (accountIndex !== -1) {
+      accountsData[accountIndex] = account.toJSON();
     } else {
       accountsData.push(account.toJSON());
     }
-
-    await fs.writeFile(this.storagePath + '/socialAccounts.json', JSON.stringify(accountsData), {'encoding': 'utf8'});
+    await fs.writeFile(this.storagePath + '/socialAccounts.json', JSON.stringify(accountsData), { encoding: 'utf8' });
   }
 
   async addAccount(account) {

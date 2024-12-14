@@ -72,7 +72,7 @@ class SocialsAgentAccountBase {
       id: this.id,
       client: {
         type: this.clientSettings.type,
-        params: this.platformSettings.params,
+        params: this.clientSettings.params,
       },
       platform: this.platformSettings,
     }
