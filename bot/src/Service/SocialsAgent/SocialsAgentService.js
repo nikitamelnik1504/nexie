@@ -54,6 +54,7 @@ class SocialsAgentService {
     } else {
       accountsData.push(account.toJSON());
     }
+
     await fs.writeFile(this.storagePath + '/socialAccounts.json', JSON.stringify(accountsData), { encoding: 'utf8' });
   }
 
@@ -61,7 +62,12 @@ class SocialsAgentService {
     if (this.getAccount(account.id)) {
       throw new Error('Account is already exist');
     }
+    await this.validateAccount(account);
+    this.accounts.push(account);
+    await this.saveAccount(account);
+  }
 
+  async validateAccount(account) {
     for (const existAccount of this.getAccounts()) {
       const existAccountClientParams = existAccount.getClientParams();
       const newAccountClientParams = account.getClientParams();
@@ -70,6 +76,7 @@ class SocialsAgentService {
         case 'dolphin':
           // Check if account with specified client, client profile and platform exist.
           if (
+            existAccount.id !== account.id &&
             'dolphin' === existAccount.getClientType() &&
             newAccountClientParams.apiUrl === existAccountClientParams.apiUrl &&
             newAccountClientParams.authToken === existAccountClientParams.authToken &&
@@ -81,6 +88,7 @@ class SocialsAgentService {
 
           // Check if account with specified client, platform and username exist.
           if (
+            existAccount.id !== account.id &&
             'dolphin' === existAccount.getClientType() &&
             newAccountClientParams.apiUrl === existAccountClientParams.apiUrl &&
             newAccountClientParams.authToken === existAccountClientParams.authToken &&
@@ -91,9 +99,6 @@ class SocialsAgentService {
           break;
       }
     }
-
-    this.accounts.push(account);
-    await this.saveAccount(account);
   }
 
   async removeAccount(id) {

@@ -15,6 +15,7 @@ class AddAccountScene extends TelegramBotSceneBase {
       async (context) => AddAccountScene.selectSocialServiceStep(this.service, context, instance_vars),
       async (context) => AddAccountScene.selectDolphinProfileStep(this.service, context, instance_vars),
       async (context) => AddAccountScene.setPlatformUsernameStep(this.service, context, instance_vars),
+      async (context) => AddAccountScene.setPlatformLoginStep(this.service, context, instance_vars),
     );
 
     scene.hears('Cancel', async (context) => AddAccountScene.cancelCommand(this.service, context, instance_vars));
@@ -100,31 +101,50 @@ class AddAccountScene extends TelegramBotSceneBase {
 
   // @todo Check which client is selected from prev step.
   static async setPlatformUsernameStep(service, context, vars, back = false) {
-    const {socialAgentAccountClientProfiles, socialAgentAccount} = vars;
-    const userText = context.message.text;
+    if (!back) {
+      const {socialAgentAccountClientProfiles, socialAgentAccount} = vars;
+      const userText = context.message.text;
 
-    const matchedProfile = socialAgentAccountClientProfiles.find(profile => profile.name === userText);
+      const matchedProfile = socialAgentAccountClientProfiles.find(profile => profile.name === userText);
 
-    if (!matchedProfile) {
-      context.wizard.cursor = 2;
-      return this.selectDolphinProfileStep(service, context, vars, true);
+      if (!matchedProfile) {
+        context.wizard.cursor = 2;
+        return this.selectDolphinProfileStep(service, context, vars, true);
+      }
+
+      socialAgentAccount.setClientParams({...socialAgentAccount.getClientParams(), profile: matchedProfile.id});
+      const socialsAgentService = await service.getSocialsAgentService();
+
+      try {
+        await socialsAgentService.validateAccount(socialAgentAccount);
+      } catch (error) {
+        await context.reply('Error! ' + error.message);
+        context.wizard.cursor = 2;
+        return this.selectDolphinProfileStep(service, context, vars, true);
+      }
     }
 
-    socialAgentAccount.setClientParams({...socialAgentAccount.getClientParams(), profile: matchedProfile.id});
-    const socialsAgentService = await service.getSocialsAgentService();
-
-    try {
-      await socialsAgentService.addAccount(socialAgentAccount);
-    } catch (error) {
-      await context.reply(error.message);
-      context.wizard.cursor = 2;
-      return this.selectDolphinProfileStep(service, context, vars, true);
-    }
-
-    await context.reply('Write account username. Warning! Please write it carefully, it will be used to check authorization status.');
+    await context.reply("Write account username\n\nWarning! Please write it carefully, it will be used to check authorization.", Markup.keyboard(['Cancel']).resize().oneTime());
     return context.wizard.next();
   }
 
+  static async setPlatformLoginStep(service, context, vars, back = false) {
+    const {socialAgentAccount} = vars;
+    const userText = context.message.text;
+
+    socialAgentAccount.setPlatformUsername(userText);
+    const socialsAgentService = await service.getSocialsAgentService();
+    try {
+      await socialsAgentService.validateAccount(socialAgentAccount);
+    } catch (error) {
+      await context.reply('Error! ' + error.message);
+      context.wizard.cursor = 3;
+      return this.setPlatformUsernameStep(service, context, vars, true);
+    }
+
+    await context.reply('Write account login. It could be email, phone or username. Please skip this step if you prefer to pass authorization out of bot.', Markup.keyboard([['Skip'], ['Cancel']]).resize().oneTime());
+    return context.wizard.next();
+  }
 
 }
 
