@@ -12,8 +12,10 @@ class RemoveAccountCallback extends TelegramBotCommandBase {
 
     try {
       await socialsAgentService.removeAccount(socialsAgentAccountId);
+      await (await this.service.getStorage()).removeSocialAgentAccount(socialsAgentAccountId);
       await this.context.reply('Account has been deleted.');
     } catch (error) {
+      console.log(error);
     }
 
     AccountsScene.refreshCommand(this.service, this.context);

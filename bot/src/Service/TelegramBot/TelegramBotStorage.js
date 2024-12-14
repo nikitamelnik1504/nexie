@@ -63,6 +63,17 @@ class TelegramBotStorage {
     }
   }
 
+  async removeSocialAgentAccount(id) {
+    const db = JSON.parse(await fs.readFile(this.path + '/telegramUsers.json', {encoding: 'utf8'}));
+    const accountIndex = db.social_agent_accounts.findIndex(account => account.id === id);
+    if (accountIndex === -1) {
+      throw new Error('Account not found.');
+    }
+
+    db.social_agent_accounts.splice(accountIndex, 1);
+    await fs.writeFile(this.path + '/telegramUsers.json', JSON.stringify(db), {'encoding': 'utf8'});
+  }
+
   updateUser() {
   }
 
