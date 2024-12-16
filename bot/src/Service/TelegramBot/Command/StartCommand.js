@@ -7,13 +7,13 @@ class StartCommand extends TelegramBotCommandBase {
   async run() {
     const user = await (await this.service.getStorage()).getUser(this.context.from.username);
 
-    if (!user || user.role !== 'admin') {
-      this.context.reply('You do not have permission to use this command.');
-      return;
+    if (!user) {
+      await this.context.reply('You do not have permission to use this command.');
+    } else if (user.role === 'admin') {
+      await this.context.reply('Welcome!', Markup.keyboard([SettingsCommand.command]).resize());
+    } else if (user.role === 'default') {
+      // Markup.button.webApp('Chats', chatsUrl),
     }
-
-    // Markup.button.webApp('Chats', chatsUrl),
-    this.context.reply('Welcome!', Markup.keyboard([SettingsCommand.command]).resize());
   }
 }
 

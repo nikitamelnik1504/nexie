@@ -35,7 +35,8 @@ class TelegramBotStorage {
     const db = JSON.parse(await fs.readFile(this.path + '/telegramUsers.json', {'encoding': 'utf8'}));
     db.users.push({
       username,
-      role
+      role,
+      social_agent_accounts: []
     });
 
     await fs.writeFile(this.path + '/telegramUsers.json', JSON.stringify(db), {'encoding': 'utf8'});
@@ -47,14 +48,14 @@ class TelegramBotStorage {
     }
 
     const db = JSON.parse(await fs.readFile(this.path + '/telegramUsers.json', {'encoding': 'utf8'}));
-    const userIndex = db.users.findIndex(user => user.id === id);
+    const userIndex = db.users.findIndex(user => user.username === username);
 
     if (data.role !== undefined) {
       db.users[userIndex].role = data.role;
     }
 
     if (data.social_agent_accounts !== undefined) {
-      db.users.social_agent_accounts = data.social_agent_accounts;
+      db.users[userIndex].social_agent_accounts = data.social_agent_accounts;
     }
 
     await fs.writeFile(this.path + '/telegramUsers.json', JSON.stringify(db), {'encoding': 'utf8'});
