@@ -17,7 +17,8 @@ class StartScene extends TelegramBotSceneBase {
   }
 
   static async enterCommand(service, context) {
-    const user = await (await service.getStorage()).getUser(context.from.username);
+    // @todo FIX DANGER BUG WITH UUID via username. It must be telegram user id.
+    const user = await (await service.getStorage()).getUser(context.chat.username);
 
     if (user.role === 'admin') {
       return context.reply('Welcome!', Markup.keyboard(['Settings']).resize().oneTime());

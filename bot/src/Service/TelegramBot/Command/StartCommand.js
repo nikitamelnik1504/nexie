@@ -4,7 +4,7 @@ import StartScene from "../Scene/StartScene/StartScene.js";
 class StartCommand extends TelegramBotCommandBase {
 
   async run() {
-    const user = await (await this.service.getStorage()).getUser(this.context.from.username);
+    const user = await (await this.service.getStorage()).getUser(this.context.chat.username);
 
     if (!user) {
       return this.context.reply('You do not have permission to use this command.');
