@@ -11,11 +11,12 @@ const telegramBotToken = '7639460431:AAFv2g2y9wdz1GEb7gORgiugyJ8qWlYHkRg';
 import TelegramBotService from "./src/Service/TelegramBot/TelegramBotService.js";
 import SocialsAgentService from "./src/Service/SocialsAgent/SocialsAgentService.js";
 import DolphinService from "./src/Service/Dolphin/DolphinService.js";
+import ApiService from "./src/Service/Api/ApiService.js";
 
 const dolphinService = new DolphinService();
 const socialsAgentService = await SocialsAgentService.init(__dirname + '/data');
+const telegramBotService = await TelegramBotService.init(telegramBotToken, __dirname + '/data');
+await ApiService.init(3000);
 
-TelegramBotService.init(telegramBotToken, __dirname + '/data');
-
-export {dolphinService, socialsAgentService}
+export {dolphinService, socialsAgentService, telegramBotService}
 
