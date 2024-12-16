@@ -5,11 +5,11 @@ import {Scenes, session, Telegraf} from "telegraf";
 import TelegramBotStorage from "./TelegramBotStorage.js";
 
 import StartCommand from "./Command/StartCommand.js";
-import SettingsCommand from "./Command/SettingsCommand.js";
 
 import SettingsScene from "./Scene/SettingsScene/SettingsScene.js";
 import AccountsScene from "./Scene/AccountsScene/AccountsScene.js";
 import AddAccountScene from "./Scene/AddAccountScene/AddAccountScene.js";
+import StartScene from "./Scene/StartScene/StartScene.js";
 
 class TelegramBotService {
 
@@ -29,6 +29,7 @@ class TelegramBotService {
     instance.bot = new Telegraf(token);
 
     const stage = new Scenes.Stage([
+        await new StartScene(instance).scene(),
         await new SettingsScene(instance).scene(),
         await new AccountsScene(instance).scene(),
         await new AddAccountScene(instance).scene(),
@@ -38,7 +39,6 @@ class TelegramBotService {
     instance.bot.use(stage.middleware());
 
     instance.bot.start(async (ctx) => new StartCommand(instance, ctx).run());
-    instance.bot.hears(SettingsCommand.command, async (ctx) => new SettingsCommand(instance, ctx).run());
     instance.bot.launch();
 
     return instance;
