@@ -19,6 +19,7 @@ class StartProfileCallback extends TelegramBotCommandBase {
       await (new Promise(resolve => setTimeout(() => resolve(), 10000)));
       await this.context.reply('Profile has been successfully started.');
     } catch (error) {
+
     }
 
     AccountsScene.refreshCommand(this.service, this.context);

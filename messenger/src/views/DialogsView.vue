@@ -1,4 +1,17 @@
 <script setup lang="ts">
+import {useRoute} from "vue-router";
+
+const route = useRoute()
+
+console.log(import.meta.env.VITE_API_URL + '/' + route.params.userId + '/dialogs/webSocket');
+fetch(import.meta.env.VITE_API_URL + '/' + route.params.userId + '/dialogs/webSocket', {
+  headers: {
+    "ngrok-skip-browser-warning": true
+  }
+});
+
+const wsConnection = '';
+
 const dialogs = [
   {
     platform: "Fancentro",

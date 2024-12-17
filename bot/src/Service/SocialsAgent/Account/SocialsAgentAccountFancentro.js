@@ -11,6 +11,8 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
     5: 'Profile is not found'
   }
 
+  dialogs = [];
+
   async getPlatformConnectionStatus() {
     if (await super.getPlatformConnectionStatus() === false) {
       return false;
@@ -42,9 +44,21 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
     }
   }
 
-  async authorize() {
-    // this.client.
+  async getPlatformDialogsList() {
+    switch (this.clientSettings.type) {
+      case 'dolphin':
+        try {
+          const dolphinCommunicator = await this.service.getDolphinService().connect(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
+          const dolphinProfile = await dolphinCommunicator.profile(this.clientSettings.params.profile);
+          return await (await (await dolphinProfile.openBrowser()).openTab('fancentro')).getDialogsLive();
+        } catch(error) {
+          console.log(error);
+        }
+        break;
+    }
   }
+
+
 
 }
 

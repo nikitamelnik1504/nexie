@@ -5,9 +5,17 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/dialogs',
+      path: '/:userId',
+      name: 'home',
+      redirect: to => {
+        return `/${to.params.userId}/dialogs`;
+      }
+    },
+    {
+      path: '/:userId/dialogs',
       name: 'dialogs',
       component: DialogsView,
+      props: route => ({ userId: route.params.userId }),
     },
   ],
 })

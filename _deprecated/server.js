@@ -24,29 +24,6 @@ function showMenu(ctx) {
     ctx.reply('Choose option:', Markup.keyboard([Markup.button.webApp('Chats', chatsUrl), 'Settings']).resize());
 }
 
-bot.use((ctx, next) => {
-    const userId = ctx.from.id;
-    const role = roles.find(role => Number(role.id) == userId);
-
-    if (ctx.callbackQuery && ctx.callbackQuery.data === 'request_access') {
-        return next();
-    }
-
-    if (!role) {
-        return ctx.reply("You don't have enough access rights",
-            Markup.inlineKeyboard([Markup.button.callback('Request access', 'request_access')])
-        );
-    }
-    return next();
-})
-
-bot.action('request_access', (ctx) => {
-    const userId = ctx.from.id;
-    const username = ctx.from.username || ctx.from.first_name || 'guest';
-    accessRequests[userId] = username;
-    ctx.reply('The request has been sent to the admins');
-})
-
 bot.hears('Chats', async (ctx) => {
     Markup.button.webApp('Open chats', `${chatsUrl}/chats`)
     // ctx.reply(
@@ -55,80 +32,6 @@ bot.hears('Chats', async (ctx) => {
     //         Markup.button.webApp('Open chat', `${chatsUrl}/chats`)
     //     ])
     // );
-});
-
-bot.hears('Settings', (ctx) => {
-    ctx.reply('Settings:', Markup.keyboard(['Access', 'Accounts', 'Back']).resize());
-});
-
-bot.hears('Back', (ctx) => {
-    showMenu(ctx);
-})
-
-bot.hears('Requests list', (ctx) => {
-    const userId = ctx.from.id;
-    const role = roles.find(role => Number(role.id) == userId);
-    if (role.role !== 'admin') return ctx.reply('You not admin');
-    if (Object.keys(accessRequests).length === 0) {
-        return ctx.reply('The list is empty');
-    }
-    Object.entries(accessRequests).map(([id, username]) => {
-        ctx.reply(`Request for @${username}`,
-            Markup.inlineKeyboard([
-                Markup.button.callback('Approve', `approve_${id}`),
-                Markup.button.callback('Decline', `deny_${id}`)
-            ])
-        )
-    });
-    ctx.reply('Requests list:', Markup.keyboard(['Back']).resize());
-})
-
-bot.hears('Access', (ctx) => {
-    const userId = ctx.from.id;
-    const role = roles.find(role => Number(role.id) == userId);
-    if (role.role !== 'admin') return ctx.reply('You not admin');
-    roles.forEach(role => {
-        ctx.reply(`User @${role.username} has ${role.role} rights`,
-            Markup.inlineKeyboard([
-                Markup.button.callback('Remove rights', `remove_access_${role.id}`),
-                Markup.button.callback('Give admin rights', `update_access_${role.id}`)
-            ])
-        )
-    })
-
-    ctx.reply('Access:', Markup.keyboard(['Requests list', 'Back']).resize());
-});
-
-bot.action(/update_access_(\d+)/, (ctx) => {
-    const userId = ctx.match[1];
-    const role = roles.find(role => Number(role.id) == ctx.from.id);
-    if (role.role !== 'admin') return ctx.reply('You not admin')
-    roles.forEach(role => {
-        if (Number(role.id) == userId) role.role = 'admin';
-    });
-    writeArrayToFile('./private/bot_access.json', roles);
-    ctx.reply(`Rights removed`);;
-});
-
-bot.action(/remove_access_(\d+)/, (ctx) => {
-    const userId = ctx.match[1];
-    const role = roles.find(role => Number(role.id) == ctx.from.id);
-    if (role.role !== 'admin') return ctx.reply('You not admin')
-    roles = roles.filter(role => Number(role.id) != userId);
-    writeArrayToFile('./private/bot_access.json', roles);
-    ctx.reply(`Rights removed`);;
-});
-
-bot.action(/approve_(\d+)/, (ctx) => {
-    const userId = ctx.match[1];
-    const role = roles.find(role => Number(role.id) == ctx.from.id);
-    if (role.role !== 'admin') return ctx.reply('You not admin')
-    const username = accessRequests[userId]
-    roles.push({id: userId, role: 'moderator', username: username})
-    writeArrayToFile('./private/bot_access.json', roles);
-    delete accessRequests[userId];
-    ctx.reply(`Access for @${username} is approved`);
-    bot.telegram.sendMessage(userId, 'Your request has been approved');
 });
 
 bot.action(/deny_(\d+)/, (ctx) => {
@@ -142,37 +45,6 @@ bot.action(/deny_(\d+)/, (ctx) => {
 
 const profiles = await ProfileManager.getProfiles(token);
 const platforms = ['ton', 'fancentro', 'fansly'];
-
-
-bot.action(/account_delete_(\d+)/, async (ctx) => {
-    const index = Number(ctx.match[1]);
-    let accounts = await getArrayFromFile('./private/accounts.json');
-    await accounts.splice(index, 1);
-    await writeArrayToFile('./private/accounts.json', accounts);
-    ctx.reply('The account has been successfully deleted');
-});
-
-bot.hears('Accounts', async (ctx) => {
-    let accounts = await getArrayFromFile('./private/accounts.json');
-    if (accounts.length > 0) {
-        let index = 0;
-        for (const account of accounts) {
-            await ctx.reply(`Account name: ${account.name} \nPlatform: ${account.platform}`, Markup.inlineKeyboard([
-                Markup.button.callback('Delete account', `account_delete_${index}`)
-            ]));
-            index++;
-        }
-    }
-    ctx.reply('Choose option', {
-        reply_markup: {
-            keyboard: [
-                [{ text: 'Add account' }, {text: 'Authorized accounts'}, { text: 'Back' }]
-            ],
-            resize_keyboard: true
-        }
-    })
-});
-
 
 bot.hears('Authorized accounts', async (ctx) => {
     ctx.reply('Please wait a few minutes...');

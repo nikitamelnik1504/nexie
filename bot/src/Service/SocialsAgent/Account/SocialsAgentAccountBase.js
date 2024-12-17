@@ -98,6 +98,9 @@ class SocialsAgentAccountBase {
     return this.getClientConnectionStatus();
   }
 
+  async getPlatformDialogsList() {
+  }
+
   async startPlatformConnection() {
     switch (this.clientSettings.type) {
       case 'dolphin':
