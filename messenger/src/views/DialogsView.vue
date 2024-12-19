@@ -3,11 +3,12 @@ import {useRoute} from "vue-router";
 
 const route = useRoute()
 
-console.log(import.meta.env.VITE_API_URL + '/' + route.params.userId + '/dialogs/webSocket');
 fetch(import.meta.env.VITE_API_URL + '/' + route.params.userId + '/dialogs/webSocket', {
   headers: {
     "ngrok-skip-browser-warning": true
   }
+}).then(async (result) => {
+  const socket = new WebSocket('wss://' + '825d-178-158-218-135.ngrok-free.app');
 });
 
 const wsConnection = '';

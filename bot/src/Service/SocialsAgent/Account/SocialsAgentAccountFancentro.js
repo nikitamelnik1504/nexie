@@ -1,4 +1,5 @@
 import SocialsAgentAccountBase from "./SocialsAgentAccountBase.js";
+import EventEmitter from "node:events";
 
 class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
 
@@ -11,6 +12,7 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
     5: 'Profile is not found'
   }
 
+  platformDialogsListener = null;
   dialogs = [];
 
   async getPlatformConnectionStatus() {
@@ -44,20 +46,71 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
     }
   }
 
-  async getPlatformDialogsList() {
+  async getPlatformDialogsListener() {
+    if (this.platformDialogsListener !== null) {
+      return this.platformDialogsListener;
+    }
+
     switch (this.clientSettings.type) {
       case 'dolphin':
+        let dialogsEvent;
+
         try {
           const dolphinCommunicator = await this.service.getDolphinService().connect(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
           const dolphinProfile = await dolphinCommunicator.profile(this.clientSettings.params.profile);
-          return await (await (await dolphinProfile.openBrowser()).openTab('fancentro')).getDialogsLive();
-        } catch(error) {
+          const dolphinDialogsEvent = await (await (await dolphinProfile.openBrowser()).openTab('fancentro')).getDialogsLive();
+
+          class DialogsListEmitter extends EventEmitter {
+          }
+
+          dialogsEvent = new DialogsListEmitter();
+
+          dolphinDialogsEvent.on('messages_data', (data) => {
+            for (const receivedDialog of data) {
+              const existDialogIndex = this.dialogs.indexOf((item) => item.id === receivedDialog.id);
+
+              if (existDialogIndex !== -1) {
+                this.dialogs[existDialogIndex].timestamp = receivedDialog.timestamp;
+                this.dialogs[existDialogIndex].lastMessage = receivedDialog.message;
+              } else {
+                this.dialogs.push({
+                  id: receivedDialog.id,
+                  timestamp: receivedDialog.timestamp,
+                  userId: receivedDialog.userId,
+                  userExternalId: receivedDialog.userExternalId,
+                  lastMessage: receivedDialog.message,
+                });
+              }
+            }
+
+            dialogsEvent.emit('update', this.dialogs);
+          });
+
+          dolphinDialogsEvent.on('users_data', (data) => {
+            for (const receivedUserExternalId in data) {
+              const existDialogIndex = this.dialogs.findIndex(item => +item.userExternalId === +receivedUserExternalId);
+              if (existDialogIndex === -1) {
+                continue;
+              }
+
+              const receivedUserData = data[receivedUserExternalId];
+
+              this.dialogs[existDialogIndex].userName = receivedUserData.name;
+            }
+
+            dialogsEvent.emit('update', this.dialogs);
+          });
+        } catch (error) {
           console.log(error);
         }
-        break;
+
+        return this.platformDialogsListener = dialogsEvent;
     }
   }
 
+  getPlatformDialogs() {
+    return this.dialogs;
+  }
 
 
 }

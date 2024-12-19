@@ -2,7 +2,7 @@ import EventEmitter from 'node:events';
 
 class DolphinFancentroTab {
 
-  dialogsWebSocket = null;
+  dialogsEmitter = null;
   messagesWebSocket = null;
   browser;
   profile;
@@ -56,6 +56,10 @@ class DolphinFancentroTab {
   }
 
   async getDialogsLive() {
+    if (this.dialogsEmitter !== null) {
+      return this.dialogsEmitter;
+    }
+
     // Open empty page and import cookies.
     const page = await this.browser.newPage();
     try {
@@ -81,7 +85,7 @@ class DolphinFancentroTab {
       }
 
       const data = await JSON.parse(response.payloadData.replace(/^42\/fc,/, ''));
-      if (data[0] !== 'room_list' || data[1].roomsData.length !== 0) {
+      if (data[0] !== 'room_list' || data[1].roomsData.length === 0) {
         return;
       }
 
@@ -91,14 +95,15 @@ class DolphinFancentroTab {
 
       for (const room of rooms) {
         const targetUser = room.members.find(member => member.user.id !== currentUserId);
+
         dialogs.push({
           id: room._id,
-          timestamp: room.messages[0].timestamp,
+          timestamp: room.messages[0] !== null ? room.messages[0].timestamp : null,
           userId: targetUser.user.id,
           userExternalId: targetUser.user.external.id,
           message: {
-            from: room.messages[0].authorId,
-            body: room.messages[0].data,
+            from: room.messages[0] !== null ? room.messages[0].authorId: null,
+            body: room.messages[0] !== null ? room.messages[0].data : null,
           }
         })
       }
@@ -124,9 +129,11 @@ class DolphinFancentroTab {
       }
     });
 
+    this.dialogsEmitter = dialogsEmitter;
+
     await page.goto(`https://fancentro.com/admin/messages`, {waitUntil: 'networkidle0'});
 
-    return dialogsEmitter;
+    return this.dialogsEmitter;
   }
 
 }
