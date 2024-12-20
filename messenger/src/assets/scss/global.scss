@@ -7,7 +7,7 @@
 }
 
 body {
-  color: white;
+  color: black;
   min-height: 100vh;
   line-height: 1.6;
   font-family:
@@ -24,10 +24,10 @@ body {
           'Helvetica Neue',
           sans-serif;
   font-size: 15px;
+  background: white;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #15161a;
 
   h1 {
     font-size: 21px;
@@ -42,7 +42,6 @@ body {
   }
 
   header {
-    background-color: #1b1c21;
     text-align: center;
     padding: 5px 0;
   }

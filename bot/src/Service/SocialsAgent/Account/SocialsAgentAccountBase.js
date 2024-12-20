@@ -14,6 +14,9 @@ class SocialsAgentAccountBase {
     username: null
   };
 
+  dialogs = null;
+  dialogsUserId = null;
+
   service;
 
   constructor(id, service, clientType, clientParams, platformName, platformAccountLogin = null, platformAccountPassword = null, platformAccountUsername = null) {
@@ -53,6 +56,10 @@ class SocialsAgentAccountBase {
 
   getPlatformUsername() {
     return this.platformSettings.username;
+  }
+
+  async getPlatformDialogsUserId() {
+    return this.dialogsUserId;
   }
 
   setPlatformUsername(username) {

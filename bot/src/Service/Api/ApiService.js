@@ -2,7 +2,9 @@ import {telegramBotService, socialsAgentService} from "../../../index.js";
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import DialogsGet from "./Get/DialogsGet.js";
+import {WebSocketServer} from "ws";
+import WebSocketGet from "./HTTP/WebSocketGet.js";
+import Connection from "./WS/Connection.js";
 
 class ApiService {
 
@@ -11,8 +13,12 @@ class ApiService {
     app.use(bodyParser.json());
     app.use(cors());
 
-    const dialogsGet = new DialogsGet(telegramBotService, socialsAgentService);
-    app.get('/:userId/dialogs/webSocket', async (req, res) => dialogsGet.ws(req, res))
+    const wsServer = new WebSocketServer({
+      port: 3002,
+    });
+    wsServer.on('connection', (wsClient, request) => Connection.run(wsClient, request, telegramBotService, socialsAgentService));
+
+    app.get('/:userId/dialogs/webSocket', async (request, response) => WebSocketGet.run(request, response, wsServer, telegramBotService, socialsAgentService))
 
     app.listen(port);
   }
