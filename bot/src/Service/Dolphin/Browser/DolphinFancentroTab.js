@@ -129,11 +129,13 @@ class DolphinFancentroTab {
       }
     });
 
-    this.dialogsEmitter = dialogsEmitter;
+    dialogsEmitter.on('refresh', async () => {
+      await page.goto(`https://fancentro.com/admin/messages`, {waitUntil: 'networkidle0'});
+    });
 
     await page.goto(`https://fancentro.com/admin/messages`, {waitUntil: 'networkidle0'});
 
-    return this.dialogsEmitter;
+    return this.dialogsEmitter = dialogsEmitter;
   }
 
 }

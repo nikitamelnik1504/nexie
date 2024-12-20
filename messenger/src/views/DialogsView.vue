@@ -1,39 +1,48 @@
 <script setup lang="ts">
 import {useRoute} from "vue-router";
+import {onMounted, ref, watch} from "vue";
+import {useApiStore} from "@/stores/api";
+import {useMessageStore} from "@/stores/message.ts";
 
-const route = useRoute()
+const route = useRoute();
+const apiStore = useApiStore();
+const messageStore = useMessageStore();
 
-fetch(import.meta.env.VITE_API_URL + '/' + route.params.userId + '/dialogs/webSocket', {
-  headers: {
-    "ngrok-skip-browser-warning": true
+const initializeWebSocket = async () => {
+  if (!apiStore.websocketConnection) {
+    await apiStore.fetchWebSocketConnection(import.meta.env.VITE_API_URL, route.params.userId);
   }
-}).then(async (result) => {
-  const socket = new WebSocket('wss://' + '825d-178-158-218-135.ngrok-free.app');
+
+  if (apiStore.websocketConnection) {
+    apiStore.websocketConnection.onmessage = (message) => {
+      const data = JSON.parse(message.data);
+
+      if (data.type === 'dialogs_list') {
+        for (const dialog of data.data.dialogs) {
+          messageStore.addDialog(data.data.platform, dialog.userName, dialog.lastMessage?.body?.text || "", "", 5);
+        }
+      }
+    };
+  }
+};
+
+onMounted(async () => {
+  await initializeWebSocket();
+
+  watch(
+      () => apiStore.websocketConnection,
+      async (newConnection, oldConnection) => {
+        if (newConnection !== oldConnection) {
+          await initializeWebSocket();
+        }
+      }
+  );
 });
-
-const wsConnection = '';
-
-const dialogs = [
-  {
-    platform: "Fancentro",
-    username: "Nikita",
-    preview_message: "Привіт, це тестове повідомлення.",
-    image: "",
-    messages_count: 5,
-  },
-  {
-    platform: "Fansly",
-    username: "Katryn",
-    preview_message: "Ахаха, а я й не знала.",
-    image: "",
-    messages_count: 1,
-  }
-];
 </script>
 
 <template>
   <div class="dialogs">
-    <a href="#" v-for="dialog in dialogs" class="dialog">
+    <a href="#" v-for="dialog in messageStore.dialogsSorted" class="dialog">
       <div></div>
       <div class="dialog__message_info">
         <h2>{{ dialog.username }}</h2>

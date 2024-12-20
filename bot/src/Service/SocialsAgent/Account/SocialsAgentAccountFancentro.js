@@ -13,7 +13,7 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
   }
 
   platformDialogsListener = null;
-  dialogs = [];
+  dialogs = null;
 
   async getPlatformConnectionStatus() {
     if (await super.getPlatformConnectionStatus() === false) {
@@ -66,8 +66,12 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
           dialogsEvent = new DialogsListEmitter();
 
           dolphinDialogsEvent.on('messages_data', (data) => {
+            if (this.dialogs === null) {
+              this.dialogs = [];
+            }
+
             for (const receivedDialog of data) {
-              const existDialogIndex = this.dialogs.indexOf((item) => item.id === receivedDialog.id);
+              const existDialogIndex = this.dialogs.findIndex((item) => item.id === receivedDialog.id);
 
               if (existDialogIndex !== -1) {
                 this.dialogs[existDialogIndex].timestamp = receivedDialog.timestamp;
@@ -87,6 +91,10 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
           });
 
           dolphinDialogsEvent.on('users_data', (data) => {
+            if (this.dialogs === null) {
+              this.dialogs = [];
+            }
+
             for (const receivedUserExternalId in data) {
               const existDialogIndex = this.dialogs.findIndex(item => +item.userExternalId === +receivedUserExternalId);
               if (existDialogIndex === -1) {
@@ -100,6 +108,8 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
 
             dialogsEvent.emit('update', this.dialogs);
           });
+
+          dolphinDialogsEvent.emit('refresh');
         } catch (error) {
           console.log(error);
         }
@@ -111,7 +121,6 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
   getPlatformDialogs() {
     return this.dialogs;
   }
-
 
 }
 

@@ -1,50 +1,51 @@
-import {WebSocketServer} from "ws";
-
 class DialogsGet {
 
-  wsServers = [];
+  wsServer;
 
-  constructor(telegramBotService, socialsAgentService) {
+  constructor(wsServer, telegramBotService, socialsAgentService) {
+    this.wsServer = wsServer;
     this.telegramBotService = telegramBotService;
     this.socialsAgentService = socialsAgentService;
   }
 
-  async ws(req, res) {
-    const telegramUserId = req.params.userId;
+  static async init(wsServer, telegramBotService, socialsAgentService) {
+    const instance = new this(wsServer, telegramBotService, socialsAgentService);
 
-    const existWsServer = this.wsServers.find(server => server.telegram_user_id === telegramUserId);
-    if (existWsServer) {
-      return res.send(existWsServer.server.address());
-    }
+    wsServer.on('connection', async (wsClient, request) => {
+      const url = new URL(request.url, `https://${request.headers.host}`);
+      const userId = url.searchParams.get('userId');
+      const telegramUserData = await (await instance.telegramBotService.getStorage()).getUser(userId);
+      if (!telegramUserData) {
+        return wsClient.close();
+      }
 
-    const telegramUserData = await (await this.telegramBotService.getStorage()).getUser(telegramUserId);
-    if (!telegramUserData) {
-      return res.send('Error');
-    }
-
-    const wsServer = new WebSocketServer({
-      port: 3002,
-    });
-
-    wsServer.on('connection', async (wsClient) => {
       for (const socialAgentId of telegramUserData.social_agent_accounts) {
-        const socialAgentAccount = this.socialsAgentService.getAccount(socialAgentId)
+        const socialAgentAccount = instance.socialsAgentService.getAccount(socialAgentId);
         const socialAgentDialogsEventListener = await socialAgentAccount.getPlatformDialogsListener();
         socialAgentDialogsEventListener.removeAllListeners('update');
         socialAgentDialogsEventListener.on('update', (dialogs) => {
           wsClient.send(JSON.stringify(dialogs));
         });
 
-        wsClient.send(JSON.stringify(socialAgentAccount.getPlatformDialogs()));
+        const dialogs = socialAgentAccount.getPlatformDialogs();
+        if (dialogs === null) {
+          continue;
+        }
+        wsClient.send(JSON.stringify({
+          type: "dialogs_list",
+          data: {
+            platform: socialAgentAccount.getPlatformType(),
+            dialogs,
+          },
+        }));
       }
     });
 
-    this.wsServers.push({
-      telegram_user_id: telegramUserId,
-      server: wsServer
-    })
+    return instance;
+  }
 
-    return res.send(wsServer.address());
+  async ws(req, res) {
+    return res.send(this.wsServer.address());
   }
 
 }
