@@ -24,7 +24,13 @@ class DialogsGet {
         const socialAgentDialogsEventListener = await socialAgentAccount.getPlatformDialogsListener();
         socialAgentDialogsEventListener.removeAllListeners('update');
         socialAgentDialogsEventListener.on('update', (dialogs) => {
-          wsClient.send(JSON.stringify(dialogs));
+          wsClient.send(JSON.stringify({
+            type: "dialogs_list",
+            data: {
+              platform: socialAgentAccount.getPlatformType(),
+              dialogs,
+            },
+          }));
         });
 
         const dialogs = socialAgentAccount.getPlatformDialogs();
