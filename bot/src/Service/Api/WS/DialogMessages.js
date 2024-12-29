@@ -17,22 +17,19 @@ class DialogMessages {
       },
     };
 
-    for (const socialAgentId of telegramUserData.social_agent_accounts) {
-      if (socialAgentId !== payload.data.accountId) {
-        continue;
-      }
+    const socialAgentId = telegramUserData.social_agent_accounts.find(id => id === payload.data.accountId);
+    if (!socialAgentId) return;
 
-      const socialAgentAccount = socialsAgentService.getAccount(socialAgentId);
-      const socialAgentMessagesEventListener = await socialAgentAccount.getPlatformMessagesListener(payload.data.dialogId);
-      socialAgentMessagesEventListener.removeAllListeners('update');
-      socialAgentMessagesEventListener.on('update', () => this.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService));
+    const socialAgentAccount = socialsAgentService.getAccount(socialAgentId);
+    const socialAgentMessagesEventListener = await socialAgentAccount.getPlatformMessagesListener(payload.data.dialogId);
+    socialAgentMessagesEventListener.removeAllListeners('update');
+    socialAgentMessagesEventListener.on('update', () => this.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService));
 
-      response.data.messages = socialAgentAccount.getPlatformDialogMessages(payload.data.dialogId);
-      response.data.accountId = socialAgentAccount.id;
-      response.data.dialogId = payload.data.dialogId;
+    response.data.messages = socialAgentAccount.getPlatformDialogMessages(payload.data.dialogId);
+    response.data.accountId = socialAgentAccount.id;
+    response.data.dialogId = payload.data.dialogId;
 
-      wsClient.send(JSON.stringify(response))
-    }
+    wsClient.send(JSON.stringify(response))
   }
 
 }

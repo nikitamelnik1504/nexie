@@ -9,9 +9,12 @@ class DolphinFancentroTab {
     emitter: null
   }
 
-  messagesWebSocket = null;
+  page;
+
   browser;
+
   profile;
+
   accountId = null;
 
   constructor(profile, browser) {
@@ -49,7 +52,7 @@ class DolphinFancentroTab {
     const devtoolsSession = await page.target().createCDPSession();
     await devtoolsSession.send('Network.enable');
 
-    return this.accountId = await (new Promise(resolve => {
+    const accountId = await (new Promise(resolve => {
       devtoolsSession.on('Network.webSocketFrameReceived', async ({requestId, timestamp, response}) => {
         if (!response.payloadData.includes('room')) {
           return;
@@ -60,12 +63,15 @@ class DolphinFancentroTab {
           return;
         }
 
-        // page.close();
         resolve(data[1].currentUserId);
       });
 
-      page.goto('https://fancentro.com/admin/messages', {waitUntil: 'networkidle0', timeout: 60000});
+      page.goto('https://fancentro.com/admin/messages');
     }));
+
+    await page.close();
+
+    return this.accountId = accountId;
   }
 
   async getAuthorizationStatus(username, login = null, password = null) {
@@ -242,7 +248,6 @@ class DolphinFancentroTab {
     if (this.dialogMessagesEmitter.username === username && this.dialogMessagesEmitter.emitter) {
       return this.dialogMessagesEmitter.emitter;
     }
-
     // Open an empty page and import cookies.
     const page = await this.browser.newPage();
     try {
