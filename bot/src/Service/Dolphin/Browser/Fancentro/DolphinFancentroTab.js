@@ -1,11 +1,15 @@
 import EventEmitter from 'node:events';
-import MessagesEmitter from "./MessagesEmitter.js";
 
 class DolphinFancentroTab {
 
   dialogsEmitter = null;
 
-  dialogMessagesEmitter;
+  dialogMessagesEmitter = {
+    username: null,
+    emitter: null
+  }
+
+  page;
 
   browser;
 
@@ -200,7 +204,7 @@ class DolphinFancentroTab {
 
         const users = data.response.collection;
 
-        let messagesDataLoaded = true;
+        let messagesDataLoaded =  true;
         for (const userId in users) {
           dialogsEmitter.data.users[userId.toString()] = {
             avatar: users[userId.toString()].avatar,
@@ -240,11 +244,10 @@ class DolphinFancentroTab {
     return this.dialogsEmitter = dialogsEmitter;
   }
 
-  async getDialogMessagesLive() {
-    if (this.dialogMessagesEmitter) {
-      return this.dialogMessagesEmitter;
+  async getDialogMessagesLive(username) {
+    if (this.dialogMessagesEmitter.username === username && this.dialogMessagesEmitter.emitter) {
+      return this.dialogMessagesEmitter.emitter;
     }
-
     // Open an empty page and import cookies.
     const page = await this.browser.newPage();
     try {
@@ -258,11 +261,53 @@ class DolphinFancentroTab {
     const devtoolsSession = await page.target().createCDPSession();
     await devtoolsSession.send('Network.enable');
 
-    const messagesEmitter = new MessagesEmitter(devtoolsSession);
+    class MessagesEmitter extends EventEmitter {
 
-    await page.goto(`https://fancentro.com/admin/messages`, { waitUntil: 'networkidle0'});
+    }
+    const messagesEmitter = new MessagesEmitter();
 
-    return this.dialogMessagesEmitter = messagesEmitter;
+
+    // Listen for WebSocket messages
+    devtoolsSession.on('Network.webSocketFrameReceived', ({response}) => {
+      if (!response.payloadData.includes('room')) {
+        return;
+      }
+
+      try {
+        const data = JSON.parse(response.payloadData.replace(/^42\/fc,/, ''));
+        if (data[0] === 'room_buckets' && data[1].buckets.length > 0) {
+          messagesEmitter.emit('messages_data', data[1].buckets[0].messages)
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    });
+
+    try {
+      await page.goto(`https://fancentro.com/admin/messages`, {waitUntil: 'networkidle0'});
+      await page.waitForSelector('div.List.customScroll', {timeout: 15000});
+
+      await page.$$eval(
+        'div.List.customScroll h2',
+        (h2Elements, username) => {
+          const title = h2Elements.find((el) => el.textContent.includes(username));
+
+          if (title) {
+            title.click();
+          }
+        },
+        username
+      );
+    } catch (error) {
+      console.error('Error navigating or locating elements:', error);
+    }
+
+    this.dialogMessagesEmitter = {
+      username,
+      emitter: messagesEmitter,
+    };
+
+    return this.dialogMessagesEmitter.emitter;
   }
 
 }
