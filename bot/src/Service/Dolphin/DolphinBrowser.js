@@ -1,6 +1,6 @@
-import DolphinFancentroTab from "./Browser/DolphinFancentroTab.js";
-import DolphinFanslyTab from "./Browser/DolphinFanslyTab.js";
-import DolphinTonTab from "./Browser/DolphinTonTab.js";
+import DolphinFancentroTab from "./Browser/Fancentro/DolphinFancentroTab.js";
+import DolphinFanslyTab from "./Browser/Fansly/DolphinFanslyTab.js";
+import DolphinTonTab from "./Browser/Ton/DolphinTonTab.js";
 
 class DolphinBrowser {
 

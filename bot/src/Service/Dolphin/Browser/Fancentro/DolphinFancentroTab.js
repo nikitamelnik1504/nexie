@@ -1,4 +1,5 @@
 import EventEmitter from 'node:events';
+import MessagesEmitter from "./MessagesEmitter.js";
 
 class DolphinFancentroTab {
 
@@ -199,7 +200,7 @@ class DolphinFancentroTab {
 
         const users = data.response.collection;
 
-        let messagesDataLoaded =  true;
+        let messagesDataLoaded = true;
         for (const userId in users) {
           dialogsEmitter.data.users[userId.toString()] = {
             avatar: users[userId.toString()].avatar,
@@ -239,60 +240,9 @@ class DolphinFancentroTab {
     return this.dialogsEmitter = dialogsEmitter;
   }
 
-  async getDialogMessagesLive(username) {
+  async getDialogMessagesLive() {
     if (this.dialogMessagesEmitter) {
-      await this.dialogMessagesEmitter.changeUser(username);
       return this.dialogMessagesEmitter;
-    }
-
-    class MessagesEmitter extends EventEmitter {
-      page;
-      cdpSession;
-      username;
-
-      constructor(page, cdpSession) {
-        super();
-
-        // Listen for WebSocket messages
-        cdpSession.on('Network.webSocketFrameReceived', ({response}) => {
-          if (!response.payloadData.includes('room')) {
-            return;
-          }
-
-          try {
-            const data = JSON.parse(response.payloadData.replace(/^42\/fc,/, ''));
-            if (data[0] === 'room_buckets' && data[1].buckets.length > 0) {
-              messagesEmitter.emit('messages_data', data[1].buckets[0].messages)
-            }
-          } catch (error) {
-            console.error('Error parsing WebSocket message:', error);
-          }
-        });
-
-
-        this.cdpSession = cdpSession;
-        this.page = page;
-      }
-
-      async changeUser(username) {
-        if (this.username === username) {
-          return;
-        } else {
-          this.username = username;
-        }
-
-        await this.page.$$eval(
-          'div.List.customScroll h2',
-          (h2Elements, username) => {
-            const title = h2Elements.find((el) => el.textContent.includes(username));
-
-            if (title) {
-              title.click();
-            }
-          },
-          username
-        );
-      }
     }
 
     // Open an empty page and import cookies.
@@ -308,15 +258,9 @@ class DolphinFancentroTab {
     const devtoolsSession = await page.target().createCDPSession();
     await devtoolsSession.send('Network.enable');
 
-    try {
-      await page.goto(`https://fancentro.com/admin/messages`);
-      await page.waitForSelector('div.List.customScroll', {timeout: 15000});
-    } catch (error) {
-      console.error('Error navigating or locating elements:', error);
-    }
+    const messagesEmitter = new MessagesEmitter(devtoolsSession);
 
-    const messagesEmitter = new MessagesEmitter(page, devtoolsSession);
-    await messagesEmitter.changeUser(username);
+    await page.goto(`https://fancentro.com/admin/messages`, { waitUntil: 'networkidle0'});
 
     return this.dialogMessagesEmitter = messagesEmitter;
   }
