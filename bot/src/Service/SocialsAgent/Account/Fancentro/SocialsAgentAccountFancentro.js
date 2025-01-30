@@ -1,5 +1,6 @@
-import SocialsAgentAccountBase from "./SocialsAgentAccountBase.js";
+import SocialsAgentAccountBase from "../SocialsAgentAccountBase.js";
 import EventEmitter from "node:events";
+import MessagesListener from "./MessagesListener.js";
 
 class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
 
@@ -108,46 +109,6 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
     }
   }
 
-  async getPlatformMessagesListener(dialogId) {
-    if (this.dialogs === null) {
-      throw new Error('Dialogs is not loaded.');
-    }
-
-    const matchedDialog = this.dialogs.find(dialog => dialog.id === dialogId);
-    if (!matchedDialog) {
-      throw new Error('Dialog is not found');
-    }
-
-    switch (this.clientSettings.type) {
-      case 'dolphin':
-        try {
-          const dolphinCommunicator = await this.service.getDolphinService().connect(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
-          const dolphinProfile = await dolphinCommunicator.profile(this.clientSettings.params.profile);
-          const dolphinMessagesEvent = await (await (await dolphinProfile.openBrowser()).openTab('fancentro')).getDialogMessagesLive(matchedDialog.userName);
-
-          class MessagesList extends EventEmitter {
-          }
-
-          const messagesEvent = new MessagesList();
-
-          dolphinMessagesEvent.removeAllListeners('messages_data');
-          dolphinMessagesEvent.on('messages_data', (messages) => {
-            for (const receivedMessage of messages) {
-              if (matchedDialog.messages.find(message => message.id === receivedMessage.id)) {
-                continue;
-              }
-
-              matchedDialog.messages.push(receivedMessage);
-            }
-
-            messagesEvent.emit('update', this.dialogs);
-          })
-          return messagesEvent;
-        } catch (error) {
-        }
-    }
-  }
-
   getPlatformDialogs() {
     if (this.dialogs === null) {
       throw new Error('Dialogs is not loaded.');
@@ -156,13 +117,15 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
     return this.dialogs;
   }
 
-  getPlatformDialogMessages(dialogId) {
-    const dialog = this.dialogs.find(dialog => dialog.id === dialogId);
-    if (!dialog) {
-      return [];
-    }
-
-    return dialog.messages;
+  async getPlatformMessagesListener() {
+    return !this.platformMessagesListener ? this.platformMessagesListener = await (async () => {
+      switch (this.clientSettings.type) {
+        case 'dolphin':
+          const dolphinCommunicator = await this.service.getDolphinService().connect(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
+          const dolphinProfile = await dolphinCommunicator.profile(this.clientSettings.params.profile);
+          return new MessagesListener(this.dialogs, await (await (await dolphinProfile.openBrowser()).openTab('fancentro')).getDialogMessagesLive());
+      }
+    })() : this.platformMessagesListener;
   }
 
 }
