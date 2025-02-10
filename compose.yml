@@ -1,0 +1,14 @@
+services:
+  sem-telegram-bot:
+    build: ./bot
+    container_name: sem_telegram_bot
+    networks:
+      - sem_network
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+
+networks:
+  sem_network:
+    driver: bridge
