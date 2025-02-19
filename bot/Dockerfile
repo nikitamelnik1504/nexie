@@ -64,6 +64,5 @@ ENV NO_AT_BRIDGE=1
 USER default
 
 EXPOSE 3000
-EXPOSE 3001
 
 ENTRYPOINT ["/entrypoint.sh"]
