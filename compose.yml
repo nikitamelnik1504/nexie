@@ -1,0 +1,27 @@
+services:
+  sem-telegram-bot:
+    build: ./bot
+    container_name: sem_telegram_bot
+    networks:
+      - sem_network
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    volumes:
+      - ./bot/data:/app/data
+    env_file:
+      - ./bot/.env
+    ports:
+      - "3000:3000"
+  sem-messenger:
+    build: ./messenger
+    container_name: sem_messenger
+    networks:
+      - sem_network
+    ports:
+      - "80:80"
+
+networks:
+  sem_network:
+    driver: bridge
