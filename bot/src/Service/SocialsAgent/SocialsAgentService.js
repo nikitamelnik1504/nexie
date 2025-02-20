@@ -17,16 +17,25 @@ class SocialsAgentService {
     const instance = new this();
 
     instance.factory = new SocialsAgentFactory(instance);
-
     instance.storagePath = storagePath;
-
     instance.dolphinService = dolphinService;
 
-    const accountsData = JSON.parse(await fs.readFile(instance.storagePath + '/socialAccounts.json', {'encoding': 'utf8'}));
+    const storageFilePath = instance.storagePath + '/socialAccounts.json';
 
-    for (const accountData of accountsData) {
-      const account = instance.factory.createAccount(accountData);
-      instance.accounts.push(account);
+    try {
+      await fs.access(storageFilePath);
+
+      const accountsData = JSON.parse(await fs.readFile(storageFilePath, { encoding: 'utf8' }));
+      for (const accountData of accountsData) {
+        const account = instance.factory.createAccount(accountData);
+        instance.accounts.push(account);
+      }
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        await fs.writeFile(storageFilePath, JSON.stringify([]));
+      } else {
+        throw error;
+      }
     }
 
     return instance;

@@ -14,7 +14,10 @@ class TelegramBotStorage {
     try {
       await fs.readFile(path + '/telegramUsers.json', {'encoding': 'utf8'});
     } catch (error) {
-      await fs.writeFile(path + '/telegramUsers.json', JSON.stringify([]), {'encoding': 'utf8'});
+      await fs.writeFile(path + '/telegramUsers.json', JSON.stringify({
+        users: [],
+        social_agent_accounts: [],
+      }), {'encoding': 'utf8'});
     }
 
     return new this(path);
