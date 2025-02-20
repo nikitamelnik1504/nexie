@@ -8,6 +8,8 @@ services:
       - SYS_ADMIN
     devices:
       - /dev/fuse
+    volumes:
+      - ./bot/data:/app/data
 
 networks:
   sem_network:
