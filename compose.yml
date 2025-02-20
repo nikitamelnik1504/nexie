@@ -10,6 +10,17 @@ services:
       - /dev/fuse
     volumes:
       - ./bot/data:/app/data
+    env_file:
+      - ./bot/.env
+    ports:
+      - "3000:3000"
+  sem-messenger:
+    build: ./messenger
+    container_name: sem_messenger
+    networks:
+      - sem_network
+    ports:
+      - "80:80"
 
 networks:
   sem_network:
