@@ -40,7 +40,7 @@ sem_messenger_production_build:
   only:
     - "#15"
 
-sem_telegram_bot_production_deploy:
+sem_production_deploy:
   stage: deploy
   before_script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
@@ -51,6 +51,6 @@ sem_telegram_bot_production_deploy:
     - ssh-keyscan ${REMOTE_HOST} >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_ROOT};docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin <<<$CI_REGISTRY_PASSWORD;docker compose up --build -d sem-telegram-bot;docker logout"
+    - ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_ROOT};docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin <<<$CI_REGISTRY_PASSWORD;docker compose up --build -d sem-telegram-bot sem-messenger;docker logout"
   only:
     - "#15"
