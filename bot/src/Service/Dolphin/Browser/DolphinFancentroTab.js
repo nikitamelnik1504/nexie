@@ -76,29 +76,27 @@ class DolphinFancentroTab {
     await page.goto(`https://fancentro.com/login`, {waitUntil: 'networkidle0', timeout: 60000});
 
     try {
-      if (!(await page.waitForSelector('button[data-testid="navigation-top-user-menu-mobile"]', {timeout: 15000}))) {
+      await page.waitForSelector('button[data-testid="navigation-top-user-menu-mobile"]', {timeout: 15000});
+      await page.click('button[data-testid="navigation-top-user-menu-mobile"]');
+      await page.waitForSelector('button[data-testid="navigation-top-user-menu-mobile-close"]', {timeout: 15000});
+      const accountAgency = await page.$('span[data-i18alias="agency"]');
+
+      const accountUsername = await page.evaluate(el => {
+        let accountInfoWrapper = el.parentElement.parentElement;
+        return accountInfoWrapper.querySelector('span').innerText;
+      }, accountAgency);
+
+      if (accountUsername !== username) {
         page.close();
-        return 0;
-      } else {
-        await page.click('button[data-testid="navigation-top-user-menu-mobile"]');
-        await page.waitForSelector('button[data-testid="navigation-top-user-menu-mobile-close"]', {timeout: 15000});
-        const accountAgency = await page.$('span[data-i18alias="agency"]');
-
-        const accountUsername = await page.evaluate(el => {
-          let accountInfoWrapper = el.parentElement.parentElement;
-          return accountInfoWrapper.querySelector('span').innerText;
-        }, accountAgency);
-
-        if (accountUsername !== username) {
-          page.close();
-          return 2;
-        }
-
-        page.close();
-        return 1;
+        return 2;
       }
+
+      page.close();
+      return 1;
     } catch (error) {
       console.log(error);
+      page.close();
+      return 0;
     }
   }
 
@@ -199,7 +197,7 @@ class DolphinFancentroTab {
 
         const users = data.response.collection;
 
-        let messagesDataLoaded =  true;
+        let messagesDataLoaded = true;
         for (const userId in users) {
           dialogsEmitter.data.users[userId.toString()] = {
             avatar: users[userId.toString()].avatar,
