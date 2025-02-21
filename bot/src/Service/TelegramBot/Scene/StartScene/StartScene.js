@@ -23,7 +23,7 @@ class StartScene extends TelegramBotSceneBase {
     if (user.role === 'admin') {
       return context.reply('Welcome!', Markup.keyboard(['Settings']).resize().oneTime());
     } else if (user.role === 'default') {
-      return context.reply('Welcome!', Markup.keyboard([Markup.button.webApp('Chats', process.env.TELEGRAM_WEB_APP_URL + '/' + user.username), 'Accounts']).resize().oneTime());
+      return context.reply('Welcome!', Markup.keyboard([Markup.button.webApp('Chats', process.env.MESSENGER_APP_URL + '/' + user.username), 'Accounts']).resize().oneTime());
     }
   }
 
