@@ -9,7 +9,7 @@ dotenv.config();
 
 const config = {
     telegramBotToken: process.env.TELEGRAM_BOT_TOKEN,
-    sharedApiPort: process.env.SHARED_API_PORT || 3000,
+    exposeApiPort: process.env.EXPOSE_API_PORT || 3000,
     dataPath: __dirname + '/data',
     telegramWebAppUrl: process.env.TELEGRAM_WEB_APP_URL,
     messagesAppUrl: process.env.MESSENGER_APP_URL,
@@ -24,6 +24,6 @@ const dolphinService = new DolphinService();
 const socialsAgentService = await SocialsAgentService.init(config.dataPath);
 const telegramBotService = await TelegramBotService.init(config.telegramBotToken, config.dataPath);
 
-await ApiService.init(config.sharedApiPort);
+await ApiService.init(config.exposeApiPort);
 
 export {dolphinService, socialsAgentService, telegramBotService}
