@@ -2,6 +2,7 @@ services:
   sem-telegram-bot:
     build: ./bot
     container_name: sem_telegram_bot
+    shm_size: '1gb'
     networks:
       - sem_network
     cap_add:
