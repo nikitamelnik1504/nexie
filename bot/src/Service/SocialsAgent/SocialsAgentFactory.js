@@ -1,5 +1,5 @@
 import {v4 as uuid} from 'uuid';
-import SocialsAgentAccountFancentro from "./Account/SocialsAgentAccountFancentro.js";
+import SocialsAgentAccountFancentro from "./Account/Fancentro/SocialsAgentAccountFancentro.js";
 
 class SocialsAgentFactory {
 
