@@ -73,7 +73,7 @@ class DolphinFancentroTab {
     const page = await this.browser.newPage();
     await page.setViewport({width: 414, height: 896});
 
-    await page.goto(`https://fancentro.com/login`, {waitUntil: 'networkidle0', timeout: 60000});
+    await page.goto(`https://fancentro.com/admin`, {waitUntil: 'networkidle0', timeout: 60000});
 
     try {
       await page.waitForSelector('button[data-testid="navigation-top-user-menu-mobile"]', {timeout: 15000});
