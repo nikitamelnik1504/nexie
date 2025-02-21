@@ -53,8 +53,7 @@ class MessagesEmitter extends EventEmitter {
       {
         roomId: this.dialogId,
         position: 'firstUnread',
-        withNextBuckets: fals
-        e,
+        withNextBuckets: false,
         minCount: 50,
       }
     ];
