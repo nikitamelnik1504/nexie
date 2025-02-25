@@ -14,7 +14,7 @@ class ApiService {
     app.use(cors());
 
     const wsServer = new WebSocketServer({
-      port: 3002,
+      server: app
     });
     wsServer.on('connection', (wsClient, request) => Connection.run(wsClient, request, telegramBotService, socialsAgentService));
 

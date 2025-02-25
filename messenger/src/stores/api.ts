@@ -16,8 +16,8 @@ export const useApiStore = defineStore('api', () => {
 
     return websocketConnections.value[userId] = await new Promise((resolve) => {
       try {
-        const wsUrl = `ws://localhost:3002?userId=${userId}`;
-        const ws = new WebSocket(wsUrl);
+        const wsUrl = import.meta.env.WS_API_URL + `?userId=${userId}`;
+          const ws = new WebSocket(wsUrl);
 
         ws.onclose = (event) => {
           console.log(`WebSocket connection closed for user ${userId}`, event.reason);
