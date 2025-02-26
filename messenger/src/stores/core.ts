@@ -97,7 +97,7 @@ export const useCoreStore = defineStore('core', () => {
                   image: null,
                 },
                 last_message: {
-                  text: dialog.lastMessage.body.text,
+                  text: decodeURIComponent(dialog.lastMessage.body.text),
                   author: dialog.lastMessage.from,
                   timestamp: dialog.timestamp,
                 },
@@ -113,7 +113,7 @@ export const useCoreStore = defineStore('core', () => {
             messages.value.push(<Message>{
               id: message.id,
               dialogId: data.data.dialogId,
-              text: message.data.text,
+              text: decodeURIComponent(message.data.text),
               author: message.authorId,
               timestamp: message.timestamp,
             })
