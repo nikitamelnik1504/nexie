@@ -14,13 +14,18 @@ class ApiService {
     app.use(cors());
 
     const wsServer = new WebSocketServer({
-      server: app
+      noServer: true
     });
-    wsServer.on('connection', (wsClient, request) => Connection.run(wsClient, request, telegramBotService, socialsAgentService));
 
     app.get('/:userId/dialogs/webSocket', async (request, response) => WebSocketGet.run(request, response, wsServer, telegramBotService, socialsAgentService))
 
-    app.listen(port);
+    const server = app.listen(port);
+
+    server.on('upgrade', (request, socket, head) => {
+      wsServer.handleUpgrade(request, socket, head, (wsClient) => {
+        Connection.run(wsClient, request, telegramBotService, socialsAgentService);
+      });
+    });
   }
 
 }
