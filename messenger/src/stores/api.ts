@@ -16,8 +16,9 @@ export const useApiStore = defineStore('api', () => {
 
     return websocketConnections.value[userId] = await new Promise((resolve) => {
       try {
-        const wsUrl = import.meta.env.WS_API_URL + `?userId=${userId}`;
-          const ws = new WebSocket(wsUrl);
+        // @todo Implement env properly.
+        const wsUrl = import.meta.env.WS_API_URL ? import.meta.env.WS_API_URL : 'wss://sem-bot.scfw.io'  + `?userId=${userId}`;
+        const ws = new WebSocket(wsUrl);
 
         ws.onclose = (event) => {
           console.log(`WebSocket connection closed for user ${userId}`, event.reason);
