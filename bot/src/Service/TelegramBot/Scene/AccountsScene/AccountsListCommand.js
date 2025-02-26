@@ -29,7 +29,7 @@ class AccountsListCommand extends TelegramBotCommandBase {
         'Client': socialAgent.getClientType(),
         'Client Connection Status': await socialAgent.getClientConnectionStatus() ? 'Connected' : 'Not Connected',
         'Platform': socialAgent.getPlatformType(),
-        'Platform Connection Status': socialAgent.constructor.PLATFORM_CONNECTION_STATUS[agentPlatformConnectionStatus],
+        'Platform Connection Status': agentPlatformConnectionStatus === null ? 'Account is not running' : socialAgent.constructor.PLATFORM_CONNECTION_STATUS[agentPlatformConnectionStatus],
         'Username': socialAgent.getPlatformUsername(),
         'Login': socialAgent.getPlatformLogin(),
         'Password': socialAgent.getPlatformPassword(),
@@ -44,37 +44,37 @@ class AccountsListCommand extends TelegramBotCommandBase {
       message.text = accountInfoString;
 
       switch (agentPlatformConnectionStatus) {
+        case null:
+          message.keyboard = Markup.inlineKeyboard(
+            [
+              Markup.button.callback('Remove', 'remove_account_' + socialAgent.id),
+              Markup.button.callback('Start', 'start_account_' + socialAgent.id)
+            ],
+          );
+          break;
         case 0:
           message.keyboard = Markup.inlineKeyboard(
-            [Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id)],
+            [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
           );
           break;
         case 1:
           message.keyboard = Markup.inlineKeyboard(
-            [Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id)],
+            [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
           );
           break;
         case 2:
           message.keyboard = Markup.inlineKeyboard(
-            [Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id)],
+            [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
           );
           break;
         case 3:
           message.keyboard = Markup.inlineKeyboard(
-            [
-              Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id),
-              Markup.button.callback('Start Profile', 'start_profile_' + socialAgent.id)
-            ],
+            [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
           );
           break;
         case 4:
           message.keyboard = Markup.inlineKeyboard(
-            [Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id)],
-          );
-          break;
-        case 5:
-          message.keyboard = Markup.inlineKeyboard(
-            [Markup.button.callback('Remove Account', 'remove_account_' + socialAgent.id)],
+            [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
           );
           break;
       }

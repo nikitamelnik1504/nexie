@@ -17,7 +17,7 @@ class DialogsList {
       const responseItem = {accountId: null, dialogs: []};
 
       const socialAgentAccount = socialsAgentService.getAccount(socialAgentId);
-      const socialAgentDialogsEventListener = await socialAgentAccount.getPlatformDialogsListener();
+      const socialAgentDialogsEventListener = await socialAgentAccount.getPlatformMessenger();
       socialAgentDialogsEventListener.removeAllListeners('update');
       socialAgentDialogsEventListener.on('update', () => this.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService));
 

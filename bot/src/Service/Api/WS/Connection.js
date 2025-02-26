@@ -1,5 +1,5 @@
-import DialogsList from "./DialogsList.js";
-import DialogMessages from "./DialogMessages.js";
+import DialogsList from "./Methods/DialogsList.js";
+import DialogMessages from "./Methods/DialogMessages.js";
 
 class Connection {
 

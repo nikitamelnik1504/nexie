@@ -5,7 +5,7 @@ import TelegramBotSceneBase from "../../TelegramBotSceneBase.js";
 import AccountsListCommand from "./AccountsListCommand.js";
 import SettingsScene from "../SettingsScene/SettingsScene.js";
 import StartCommand from "../../Command/StartCommand.js";
-import StartProfileCallback from "./StartProfileCallback.js";
+import StartAccountCallback from "./StartAccountCallback.js";
 import RemoveAccountCallback from "./RemoveAccountCallback.js";
 import AddAccountScene from "../AddAccountScene/AddAccountScene.js";
 
@@ -19,7 +19,7 @@ class AccountsScene extends TelegramBotSceneBase {
     scene.hears('Back', (ctx) => AccountsScene.backCommand(this.service, ctx));
     scene.hears('Refresh', (ctx) => AccountsScene.refreshCommand(this.service, ctx))
     scene.hears('Add Account', (ctx) => AccountsScene.addAccountCommand(this.service, ctx))
-    scene.action(StartProfileCallback.command, async (ctx) => AccountsScene.startProfileCallback(this.service, ctx));
+    scene.action(StartAccountCallback.command, async (ctx) => AccountsScene.startProfileCallback(this.service, ctx));
     scene.action(RemoveAccountCallback.command, async (ctx) => AccountsScene.removeAccountCallback(this.service, ctx));
     return scene;
   }
@@ -49,7 +49,7 @@ class AccountsScene extends TelegramBotSceneBase {
   }
 
   static async startProfileCallback(service, context) {
-    await new StartProfileCallback(service, context).run();
+    await new StartAccountCallback(service, context).run();
   }
 
   static async removeAccountCallback(service, context) {

@@ -14,8 +14,9 @@ class SocialsAgentAccountBase {
     username: null
   };
 
-  dialogs = null;
-  dialogsUserId = null;
+  platformConnectionStatus = null;
+
+  messenger = null;
 
   service;
 
@@ -56,10 +57,6 @@ class SocialsAgentAccountBase {
 
   getPlatformUsername() {
     return this.platformSettings.username;
-  }
-
-  async getPlatformDialogsUserId() {
-    return this.dialogsUserId;
   }
 
   setPlatformUsername(username) {
@@ -105,7 +102,8 @@ class SocialsAgentAccountBase {
     return this.getClientConnectionStatus();
   }
 
-  async getPlatformDialogsList() {
+  async getPlatformMessenger() {
+    return this.messenger;
   }
 
   async startPlatformConnection() {

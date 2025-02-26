@@ -2,12 +2,12 @@ import TelegramBotCommandBase from "../../TelegramBotCommandBase.js";
 import {Markup} from "telegraf";
 import AccountsScene from "./AccountsScene.js";
 
-class StartProfileCallback extends TelegramBotCommandBase {
+class StartAccountCallback extends TelegramBotCommandBase {
 
-  static command = /start_profile_([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/;
+  static command = /start_account_([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/;
 
   async run() {
-    await this.context.reply('Starting profile...', Markup.removeKeyboard());
+    await this.context.reply('Starting account...', Markup.removeKeyboard());
 
     const socialsAgentAccountId = this.context.match[1];
     const socialsAgentService = await this.service.getSocialsAgentService();
@@ -17,9 +17,10 @@ class StartProfileCallback extends TelegramBotCommandBase {
       await socialsAgentAccount.startPlatformConnection();
       // @todo Replace.
       await (new Promise(resolve => setTimeout(() => resolve(), 10000)));
-      await this.context.reply('Profile has been successfully started.');
+      await this.context.reply('Account has been successfully started.');
     } catch (error) {
-
+      console.error(error);
+      await this.context.reply('Error happened while starting account.');
     }
 
     AccountsScene.refreshCommand(this.service, this.context);
@@ -27,4 +28,4 @@ class StartProfileCallback extends TelegramBotCommandBase {
 
 }
 
-export default StartProfileCallback;
+export default StartAccountCallback;
