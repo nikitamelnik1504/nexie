@@ -83,6 +83,7 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
     }
 
     this.messenger = await Messenger.init(platformTab, this.platformSettings.username);
+    this.platformConnectionStatus = 1;
   }
 
 }

@@ -21,11 +21,12 @@ class AuthorizationWatcher extends EventEmitter {
 
     instance.page.on("load", async () => {
       try {
+        await instance.page.waitForSelector('button[data-testid="navigation-top-user-menu-mobile"]', { timeout: 10000 });
         await instance.page.click('button[data-testid="navigation-top-user-menu-mobile"]');
-        const accountAgency = await instance.page.$('span[data-i18alias="agency"]');
+        const accountAgency = await instance.page.$('span[data-i18alias="showWhenOnline"]');
 
         instance.username = await instance.page.evaluate(el => {
-          let accountInfoWrapper = el.parentElement.parentElement;
+          let accountInfoWrapper = el.parentElement.parentElement.parentElement.parentElement;
           return accountInfoWrapper.querySelector('span').innerText;
         }, accountAgency);
 
