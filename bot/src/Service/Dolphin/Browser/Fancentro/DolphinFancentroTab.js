@@ -6,10 +6,9 @@ import DialogsWatcher from "./Watcher/DialogsWatcher.js";
 
 class DolphinFancentroTab {
 
-  messengerEmitter;
+  emitter;
 
   browser;
-
   profile;
 
   accountId = null;
@@ -55,18 +54,18 @@ class DolphinFancentroTab {
     instance.watchers.dialogs = await DialogsWatcher.init(instance.page, instance.cdp);
 
     // Init event emitters.
-    instance.messengerEmitter = new class extends EventEmitter {
+    instance.emitter = new class extends EventEmitter {
       me() {
         return instance.watchers.dialogs.getMe();
       }
     }();
 
     instance.watchers.dialogs.on("update", () => {
-      instance.messengerEmitter.emit('dialogs_update', instance.watchers.dialogs.getDialogs());
+      instance.emitter.emit('dialogs_update', instance.watchers.dialogs.getDialogs());
     });
 
     // instance.watchers.messages.on("update", () => {
-    //   instance.messengerEmitter.emit('dialog_messages_update', instance.watchers.dialogs.getDialogs());
+    //   instance.emitter.emit('dialog_messages_update', instance.watchers.dialogs.getDialogs());
     // });
 
     return instance;
@@ -81,7 +80,7 @@ class DolphinFancentroTab {
   }
 
   getMessengerLive() {
-    return this.messengerEmitter;
+    return this.emitter;
   }
 
 }

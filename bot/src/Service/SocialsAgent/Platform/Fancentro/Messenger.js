@@ -3,6 +3,11 @@ import Me from "./Dialogs/Me.js";
 import DialogsCollection from "./Dialogs/DialogsCollection.js";
 import Dialog from "./Dialogs/Dialog.js";
 
+/**
+ * Central place where all messages related functionality located in.
+ *
+ * Here will be located cache, delayed messages and all custom functionality.
+ */
 class Messenger extends EventEmitter {
 
   dialogs = null;
@@ -19,6 +24,7 @@ class Messenger extends EventEmitter {
     //   return;
     // }
     instance.runtime = tab.getMessengerLive();
+
     instance.runtime.on('dialogs_update', (data) => {
       if (instance.dialogs === null) {
         const me = new Me({...instance.runtime.me(), username});

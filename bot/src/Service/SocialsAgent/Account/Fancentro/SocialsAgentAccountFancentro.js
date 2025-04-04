@@ -34,14 +34,6 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
     return this.platformConnectionStatus;
   }
 
-  getPlatformDialogs() {
-    if (this.dialogs === null) {
-      throw new Error('Dialogs is not loaded.');
-    }
-
-    return this.dialogs;
-  }
-
   // async getPlatformMessagesListener() {
   //   return !this.platformMessagesListener ? this.platformMessagesListener = await (async () => {
   //     switch (this.clientSettings.type) {
