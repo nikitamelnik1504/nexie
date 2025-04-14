@@ -34,6 +34,8 @@ class Messenger extends EventEmitter {
       for (const receivedDialog of data) {
         instance.dialogs.addDialog(new Dialog(receivedDialog));
       }
+
+      instance.emit('dialogs_update');
     });
 
     // platformMessengerRuntime.on('dialog_messages_update', (data) => {

@@ -17,12 +17,12 @@ class DialogsList {
       const responseItem = {accountId: null, dialogs: []};
 
       const socialAgentAccount = socialsAgentService.getAccount(socialAgentId);
-      const socialAgentDialogsEventListener = await socialAgentAccount.getPlatformMessenger();
-      socialAgentDialogsEventListener.removeAllListeners('update');
-      socialAgentDialogsEventListener.on('update', () => this.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService));
+      const socialAgentAccountMessenger = await socialAgentAccount.getPlatformMessenger();
+      socialAgentAccountMessenger.removeAllListeners('dialogs_update');
+      socialAgentAccountMessenger.on('dialogs_update', () => this.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService));
 
       try {
-        responseItem.dialogs = socialAgentAccount.getPlatformDialogs();
+        responseItem.dialogs = socialAgentAccountMessenger.getDialogs();
       } catch (error) {
         responseItem.dialogs = null;
       }

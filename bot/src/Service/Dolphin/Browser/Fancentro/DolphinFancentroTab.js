@@ -1,5 +1,4 @@
 import EventEmitter from 'node:events';
-import MessagesEmitter from "./MessagesEmitter.js";
 import AuthorizationWatcher from "./Watcher/AuthorizationWatcher.js";
 import AccountWatcher from "./Watcher/AccountWatcher.js";
 import DialogsWatcher from "./Watcher/DialogsWatcher.js";

@@ -12,8 +12,6 @@ type User = {
 type Account = {
   userId: string,
   id: string,
-  remoteId: string,
-  remoteIdForDialogs: string,
   username: string,
   platform: string,
 }
@@ -25,6 +23,9 @@ type Dialog = {
     id: string;
     username: string;
     image: unknown;
+  };
+  me: {
+    id: string;
   };
   last_message: {
     text: string;
@@ -71,8 +72,6 @@ export const useCoreStore = defineStore('core', () => {
             accounts.value.push(<Account>{
               userId,
               id: account.id,
-              remoteId: account.remoteId,
-              remoteIdForDialogs: account.remoteIdForDialogs,
               username: account.username,
               platform: account.platform,
             });
@@ -86,20 +85,23 @@ export const useCoreStore = defineStore('core', () => {
             if (item.dialogs === null) {
               break;
             }
-
-            for (const dialog of item.dialogs) {
+            console.log(item);
+            for (const dialog of item.dialogs.collection) {
               dialogs.value.push(<Dialog>{
                 accountId: item.accountId,
                 id: dialog.id,
                 member: {
-                  id: dialog.userId,
-                  username: dialog.userName,
+                  id: dialog.member.externalId,
+                  username: dialog.member.username,
                   image: null,
                 },
+                me: {
+                  id: item.dialogs.me.id,
+                },
                 last_message: {
-                  text: decodeURIComponent(dialog.lastMessage.body.text),
-                  author: dialog.lastMessage.from,
-                  timestamp: dialog.timestamp,
+                  text: decodeURIComponent(dialog.messages.collection[0].text),
+                  author: dialog.messages.collection[0].from,
+                  timestamp: dialog.messages.collection[0].timestamp,
                 },
                 new_messages_count: 0,
               })

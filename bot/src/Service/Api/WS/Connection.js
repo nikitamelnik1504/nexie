@@ -26,8 +26,6 @@ class Connection {
       const socialAgentAccount = socialsAgentService.getAccount(socialAgentId);
       response.data.push({
         id: socialAgentAccount.id,
-        remoteId: null,
-        remoteIdForDialogs: await socialAgentAccount.getPlatformDialogsUserId(),
         username: socialAgentAccount.getPlatformUsername(),
         platform: socialAgentAccount.getPlatformType(),
       });

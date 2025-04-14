@@ -1,5 +1,4 @@
 import SocialsAgentAccountBase from "../SocialsAgentAccountBase.js";
-import MessagesListener from "./MessagesListener.js";
 import Messenger from "../../Platform/Fancentro/Messenger.js";
 
 class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {

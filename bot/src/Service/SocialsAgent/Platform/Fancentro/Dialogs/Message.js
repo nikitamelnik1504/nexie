@@ -24,10 +24,6 @@ class Message {
     }
   }
 
-  toJSON() {
-    return JSON.stringify({});
-  }
-
 }
 
 export default Message;

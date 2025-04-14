@@ -3,7 +3,6 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import {WebSocketServer} from "ws";
-import WebSocketGet from "./HTTP/WebSocketGet.js";
 import Connection from "./WS/Connection.js";
 
 class ApiService {
@@ -16,8 +15,6 @@ class ApiService {
     const wsServer = new WebSocketServer({
       noServer: true
     });
-
-    app.get('/:userId/dialogs/webSocket', async (request, response) => WebSocketGet.run(request, response, wsServer, telegramBotService, socialsAgentService))
 
     const server = app.listen(port);
 

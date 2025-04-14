@@ -1,13 +1,16 @@
 import MessagesCollection from "./MessagesCollection.js";
 import Message from "./Message.js";
+import Member from "./Member.js";
 
 class Dialog {
 
   id;
   messages;
+  member;
 
   constructor(data) {
     this.id = data.room._id;
+    this.member = new Member(data);
 
     this.messages = new MessagesCollection();
 

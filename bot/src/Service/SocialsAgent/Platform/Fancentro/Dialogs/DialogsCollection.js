@@ -24,6 +24,7 @@ class DialogsCollection {
   }
 
   getAllDialogs() {
+
   }
 
   getMembers() {
