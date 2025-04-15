@@ -20,7 +20,11 @@ class DialogsCollection {
     return dialog;
   }
 
-  getDialog(id) {
+  getDialogByRemoteId(id) {
+    return this.collection.find((dialog) => dialog.remoteId === id);
+  }
+
+  getDialogById(id) {
     return this.collection.find((dialog) => dialog.id === id);
   }
 

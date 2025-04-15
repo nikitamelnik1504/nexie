@@ -1,4 +1,4 @@
-import DolphinBrowser from "../DolphinBrowser.js";
+import DolphinBrowser from "./DolphinBrowser.js";
 import puppeteer from "puppeteer-core";
 import axios from "axios";
 

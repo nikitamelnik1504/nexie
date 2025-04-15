@@ -85,7 +85,7 @@ class SocialsAgentAccountBase {
   async getClient() {
     switch (this.clientSettings.type) {
       case 'dolphin':
-        return await this.service.getDolphinService().connect(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
+        return await this.service.getClientServices().dolphin.client(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
     }
   }
 

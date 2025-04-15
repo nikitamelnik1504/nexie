@@ -42,6 +42,7 @@ type Message = {
   text: string;
   author: string;
   timestamp: number;
+  status: string;
 };
 
 export const useCoreStore = defineStore('core', () => {
@@ -117,6 +118,7 @@ export const useCoreStore = defineStore('core', () => {
               text: decodeURIComponent(message.text),
               author: message.from,
               timestamp: message.timestamp,
+              status: 'sent',
             })
           }
           break;
@@ -167,6 +169,23 @@ export const useCoreStore = defineStore('core', () => {
     }));
   }
 
+  async function requestSendMessage(userId: sring, accountId: string, dialogId: string, message: string) {
+    const matchedUser = users.value.find(user => user.id === userId);
+    return matchedUser.wsConnection.send(JSON.stringify({
+      type: 'dialog_send_message',
+      data: {
+        accountId,
+        dialogId,
+        message: {
+          type: 'text',
+          data: {
+            text: message
+          }
+        }
+      }
+    }));
+  }
+
   return {
     users,
     user,
@@ -178,6 +197,7 @@ export const useCoreStore = defineStore('core', () => {
     messages,
     getMessages,
     requestDialogs,
-    requestMessages
+    requestMessages,
+    requestSendMessage
   }
 });

@@ -1,3 +1,4 @@
+import {v4 as uuid} from 'uuid';
 import MessagesCollection from "./MessagesCollection.js";
 import Message from "./Message.js";
 import Member from "./Member.js";
@@ -5,11 +6,13 @@ import Member from "./Member.js";
 class Dialog {
 
   id;
+  remoteId;
   messages;
   member;
 
   constructor(data) {
-    this.id = data.room._id;
+    this.id = uuid();
+    this.remoteId = data.room._id;
     this.member = new Member(data);
 
     this.messages = new MessagesCollection();
@@ -26,7 +29,7 @@ class Dialog {
     }
   }
 
-    getMessages() {
+  getMessages() {
     return this.messages;
   }
 

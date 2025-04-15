@@ -1,4 +1,4 @@
-import EventEmitter from 'node:events';
+import EventeventEmitter from 'node:events';
 import AuthorizationWatcher from "./Watcher/AuthorizationWatcher.js";
 import AccountWatcher from "./Watcher/AccountWatcher.js";
 import DialogsWatcher from "./Watcher/DialogsWatcher.js";
@@ -6,7 +6,7 @@ import MessagesWatcher from "./Watcher/MessagesWatcher.js";
 
 class DolphinFancentroTab {
 
-  emitter;
+  eventEmitter;
 
   browser;
   profile;
@@ -55,22 +55,29 @@ class DolphinFancentroTab {
     instance.watchers.dialogs = await DialogsWatcher.init(instance.page, instance.cdp);
     instance.watchers.messages = await MessagesWatcher.init(instance.page, instance.cdp);
 
-    // Init event emitters.
-    instance.emitter = new class extends EventEmitter {
+    // Init event eventEmitters.
+    instance.eventEmitter = new class extends EventeventEmitter {
       me() {
         return instance.watchers.dialogs.getMe();
       }
       loadMessages(dialogId) {
         instance.watchers.messages.emit("loadMessages", dialogId);
       }
+      sendMessage(dialogId, message) {
+        instance.watchers.messages.emit("sendMessage", dialogId, message);
+      }
     }();
 
     instance.watchers.dialogs.on("update", () => {
-      instance.emitter.emit('dialogs_update', instance.watchers.dialogs.getDialogs());
+      instance.eventEmitter.emit('dialogs_update', instance.watchers.dialogs.getDialogs());
     });
 
     instance.watchers.messages.on("update", () => {
-      instance.emitter.emit('dialog_messages_update', instance.watchers.messages.getMessages());
+      instance.eventEmitter.emit('dialog_messages_update', instance.watchers.messages.getMessages());
+    });
+
+    instance.watchers.messages.on("new", (messageId) => {
+      instance.eventEmitter.emit('dialog_messages_new', instance.watchers.messages.getMessage(messageId));
     });
 
     return instance;
@@ -84,8 +91,8 @@ class DolphinFancentroTab {
     return await this.watchers.authorization.getStatus(username);
   }
 
-  getMessengerLive() {
-    return this.emitter;
+  getEventEmitter() {
+    return this.eventEmitter;
   }
 
 }

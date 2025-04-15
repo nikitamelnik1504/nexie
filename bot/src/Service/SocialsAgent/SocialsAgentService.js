@@ -1,13 +1,14 @@
-import {dolphinService} from "../../../index.js";
-
 import fs from "fs/promises";
 import SocialsAgentFactory from "./SocialsAgentFactory.js";
+import ClientManager from "./Client/ClientManager.js";
 
 class SocialsAgentService {
 
   storagePath;
 
-  dolphinService;
+  clientServices = {
+    dolphin: null,
+  };
 
   factory;
 
@@ -17,8 +18,11 @@ class SocialsAgentService {
     const instance = new this();
 
     instance.factory = new SocialsAgentFactory(instance);
+
     instance.storagePath = storagePath;
-    instance.dolphinService = dolphinService;
+
+    const clientManager = ClientManager.init();
+    instance.clientServices.dolphin = clientManager.getDolphinService();
 
     const storageFilePath = instance.storagePath + '/socialAccounts.json';
 
@@ -122,8 +126,8 @@ class SocialsAgentService {
     await fs.writeFile(this.storagePath + '/socialAccounts.json', JSON.stringify(accountsData), {'encoding': 'utf8'});
   }
 
-  getDolphinService() {
-    return this.dolphinService;
+  getClientServices() {
+    return this.clientServices;
   }
 
 }

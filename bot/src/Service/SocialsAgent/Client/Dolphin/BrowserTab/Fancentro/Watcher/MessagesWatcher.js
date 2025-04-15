@@ -23,6 +23,7 @@ class MessagesWatcher extends EventEmitter {
 
   static async extendWsConnection(instance) {
     await instance.page.exposeFunction("addMessages", instance.addMessages.bind(instance));
+    await instance.page.exposeFunction("addMessage", instance.addMessage.bind(instance));
     await instance.page.exposeFunction("messagesWatcherEmit", instance.emit.bind(instance));
     await instance.page.evaluate(async () => {
       const message_event = async (event) => {
@@ -35,6 +36,10 @@ class MessagesWatcher extends EventEmitter {
           case 'room_buckets':
             await window.addMessages(parsed[1].buckets[0]);
             window.messagesWatcherEmit("update");
+            break;
+          case 'message':
+            await window.addMessage(parsed[1]);
+            window.messagesWatcherEmit("new", parsed[1].id);
             break;
         }
       };
@@ -52,14 +57,39 @@ class MessagesWatcher extends EventEmitter {
         }]));
       }, dialogId);
     });
+
+    instance.on("sendMessage", async (dialogId, message) => {
+      await instance.page.evaluate(async (dialogId, message) => {
+        window.ws.send('42/fc,' + JSON.stringify(["message", {
+          additionalData: {recipientGroup: "followers"},
+          data: {text: message},
+          edited: 0,
+          isBulk: false,
+          muted: false,
+          price: null,
+          reactions: [],
+          room: dialogId,
+          state: 2,
+          type: "text"
+        }]));
+      }, dialogId, message);
+    })
   }
 
   addMessages(data) {
     this.messages = data;
   }
 
+  addMessage(data) {
+    this.messages.push(data);
+  }
+
   getMessages() {
     return this.messages;
+  }
+
+  getMessage(id) {
+    return this.messages.find(message => message.id === id);
   }
 
 }

@@ -15,7 +15,7 @@ class Messenger extends EventEmitter {
 
   authorizationStatus;
 
-  runtime;
+  clientBrowserTabEmitter;
 
   static async init(tab, username) {
     const instance = new this();
@@ -24,11 +24,11 @@ class Messenger extends EventEmitter {
     // if (this.platformConnectionStatus !== 1) {
     //   return;
     // }
-    instance.runtime = tab.getMessengerLive();
+    instance.clientBrowserTabEmitter = tab.getEventEmitter();
 
-    instance.runtime.on('dialogs_update', (data) => {
+    instance.clientBrowserTabEmitter.on('dialogs_update', (data) => {
       if (instance.dialogs === null) {
-        const me = new Me({...instance.runtime.me(), username});
+        const me = new Me({...instance.clientBrowserTabEmitter.me(), username});
         instance.dialogs = new DialogsCollection(me);
       }
 
@@ -39,8 +39,8 @@ class Messenger extends EventEmitter {
       instance.emit('dialogs_update');
     });
 
-    instance.runtime.on('dialog_messages_update', (data) => {
-      const dialog = instance.dialogs.getDialog(data.roomId);
+    instance.clientBrowserTabEmitter.on('dialog_messages_update', (data) => {
+      const dialog = instance.dialogs.getDialogByRemoteId(data.roomId);
       if (dialog.messages.loaded === false) {
         dialog.messages.collection = [];
       }
@@ -48,6 +48,16 @@ class Messenger extends EventEmitter {
       for (const message of data.messages) {
         dialog.messages.addMessage(new Message(message));
       }
+
+      dialog.messages.loaded = true;
+      instance.emit('dialog_messages_update');
+    });
+
+    instance.clientBrowserTabEmitter.on('dialog_messages_new', (data) => {
+      const dialog = instance.dialogs.getDialogByRemoteId(data.room);
+
+      const messages = dialog.getMessages();
+      messages.collection.find(message => '');
 
       dialog.messages.loaded = true;
       instance.emit('dialog_messages_update');
@@ -61,14 +71,24 @@ class Messenger extends EventEmitter {
   }
 
   getMessages(dialogId) {
-    const dialog = this.dialogs.getDialog(dialogId);
+    const dialog = this.dialogs.getDialogById(dialogId);
 
     if (dialog && dialog.getMessages().loaded === false) {
-      this.runtime.loadMessages(dialogId);
+      this.clientBrowserTabEmitter.loadMessages(dialog.remoteId);
       return false;
     }
 
     return dialog.getMessages();
+  }
+
+  sendMessage(data) {
+    const dialog = this.dialogs.getDialogById(data.dialogId);
+    const messages = dialog.getMessages();
+    const message = new Message(data.message);
+    message.sent = false;
+
+    messages.addMessage(message);
+    this.clientBrowserTabEmitter.sendMessage(dialog.remoteId, message.text);
   }
 }
 

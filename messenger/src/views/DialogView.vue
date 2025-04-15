@@ -5,7 +5,7 @@ import {useCoreStore} from "@/stores/core.ts";
 
 const route = useRoute();
 
-const test = ref('');
+const message = ref('');
 
 const coreStore = useCoreStore();
 
@@ -52,6 +52,18 @@ function formatTime(timestamp: number) {
   return new Date(timestamp).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
 }
 
+function sendMessage(message) {
+  coreStore.messages.push({
+    id: null,
+    dialogId: route.params.dialogId,
+    text: decodeURIComponent(message),
+    author: dialog.value.me.id,
+    timestamp: Date.now(),
+    status: 'sending',
+  });
+  coreStore.requestSendMessage(route.params.userId, route.params.accountId, route.params.dialogId, message);
+}
+
 </script>
 
 <template>
@@ -96,8 +108,8 @@ function formatTime(timestamp: number) {
       </div>
     </div>
     <div class="dialog__field">
-      <input v-model="test" placeholder="Please write the message"/>
-      <button @click="sendMessage">Send</button>
+      <input v-model="message" placeholder="Please write the message"/>
+      <button @click="sendMessage(message)">Send</button>
     </div>
   </div>
 </template>

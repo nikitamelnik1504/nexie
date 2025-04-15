@@ -1,7 +1,7 @@
 import axios from "axios";
-import DolphinProfile from "./Communicator/DolphinProfile.js";
+import DolphinProfile from "./DolphinProfile.js";
 
-class DolphinCommunicator {
+class DolphinClient {
 
   profiles = [];
 
@@ -69,4 +69,4 @@ class DolphinCommunicator {
 
 }
 
-export default DolphinCommunicator;
+export default DolphinClient;
