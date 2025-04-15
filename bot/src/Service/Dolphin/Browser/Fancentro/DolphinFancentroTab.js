@@ -2,6 +2,7 @@ import EventEmitter from 'node:events';
 import AuthorizationWatcher from "./Watcher/AuthorizationWatcher.js";
 import AccountWatcher from "./Watcher/AccountWatcher.js";
 import DialogsWatcher from "./Watcher/DialogsWatcher.js";
+import MessagesWatcher from "./Watcher/MessagesWatcher.js";
 
 class DolphinFancentroTab {
 
@@ -22,7 +23,8 @@ class DolphinFancentroTab {
   watchers = {
     authorization: null,
     account: null,
-    dialogs: null
+    dialogs: null,
+    messages: null
   };
 
   constructor(profile, browser) {
@@ -51,11 +53,15 @@ class DolphinFancentroTab {
     instance.watchers.authorization = await AuthorizationWatcher.init(instance.page, instance.cdp);
     instance.watchers.account = await AccountWatcher.init(instance.page, instance.cdp);
     instance.watchers.dialogs = await DialogsWatcher.init(instance.page, instance.cdp);
+    instance.watchers.messages = await MessagesWatcher.init(instance.page, instance.cdp);
 
     // Init event emitters.
     instance.emitter = new class extends EventEmitter {
       me() {
         return instance.watchers.dialogs.getMe();
+      }
+      loadMessages(dialogId) {
+        instance.watchers.messages.emit("loadMessages", dialogId);
       }
     }();
 
@@ -63,9 +69,9 @@ class DolphinFancentroTab {
       instance.emitter.emit('dialogs_update', instance.watchers.dialogs.getDialogs());
     });
 
-    // instance.watchers.messages.on("update", () => {
-    //   instance.emitter.emit('dialog_messages_update', instance.watchers.dialogs.getDialogs());
-    // });
+    instance.watchers.messages.on("update", () => {
+      instance.emitter.emit('dialog_messages_update', instance.watchers.messages.getMessages());
+    });
 
     return instance;
   }

@@ -21,6 +21,7 @@ class DialogsCollection {
   }
 
   getDialog(id) {
+    return this.collection.find((dialog) => dialog.id === id);
   }
 
   getAllDialogs() {

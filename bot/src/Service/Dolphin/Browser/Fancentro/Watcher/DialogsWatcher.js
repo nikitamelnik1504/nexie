@@ -96,9 +96,11 @@ class DialogsWatcher extends EventEmitter {
             if (data.startsWith('0{"sid"')) {
               ws.send('40/fc');
             } else if (data.startsWith('40/fc,{"sid"')) {
+
+              // @TODO VERY IMPORTANT TO FIX!!!
               ws.send('42/fc,' + JSON.stringify(["authentication", {
-                authKey: "ccbd708aef1b6a7326d26ec899886cbe",
-                sessionHash: "241ea36c_a33b7848"
+                authKey: "ccd8f6a04f835c2b0ba64ea1b2be5ac0",
+                sessionHash: "af49373d_0cb91437"
               }]));
             } else if (data.startsWith('42/fc,["authenticated"')) {
               window.ws = ws; // Store WebSocket globally
@@ -125,7 +127,7 @@ class DialogsWatcher extends EventEmitter {
     await instance.page.exposeFunction("isAllRoomsCompletelyLoaded", instance.isAllRoomsCompletelyLoaded.bind(instance));
     await instance.page.exposeFunction("addUserDataToRoom", instance.addUserDataToRoom.bind(instance));
     await instance.page.exposeFunction("watcherEmit", instance.emit.bind(instance));
-    await instance.page.evaluate(async () => {
+      await instance.page.evaluate(async () => {
       window.ws.addEventListener("message", async (event) => {
         const data = event.data;
         if (!data.includes("42/fc,")) return;

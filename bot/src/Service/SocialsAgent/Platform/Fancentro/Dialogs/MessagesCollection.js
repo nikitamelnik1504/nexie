@@ -2,6 +2,8 @@ class MessagesCollection {
 
   collection = [];
 
+  loaded = false;
+
   getLast() {
   }
 

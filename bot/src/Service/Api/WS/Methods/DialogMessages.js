@@ -22,16 +22,19 @@ class DialogMessages {
 
     const socialAgentAccount = socialsAgentService.getAccount(socialAgentId);
 
-    const socialAgentMessagesListener = await socialAgentAccount.getPlatformMessagesListener();
-    await socialAgentMessagesListener.messages(payload.data.dialogId);
+    const socialAgentAccountMessenger = await socialAgentAccount.getPlatformMessenger();
 
-    socialAgentMessagesListener.on('messages', (messages) => {
-      response.data.messages = messages;
-      response.data.accountId = socialAgentAccount.id;
-      response.data.dialogId = payload.data.dialogId;
+    socialAgentAccountMessenger.removeAllListeners('dialog_messages_update');
+    socialAgentAccountMessenger.on('dialog_messages_update', () => this.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService));
 
-      wsClient.send(JSON.stringify(response))
-    })
+    response.data.messages = socialAgentAccountMessenger.getMessages(payload.data.dialogId);
+    if (response.data.messages === false) {
+      return;
+    }
+    response.data.accountId = socialAgentAccount.id;
+    response.data.dialogId = payload.data.dialogId;
+
+    wsClient.send(JSON.stringify(response))
   }
 
 }

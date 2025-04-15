@@ -16,9 +16,18 @@ class Dialog {
 
     if (data.room.messages) {
       for (const message of data.room.messages) {
+        // @todo stupid shit. Replace in watcher.
+        if (message === null) {
+          continue;
+        }
+
         this.messages.addMessage(new Message(message));
       }
     }
+  }
+
+    getMessages() {
+    return this.messages;
   }
 
 }

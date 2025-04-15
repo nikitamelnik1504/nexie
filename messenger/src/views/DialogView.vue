@@ -84,8 +84,8 @@ function formatTime(timestamp: number) {
       <div v-if="messages.length !== 0" v-for="dialogMessage in reversedMessages" :key="dialogMessage.id"
            class="message"
            :class="{
-        'me': dialogMessage.author === account.remoteIdForDialogs,
-        'not-me': dialogMessage.author !== account.remoteIdForDialogs,
+        'me': dialogMessage.author === dialog.me.id,
+        'not-me': dialogMessage.author !== dialog.me.id,
       }"
       >
         <p>{{ dialogMessage.text }}</p>

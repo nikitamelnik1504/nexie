@@ -2,6 +2,7 @@ import EventEmitter from "node:events";
 import Me from "./Dialogs/Me.js";
 import DialogsCollection from "./Dialogs/DialogsCollection.js";
 import Dialog from "./Dialogs/Dialog.js";
+import Message from "./Dialogs/Message.js";
 
 /**
  * Central place where all messages related functionality located in.
@@ -38,25 +39,36 @@ class Messenger extends EventEmitter {
       instance.emit('dialogs_update');
     });
 
-    // platformMessengerRuntime.on('dialog_messages_update', (data) => {
-    //   for (const receivedDialog of data) {
-    //     this.dialogs.push({
-    //       id: receivedDialog.id,
-    //       timestamp: receivedDialog.timestamp,
-    //       userId: receivedDialog.userId,
-    //       userExternalId: receivedDialog.userExternalId,
-    //       userName: receivedDialog.userName,
-    //       lastMessage: receivedDialog.message,
-    //       messages: [],
-    //     });
-    //   }
-    // });
+    instance.runtime.on('dialog_messages_update', (data) => {
+      const dialog = instance.dialogs.getDialog(data.roomId);
+      if (dialog.messages.loaded === false) {
+        dialog.messages.collection = [];
+      }
+
+      for (const message of data.messages) {
+        dialog.messages.addMessage(new Message(message));
+      }
+
+      dialog.messages.loaded = true;
+      instance.emit('dialog_messages_update');
+    });
 
     return instance;
   }
 
   getDialogs() {
     return this.dialogs;
+  }
+
+  getMessages(dialogId) {
+    const dialog = this.dialogs.getDialog(dialogId);
+
+    if (dialog && dialog.getMessages().loaded === false) {
+      this.runtime.loadMessages(dialogId);
+      return false;
+    }
+
+    return dialog.getMessages();
   }
 }
 

@@ -85,7 +85,6 @@ export const useCoreStore = defineStore('core', () => {
             if (item.dialogs === null) {
               break;
             }
-            console.log(item);
             for (const dialog of item.dialogs.collection) {
               dialogs.value.push(<Dialog>{
                 accountId: item.accountId,
@@ -111,12 +110,12 @@ export const useCoreStore = defineStore('core', () => {
         case 'dialog_messages':
           messages.value.length = 0;
 
-          for (const message of data.data.messages) {
+          for (const message of data.data.messages.collection) {
             messages.value.push(<Message>{
               id: message.id,
               dialogId: data.data.dialogId,
-              text: decodeURIComponent(message.data.text),
-              author: message.authorId,
+              text: decodeURIComponent(message.text),
+              author: message.from,
               timestamp: message.timestamp,
             })
           }
