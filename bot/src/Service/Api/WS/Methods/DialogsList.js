@@ -18,8 +18,8 @@ class DialogsList {
 
       const socialAgentAccount = socialsAgentService.getAccount(socialAgentId);
       const socialAgentAccountMessenger = await socialAgentAccount.getPlatformMessenger();
-      socialAgentAccountMessenger.removeAllListeners('dialogs_update');
-      socialAgentAccountMessenger.on('dialogs_update', () => this.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService));
+      socialAgentAccountMessenger.removeAllListeners('dialogs_list_loaded'); // @todo Telegram multi-visitors impossibility risk.
+      socialAgentAccountMessenger.on('dialogs_list_loaded', () => this.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService));
 
       try {
         responseItem.dialogs = socialAgentAccountMessenger.getDialogs();

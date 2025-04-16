@@ -5,6 +5,8 @@ import Member from "./Member.js";
 
 class Dialog {
 
+  _collection;
+
   id;
   remoteId;
   messages;
@@ -16,6 +18,7 @@ class Dialog {
     this.member = new Member(data);
 
     this.messages = new MessagesCollection();
+    this.messages._dialog = this;
 
     if (data.room.messages) {
       for (const message of data.room.messages) {
@@ -31,6 +34,15 @@ class Dialog {
 
   getMessages() {
     return this.messages;
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      remoteId: this.remoteId,
+      messages: this.messages,
+      member: this.member,
+    };
   }
 
 }

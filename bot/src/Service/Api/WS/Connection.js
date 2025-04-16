@@ -1,6 +1,7 @@
 import DialogsList from "./Methods/DialogsList.js";
 import DialogMessages from "./Methods/DialogMessages.js";
 import DialogSendMessage from "./Methods/DialogSendMessage.js";
+import DialogMessageNew from "./Methods/DialogMessageNew.js";
 
 class Connection {
 
@@ -38,6 +39,7 @@ class Connection {
       switch (payload.type) {
         case 'dialogs_list':
           DialogsList.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
+          DialogMessageNew.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
           break;
         case 'dialog_messages':
           DialogMessages.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);

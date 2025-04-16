@@ -27,7 +27,7 @@ class DialogMessages {
     socialAgentAccountMessenger.removeAllListeners('dialog_messages_update');
     socialAgentAccountMessenger.on('dialog_messages_update', () => this.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService));
 
-    response.data.messages = socialAgentAccountMessenger.getMessages(payload.data.dialogId);
+    response.data.messages = socialAgentAccountMessenger.getDialogMessages(payload.data.dialogId);
     if (response.data.messages === false) {
       return;
     }

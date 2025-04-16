@@ -122,6 +122,16 @@ export const useCoreStore = defineStore('core', () => {
             })
           }
           break;
+        case 'dialog_message_new':
+          messages.value.push(<Message>{
+            id: data.data.message.id,
+            dialogId: data.data.dialogId,
+            text: decodeURIComponent(data.data.message.text),
+            author: data.data.message.from,
+            timestamp: data.data.message.timestamp,
+            status: 'sent',
+          })
+          break;
       }
     }
   }

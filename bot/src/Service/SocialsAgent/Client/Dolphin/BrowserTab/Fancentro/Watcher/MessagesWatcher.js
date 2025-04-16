@@ -5,7 +5,7 @@ class MessagesWatcher extends EventEmitter {
   page;
   cdpSession;
 
-  messages = [];
+  room = {};
 
   constructor(page, cdpSession) {
     super();
@@ -22,7 +22,7 @@ class MessagesWatcher extends EventEmitter {
   }
 
   static async extendWsConnection(instance) {
-    await instance.page.exposeFunction("addMessages", instance.addMessages.bind(instance));
+    await instance.page.exposeFunction("setRoom", instance.setRoom.bind(instance));
     await instance.page.exposeFunction("addMessage", instance.addMessage.bind(instance));
     await instance.page.exposeFunction("messagesWatcherEmit", instance.emit.bind(instance));
     await instance.page.evaluate(async () => {
@@ -34,7 +34,7 @@ class MessagesWatcher extends EventEmitter {
         switch (parsed[0]) {
           // @todo Implement buckets system.
           case 'room_buckets':
-            await window.addMessages(parsed[1].buckets[0]);
+            await window.setRoom(parsed[1].buckets[0]);
             window.messagesWatcherEmit("update");
             break;
           case 'message':
@@ -76,20 +76,20 @@ class MessagesWatcher extends EventEmitter {
     })
   }
 
-  addMessages(data) {
-    this.messages = data;
+  setRoom(data) {
+    this.room = data;
   }
 
   addMessage(data) {
-    this.messages.push(data);
+    this.room.messages.push(data);
   }
 
-  getMessages() {
-    return this.messages;
+  getRoom() {
+    return this.room;
   }
 
   getMessage(id) {
-    return this.messages.find(message => message.id === id);
+    return this.room.messages.find(message => message.id === id);
   }
 
 }

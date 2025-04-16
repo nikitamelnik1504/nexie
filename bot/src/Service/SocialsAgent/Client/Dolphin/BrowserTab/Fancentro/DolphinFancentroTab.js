@@ -73,11 +73,11 @@ class DolphinFancentroTab {
     });
 
     instance.watchers.messages.on("update", () => {
-      instance.eventEmitter.emit('dialog_messages_update', instance.watchers.messages.getMessages());
+      instance.eventEmitter.emit('dialog_messages_update', instance.watchers.messages.getRoom());
     });
 
     instance.watchers.messages.on("new", (messageId) => {
-      instance.eventEmitter.emit('dialog_messages_new', instance.watchers.messages.getMessage(messageId));
+      instance.eventEmitter.emit('dialog_message_new', instance.watchers.messages.getMessage(messageId));
     });
 
     return instance;

@@ -2,6 +2,8 @@ import {v4 as uuid} from 'uuid';
 
 class Message {
 
+  _collection;
+
   id;
   remoteId = null;
   timestamp = null;
@@ -27,6 +29,17 @@ class Message {
     if (data.authorId !== undefined) {
       this.from = data.authorId;
     }
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      remoteId: this.remoteId,
+      timestamp: this.timestamp,
+      text: this.text,
+      edited: this.edited,
+      from: this.from,
+    };
   }
 
 }

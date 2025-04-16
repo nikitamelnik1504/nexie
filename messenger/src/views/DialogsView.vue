@@ -3,6 +3,9 @@ import {useRoute} from "vue-router";
 import {computed, ref, watch} from "vue";
 import {useCoreStore} from "@/stores/core.ts";
 
+const appVersion = __APP_VERSION__;
+const socialsAgentVersion = '0.2.0';
+
 const route = useRoute();
 
 const coreStore = useCoreStore();
@@ -47,7 +50,9 @@ function formatTime(timestamp: number) {
 <template>
   <div class="dialogs">
     <header>
-      <h1>Messages</h1>
+      <h1 class="mb-0">Messages</h1>
+      <h5>Socials Agent Version: {{ socialsAgentVersion }}</h5>
+      <h5>Client Version: {{ appVersion }}</h5>
     </header>
 
     <div class="dialogs__list">

@@ -13,9 +13,10 @@ class DialogsCollection {
 
     if (matchedDialogIndex !== -1) {
       this.collection[matchedDialogIndex] = dialog;
+    } else {
+      dialog._collection = this;
+      this.collection.push(dialog);
     }
-
-    this.collection.push(dialog);
 
     return dialog;
   }
@@ -29,7 +30,6 @@ class DialogsCollection {
   }
 
   getAllDialogs() {
-
   }
 
   getMembers() {

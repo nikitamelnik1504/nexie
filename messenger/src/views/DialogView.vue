@@ -52,16 +52,17 @@ function formatTime(timestamp: number) {
   return new Date(timestamp).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
 }
 
-function sendMessage(message) {
+function sendMessage() {
   coreStore.messages.push({
     id: null,
     dialogId: route.params.dialogId,
-    text: decodeURIComponent(message),
+    text: decodeURIComponent(message.value),
     author: dialog.value.me.id,
     timestamp: Date.now(),
     status: 'sending',
   });
-  coreStore.requestSendMessage(route.params.userId, route.params.accountId, route.params.dialogId, message);
+  coreStore.requestSendMessage(route.params.userId, route.params.accountId, route.params.dialogId, message.value);
+  message.value = '';
 }
 
 </script>
@@ -109,7 +110,7 @@ function sendMessage(message) {
     </div>
     <div class="dialog__field">
       <input v-model="message" placeholder="Please write the message"/>
-      <button @click="sendMessage(message)">Send</button>
+      <button @click="sendMessage" :disabled="!message" :class="{'v-btn--disabled': !message}">Send</button>
     </div>
   </div>
 </template>

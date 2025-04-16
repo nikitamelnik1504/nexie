@@ -1,8 +1,8 @@
 import EventEmitter from "node:events";
-import Me from "./Dialogs/Me.js";
-import DialogsCollection from "./Dialogs/DialogsCollection.js";
-import Dialog from "./Dialogs/Dialog.js";
-import Message from "./Dialogs/Message.js";
+import Me from "./Dialog/Me.js";
+import DialogsCollection from "./Dialog/DialogsCollection.js";
+import Dialog from "./Dialog/Dialog.js";
+import Message from "./Dialog/Message.js";
 
 /**
  * Central place where all messages related functionality located in.
@@ -15,20 +15,20 @@ class Messenger extends EventEmitter {
 
   authorizationStatus;
 
-  clientBrowserTabEmitter;
+  clientBrowserTabEventEmitter;
 
-  static async init(tab, username) {
+  static async init(clientBrowserTab, username) {
     const instance = new this();
 
-    instance.authorizationStatus = await tab.getAuthorizationStatus(username);
+    instance.authorizationStatus = await clientBrowserTab.getAuthorizationStatus(username);
     // if (this.platformConnectionStatus !== 1) {
     //   return;
     // }
-    instance.clientBrowserTabEmitter = tab.getEventEmitter();
+    instance.clientBrowserTabEventEmitter = clientBrowserTab.getEventEmitter();
 
-    instance.clientBrowserTabEmitter.on('dialogs_update', (data) => {
+    instance.clientBrowserTabEventEmitter.on('dialogs_update', (data) => {
       if (instance.dialogs === null) {
-        const me = new Me({...instance.clientBrowserTabEmitter.me(), username});
+        const me = new Me({...instance.clientBrowserTabEventEmitter.me(), username});
         instance.dialogs = new DialogsCollection(me);
       }
 
@@ -36,14 +36,11 @@ class Messenger extends EventEmitter {
         instance.dialogs.addDialog(new Dialog(receivedDialog));
       }
 
-      instance.emit('dialogs_update');
+      instance.emit('dialogs_list_loaded');
     });
 
-    instance.clientBrowserTabEmitter.on('dialog_messages_update', (data) => {
+    instance.clientBrowserTabEventEmitter.on('dialog_messages_update', (data) => {
       const dialog = instance.dialogs.getDialogByRemoteId(data.roomId);
-      if (dialog.messages.loaded === false) {
-        dialog.messages.collection = [];
-      }
 
       for (const message of data.messages) {
         dialog.messages.addMessage(new Message(message));
@@ -53,14 +50,22 @@ class Messenger extends EventEmitter {
       instance.emit('dialog_messages_update');
     });
 
-    instance.clientBrowserTabEmitter.on('dialog_messages_new', (data) => {
+    instance.clientBrowserTabEventEmitter.on('dialog_message_new', (data) => {
       const dialog = instance.dialogs.getDialogByRemoteId(data.room);
 
-      const messages = dialog.getMessages();
-      messages.collection.find(message => '');
+      if (data.authorId !== instance.dialogs.me.id) {
+        const message = new Message(data);
+        dialog.messages.addMessage(message);
+        instance.emit("dialog_message_new", message);
+      } else {
+        const message = dialog.getMessages().getFirstMatchedUnsentMessageByText(data.data.text);
+        message.remoteId = data.id;
+        message.timestamp = data.timestamp;
+        message.edited = data.edited;
 
-      dialog.messages.loaded = true;
-      instance.emit('dialog_messages_update');
+        // @todo Don't use object instances from Messenger/Dialog. Just JSON api needs to know. Or not?
+        instance.emit('dialog_message_sent', message);
+      }
     });
 
     return instance;
@@ -70,25 +75,24 @@ class Messenger extends EventEmitter {
     return this.dialogs;
   }
 
-  getMessages(dialogId) {
+  getDialogMessages(dialogId) {
     const dialog = this.dialogs.getDialogById(dialogId);
 
     if (dialog && dialog.getMessages().loaded === false) {
-      this.clientBrowserTabEmitter.loadMessages(dialog.remoteId);
+      this.clientBrowserTabEventEmitter.loadMessages(dialog.remoteId);
       return false;
     }
 
     return dialog.getMessages();
   }
 
-  sendMessage(data) {
+  sendDialogMessage(data) {
     const dialog = this.dialogs.getDialogById(data.dialogId);
     const messages = dialog.getMessages();
-    const message = new Message(data.message);
-    message.sent = false;
+    const message = new Message({...data.message, authorId: this.dialogs.me.id});
 
     messages.addMessage(message);
-    this.clientBrowserTabEmitter.sendMessage(dialog.remoteId, message.text);
+    this.clientBrowserTabEventEmitter.sendMessage(dialog.remoteId, message.text);
   }
 }
 

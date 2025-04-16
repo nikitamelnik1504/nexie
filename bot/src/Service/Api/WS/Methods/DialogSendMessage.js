@@ -18,14 +18,14 @@ class DialogSendMessage {
 
     const socialAgentAccountMessenger = await socialAgentAccount.getPlatformMessenger();
 
-    socialAgentAccountMessenger.sendMessage(payload.data);
+    socialAgentAccountMessenger.sendDialogMessage(payload.data);
 
-    socialAgentAccountMessenger.removeAllListeners('dialog_send_message');
-    socialAgentAccountMessenger.on('dialog_send_message', () => () => {
+    socialAgentAccountMessenger.removeAllListeners('dialog_message_sent');
+    socialAgentAccountMessenger.on('dialog_message_sent', (message) => {
       response.data.accountId = socialAgentAccount.id;
       response.data.dialogId = payload.data.dialogId;
-
-      wsClient.send(JSON.stringify(response))
+      response.data.message = message;
+      wsClient.send(JSON.stringify(response));
     });
   }
 
