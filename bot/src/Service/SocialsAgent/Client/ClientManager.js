@@ -9,7 +9,7 @@ class ClientManager {
   }
 
   static init() {
-    return new ClientManager(new DolphinService());
+    return new this(new DolphinService());
   }
 
   getDolphinService() {

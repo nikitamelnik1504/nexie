@@ -81,6 +81,10 @@ class MessagesWatcher extends EventEmitter {
   }
 
   addMessage(data) {
+    if (this.room.messages === undefined) {
+      this.room.messages = [];
+    }
+
     this.room.messages.push(data);
   }
 
