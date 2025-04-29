@@ -29,6 +29,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  .notification-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+  }
+
   h1 {
     font-size: 21px;
   }

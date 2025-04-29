@@ -106,9 +106,9 @@ export const useCoreStore = defineStore('core', () => {
                   id: item.dialogs.me.id,
                 },
                 last_message: {
-                  text: decodeURIComponent(dialog.messages.collection[0].text),
-                  author: dialog.messages.collection[0].from,
-                  timestamp: dialog.messages.collection[0].timestamp,
+                  text: decodeURIComponent(dialog.messages.collection[dialog.messages.collection.length - 1].text),
+                  author: dialog.messages.collection[dialog.messages.collection.length - 1].from,
+                  timestamp: dialog.messages.collection[dialog.messages.collection.length - 1].timestamp,
                 },
                 new_messages_count: 0,
               })
@@ -130,6 +130,11 @@ export const useCoreStore = defineStore('core', () => {
           }
           break;
         case 'dialog_message_new':
+          const dialog = dialogs.value.find((dialog) => dialog.id === data.data.dialogId && dialog.accountId === data.data.accountId);
+          dialog.last_message.text = decodeURIComponent(data.data.message.text);
+          dialog.last_message.author = data.data.message.from;
+          dialog.last_message.timestamp = data.data.message.timestamp;
+
           messages.value.push(<Message>{
             id: data.data.message.id,
             dialogId: data.data.dialogId,
@@ -146,7 +151,7 @@ export const useCoreStore = defineStore('core', () => {
   const user = (userId: string) => computed(() => users.value.find(user => user.id === userId));
 
   function addNotification(type: string, message: string, pinned: boolean) {
-    notifications.value.push(<Notification>{ type, message, pinned});
+    notifications.value.push(<Notification>{type, message, pinned});
     if (!pinned) {
       setTimeout(() => {
         removeNotification(type, message);
