@@ -1,8 +1,12 @@
 import {ref} from 'vue'
 import {defineStore} from 'pinia'
 
+import {useCoreStore} from "@/stores/core.ts";
+
 export const useApiStore = defineStore('api', () => {
   const websocketConnections = ref({});
+
+  const coreStore = useCoreStore();
 
   /**
    * Establishes or retrieves a WebSocket connection for a specific userId.
@@ -23,6 +27,7 @@ export const useApiStore = defineStore('api', () => {
         ws.onclose = (event) => {
           console.log(`WebSocket connection closed for user ${userId}`, event.reason);
           delete websocketConnections.value[userId];
+          coreStore.addNotification('error', 'Lost connection to the SEM SocialAgents service', true);
         };
 
         ws.onerror = (error) => {

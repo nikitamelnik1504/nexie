@@ -50,9 +50,9 @@ function formatTime(timestamp: number) {
 <template>
   <div class="dialogs">
     <header>
-      <h1 class="mb-0">Messages</h1>
-      <h5>Socials Agent Version: {{ socialsAgentVersion }}</h5>
-      <h5>Client Version: {{ appVersion }}</h5>
+      <h1 class="my-0">{{ route.params.userId }}</h1>
+      <h5>SEM SocialAgents Version: {{ socialsAgentVersion }}</h5>
+      <h5>SEM Client Version: {{ appVersion }}</h5>
     </header>
 
     <div class="dialogs__list">

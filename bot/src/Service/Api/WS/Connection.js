@@ -1,7 +1,7 @@
-import DialogsList from "./Methods/DialogsList.js";
-import DialogMessages from "./Methods/DialogMessages.js";
-import DialogSendMessage from "./Methods/DialogSendMessage.js";
-import DialogMessageNew from "./Methods/DialogMessageNew.js";
+import DialogsList from "./Method/DialogsList.js";
+import DialogMessages from "./Method/DialogMessages.js";
+import DialogSendMessage from "./Method/DialogSendMessage.js";
+import DialogMessageNew from "./Method/DialogMessageNew.js";
 
 class Connection {
 

@@ -45,11 +45,18 @@ type Message = {
   status: string;
 };
 
+type Notification = {
+  type: string;
+  message: string;
+  pinned: boolean;
+}
+
 export const useCoreStore = defineStore('core', () => {
   const users: Ref<Array<User>> = ref([]);
   const accounts: Ref<Array<Account>> = ref([]);
   const dialogs: Ref<Array<Dialog>> = ref([]);
   const messages: Ref<Array<Message>> = ref([]);
+  const notifications: Ref<Array<Notification>> = ref([]);
 
   const apiStore = useApiStore();
 
@@ -138,6 +145,23 @@ export const useCoreStore = defineStore('core', () => {
 
   const user = (userId: string) => computed(() => users.value.find(user => user.id === userId));
 
+  function addNotification(type: string, message: string, pinned: boolean) {
+    notifications.value.push(<Notification>{ type, message, pinned});
+    if (!pinned) {
+      setTimeout(() => {
+        removeNotification(type, message);
+      }, 5000);
+    }
+  }
+
+  function removeNotification(type: string, message: string) {
+    const notification = notifications.value.find((notification) => notification.type === type && notification.message === message);
+    const notificationArrayIndex = notifications.value.indexOf(notification);
+    if (notificationArrayIndex > -1) {
+      notifications.value.splice(notificationArrayIndex, 1);
+    }
+  }
+
   function addUser(userId: string) {
     if (users.value.find(user => user.id === userId)) {
       return;
@@ -208,6 +232,9 @@ export const useCoreStore = defineStore('core', () => {
     getMessages,
     requestDialogs,
     requestMessages,
-    requestSendMessage
+    requestSendMessage,
+    notifications,
+    addNotification,
+    removeNotification
   }
 });
