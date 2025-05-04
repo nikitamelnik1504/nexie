@@ -11,44 +11,11 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
     4: 'Profile is not found'
   }
 
-  // async getPlatformDialogsUserId() {
-  //   // if (await this.getPlatformConnectionStatus() !== 1) {
-  //   //   return null;
-  //   // }
-  //
-  //   switch (this.clientSettings.type) {
-  //     case 'dolphin':
-  //       try {
-  //         const dolphinCommunicator = await this.service.getDolphinService().connect(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
-  //         const dolphinProfile = await dolphinCommunicator.profile(this.clientSettings.params.profile);
-  //         return await (await (await dolphinProfile.openBrowser()).openTab('fancentro')).getAccountUserId();
-  //       } catch (error) {
-  //         console.log(error);
-  //         return false;
-  //       }
-  //   }
-  // }
-
   async getPlatformConnectionStatus() {
     return this.platformConnectionStatus;
   }
 
-  // async getPlatformMessagesListener() {
-  //   return !this.platformMessagesListener ? this.platformMessagesListener = await (async () => {
-  //     switch (this.clientSettings.type) {
-  //       case 'dolphin':
-  //         const dolphinCommunicator = await this.service.getDolphinService().connect(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
-  //         const dolphinProfile = await dolphinCommunicator.profile(this.clientSettings.params.profile);
-  //         return new MessagesListener(this.dialogs, await (await (await dolphinProfile.openBrowser()).openTab('fancentro')).getDialogMessagesLive());
-  //     }
-  //   })() : this.platformMessagesListener;
-  // }
-
   async startPlatformConnection() {
-    if (!(await this.getClientConnectionStatus())) {
-      throw new Error('Error happened while establishing connection to the client.');
-    }
-
     let platformTab;
     switch (this.clientSettings.type) {
       case 'dolphin':
@@ -75,6 +42,31 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
 
     this.messenger = await Messenger.init(platformTab, this.platformSettings.username);
     this.platformConnectionStatus = 1;
+  }
+
+  async stopPlatformConnection() {
+    switch (this.clientSettings.type) {
+      case 'dolphin':
+        const dolphinProfile = await (await (await this.getClient()).profile(this.clientSettings.params.profile));
+        if (dolphinProfile.running === false) {
+          return;
+        }
+
+        if (dolphinProfile.wsEndpoint === null || dolphinProfile.port === null) {
+          await dolphinProfile.stop();
+          this.platformConnectionStatus = 0;
+          return;
+        }
+
+        const dolphinBrowser = await dolphinProfile.openBrowser();
+        await dolphinBrowser.closeTab(this.platformSettings.name);
+        if (!dolphinBrowser.isAnyTabOpen()) {
+          dolphinProfile.closeBrowser();
+          await dolphinProfile.stop();
+          this.platformConnectionStatus = 0;
+        }
+        break;
+    }
   }
 
 }

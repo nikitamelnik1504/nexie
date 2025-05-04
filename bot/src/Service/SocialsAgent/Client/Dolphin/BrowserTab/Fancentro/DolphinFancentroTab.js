@@ -95,6 +95,11 @@ class DolphinFancentroTab {
     return this.eventEmitter;
   }
 
+  async close() {
+    await this.cdp.detach();
+    return this.page.close();
+  }
+
 }
 
 export default DolphinFancentroTab;

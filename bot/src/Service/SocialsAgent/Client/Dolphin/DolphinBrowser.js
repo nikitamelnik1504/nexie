@@ -41,6 +41,32 @@ class DolphinBrowser {
     return tab;
   }
 
+  async closeTab(siteName) {
+    let tabInstances = this.tabs.filter(tab => {
+        if (siteName === 'fancentro') {
+          return tab instanceof DolphinFancentroTab;
+        }
+      }
+    );
+
+    if (tabInstances.length === 0) {
+      return;
+    }
+
+    const tabInstance = tabInstances[0];
+
+    await tabInstance.close();
+
+    const index = this.tabs.indexOf(tabInstance);
+    if (index > -1) {
+      this.tabs.splice(index, 1);
+    }
+  }
+
+  isAnyTabOpen() {
+    return this.tabs.length > 0;
+  }
+
 }
 
 export default DolphinBrowser;

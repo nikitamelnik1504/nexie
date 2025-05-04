@@ -70,7 +70,11 @@ class DolphinProfile {
     return await axios.post(`https://sync.anty-api.com/?actionType=importCookies&browserProfileId=` + this.id, raw, {headers: {'Authorization': `Bearer ${this.communicator.authToken}`, 'Content-Type': 'application/json'}});
   }
 
-  stop() {
+  async stop() {
+    await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/stop`);
+    this.running = false;
+    this.port = null;
+    this.wsEndpoint = null;
   }
 
   async openBrowser() {
@@ -87,6 +91,12 @@ class DolphinProfile {
     })
 
     return this.browser = new DolphinBrowser(this, browser);
+  }
+
+  closeBrowser() {
+    if (this.browser !== null) {
+      this.browser = null;
+    }
   }
 
 }

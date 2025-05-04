@@ -1,5 +1,6 @@
 import { expect, jest, test, describe, beforeEach } from '@jest/globals';
 import StartCommand from "../../../../src/Service/TelegramBot/Command/StartCommand.js";
+import StartScene from "../../../../src/Service/TelegramBot/Scene/StartScene/StartScene.js";
 
 const mockTelegramBotContext = {
   reply: jest.fn(),
@@ -20,20 +21,20 @@ describe('StartCommand', () => {
 
   beforeEach(() => {
     const mockGetUser = jest.fn();
-    mockTelegramBotService.getStorage.mockReturnValue({ getUser: mockGetUser });
+    mockTelegramBotService.getStorage.mockReturnValue({ getUserByUsername: mockGetUser });
     startCommand = new StartCommand(mockTelegramBotService, mockTelegramBotContext);
     jest.clearAllMocks();
   });
 
   test('should reply with an error message if no user is found', async () => {
-    mockTelegramBotService.getStorage().getUser.mockResolvedValue(false);
+    mockTelegramBotService.getStorage().getUserByUsername.mockResolvedValue(false);
     await startCommand.run();
     expect(mockTelegramBotContext.reply).toHaveBeenCalledWith('You do not have permission to use this command.');
     expect(mockTelegramBotContext.scene.enter).not.toHaveBeenCalled();
   });
 
   test('should reply with an error message if found user is not admin or default role', async () => {
-    mockTelegramBotService.getStorage().getUser.mockResolvedValue({ role: 'editor' });
+    mockTelegramBotService.getStorage().getUserByUsername.mockResolvedValue({ role: 'editor' });
     await startCommand.run();
     expect(mockTelegramBotContext.reply).toHaveBeenCalledWith('You do not have permission to use this command.');
     expect(mockTelegramBotContext.scene.enter).not.toHaveBeenCalled();
@@ -43,9 +44,9 @@ describe('StartCommand', () => {
     { role: 'admin', roleDescription: 'admin user' },
     { role: 'default', roleDescription: 'default user' }
   ])('should enter the StartScene if user is $roleDescription', async ({ role }) => {
-    mockTelegramBotService.getStorage().getUser.mockResolvedValueOnce({ role });
+    mockTelegramBotService.getStorage().getUserByUsername.mockResolvedValueOnce({ role });
     await startCommand.run();
     expect(mockTelegramBotContext.reply).not.toHaveBeenCalled();
-    expect(mockTelegramBotContext.scene.enter).toHaveBeenCalledWith('start');
+    expect(mockTelegramBotContext.scene.enter).toHaveBeenCalledWith(StartScene.id);
   });
 });

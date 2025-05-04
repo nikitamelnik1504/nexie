@@ -114,6 +114,9 @@ class SocialsAgentAccountBase {
     }
   }
 
+  async stopPlatformConnection() {
+  }
+
 }
 
 export default SocialsAgentAccountBase;

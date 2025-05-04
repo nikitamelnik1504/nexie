@@ -1,7 +1,7 @@
 class DialogSendMessage {
 
   static async run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService) {
-    const telegramUserData = await (await telegramBotService.getStorage()).getUser(telegramUserId);
+    const telegramUserData = await (await telegramBotService.getStorage()).getUserByUsername(telegramUserId);
 
     const response = {
       type: "dialog_send_message",

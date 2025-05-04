@@ -15,7 +15,7 @@ class Connection {
     const requestUrl = new URL(request.url, `https://${request.headers.host}`);
     const telegramUserId = requestUrl.searchParams.get('userId');
 
-    const telegramUserData = await (await telegramBotService.getStorage()).getUser(telegramUserId);
+    const telegramUserData = await (await telegramBotService.getStorage()).getUserByUsername(telegramUserId);
     if (!telegramUserData) {
       return wsClient.close();
     }

@@ -23,7 +23,7 @@ class TelegramBotStorage {
     return new this(path);
   }
 
-  async getUser(username) {
+  async getUserByUsername(username) {
     const db = JSON.parse(await fs.readFile(this.path + '/telegramUsers.json', {'encoding': 'utf8'}));
     const match = db.users.filter(item => item.username === username);
 
@@ -31,7 +31,7 @@ class TelegramBotStorage {
   }
 
   async addUser(username, role) {
-    if (await this.getUser(username)) {
+    if (await this.getUserByUsername(username)) {
       throw new Error('User already exists');
     }
 
@@ -46,7 +46,7 @@ class TelegramBotStorage {
   }
 
   async updateUser(username, data = {}) {
-    if (!(await this.getUser(username))) {
+    if (!(await this.getUserByUsername(username))) {
       throw new Error('User is not exist');
     }
 
@@ -108,11 +108,25 @@ class TelegramBotStorage {
   }
 
   async setUserAccessToSocialAgentAccount(username, socialAgentAccountId) {
-    const user = await this.getUser(username);
+    const user = await this.getUserByUsername(username);
     return await this.updateUser(username, {social_agent_accounts: [...user.social_agent_accounts, socialAgentAccountId]})
   }
 
+  async removeUserAccessToSocialAgentAccount(username, socialAgentAccountId) {
+    const user = await this.getUserByUsername(username);
+    return await this.updateUser(username, {social_agent_accounts: user.social_agent_accounts.filter(id => id !== socialAgentAccountId)})
+  }
+
+  async getAllUsersWithAccessToSocialAgentAccount(socialAgentAccountId) {
+    const db = JSON.parse(await fs.readFile(this.path + '/telegramUsers.json', {encoding: 'utf8'}));
+    return db.users.filter(user =>
+      user.social_agent_accounts && user.social_agent_accounts.some(id => id === socialAgentAccountId)
+    );
+  }
+
+
   removeUser() {
+
   }
 
 }
