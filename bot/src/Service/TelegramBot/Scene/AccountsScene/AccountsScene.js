@@ -26,7 +26,12 @@ class AccountsScene extends TelegramBotSceneBase {
 
   static async enterCommand(service, context) {
     await new AccountsListCommand(service, context).run();
-    await context.reply('Choose option', Markup.keyboard(['Back', 'Refresh', 'Add Account']).resize().oneTime());
+    const user = await (await service.getStorage()).getUserByUsername(context.chat.username);
+
+    const replyKeyboardButtonsAdmin = ['Back', 'Refresh', 'Add Account'];
+    const replyKeyboardButtonsDefault = ['Back', 'Refresh'];
+
+    await context.reply('Choose option', Markup.keyboard(user.role === 'admin' ? replyKeyboardButtonsAdmin : replyKeyboardButtonsDefault).resize().oneTime());
   }
 
   static async backCommand(service, context) {
@@ -45,6 +50,11 @@ class AccountsScene extends TelegramBotSceneBase {
   }
 
   static async addAccountCommand(service, context) {
+    const user = await (await service.getStorage()).getUserByUsername(context.chat.username);
+    if (user.role !== 'admin') {
+      return context.reply('You are not allowed to add accounts.');
+    }
+
     await context.scene.enter(AddAccountScene.id, {from: AccountsScene.id});
   }
 
