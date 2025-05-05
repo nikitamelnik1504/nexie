@@ -24,7 +24,8 @@ class AccountsListCommand extends TelegramBotCommandBase {
     for (const socialAgent of accounts) {
       const message = {text: null, keyboard: null};
 
-      const agentPlatformConnectionStatus = await socialAgent.getPlatformConnectionStatus();
+      const accountClientConnectionStatus = await socialAgent.getClientConnectionStatus();
+      const accountPlatformConnectionStatus = await socialAgent.getPlatformConnectionStatus();
 
       let accountInfo;
       if (user.role === 'admin') {
@@ -36,9 +37,10 @@ class AccountsListCommand extends TelegramBotCommandBase {
         accountInfo = {
           'Account': (await storage.getSocialAgentAccount({id: socialAgent.id})).name,
           'Client': socialAgent.getClientType(),
-          'Client Connection Status': await socialAgent.getClientConnectionStatus() ? 'Connected' : 'Not Connected',
+          'Client Status': !!(await socialAgent.getClient()) ? 'Connected' : 'Not Connected',
+          'Client Connection Status': accountClientConnectionStatus ? socialAgent.constructor.CLIENT_CONNECTION_STATUS[accountClientConnectionStatus] : 'Account is not running',
           'Platform': socialAgent.getPlatformType(),
-          'Platform Connection Status': agentPlatformConnectionStatus === null ? 'Account is not running' : socialAgent.constructor.PLATFORM_CONNECTION_STATUS[agentPlatformConnectionStatus],
+          'Platform Connection Status': accountPlatformConnectionStatus === null ? 'Account is not running' : socialAgent.constructor.PLATFORM_CONNECTION_STATUS[accountPlatformConnectionStatus],
           'Username': socialAgent.getPlatformUsername(),
           'Login': socialAgent.getPlatformLogin(),
           'Password': socialAgent.getPlatformPassword(),
@@ -48,9 +50,10 @@ class AccountsListCommand extends TelegramBotCommandBase {
         accountInfo = {
           'Account': (await storage.getSocialAgentAccount({id: socialAgent.id})).name,
           'Client': socialAgent.getClientType(),
-          'Client Connection Status': await socialAgent.getClientConnectionStatus() ? 'Connected' : 'Not Connected',
+          'Client Status': !!(await socialAgent.getClient()) ? 'Connected' : 'Not Connected',
+          'Client Connection Status': accountClientConnectionStatus ? socialAgent.constructor.CLIENT_CONNECTION_STATUS[accountClientConnectionStatus] : 'Account is not running',
           'Platform': socialAgent.getPlatformType(),
-          'Platform Connection Status': agentPlatformConnectionStatus === null ? 'Account is not running' : socialAgent.constructor.PLATFORM_CONNECTION_STATUS[agentPlatformConnectionStatus],
+          'Platform Connection Status': accountPlatformConnectionStatus === null ? 'Account is not running' : socialAgent.constructor.PLATFORM_CONNECTION_STATUS[accountPlatformConnectionStatus],
           'Username': socialAgent.getPlatformUsername(),
         };
       }
@@ -63,7 +66,7 @@ class AccountsListCommand extends TelegramBotCommandBase {
       message.text = accountInfoString;
 
       if (user.role === 'admin') {
-        switch (agentPlatformConnectionStatus) {
+        switch (accountPlatformConnectionStatus) {
           case null:
             message.keyboard = Markup.inlineKeyboard(
               [

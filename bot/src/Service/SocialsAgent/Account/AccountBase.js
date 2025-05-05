@@ -14,6 +14,17 @@ class AccountBase {
     username: null
   };
 
+  // @todo Implement dolphin client hierarchy.
+  static CLIENT_CONNECTION_STATUS = {
+    0: 'Profile is not found',
+    1: 'Profile is failed to start',
+    2: 'Profile is running out of bot',
+    3: 'Profile is successfully started'
+  };
+
+  clientConnection;
+
+  clientConnectionStatus = null;
   platformConnectionStatus = null;
 
   messenger = null;
@@ -90,31 +101,67 @@ class AccountBase {
   }
 
   async getClientConnectionStatus() {
-    try {
-      return !!(await this.getClient());
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
+    return this.clientConnectionStatus;
   }
 
   async getPlatformConnectionStatus() {
-    return this.getClientConnectionStatus();
+    return this.platformConnectionStatus;
   }
 
   async getPlatformMessenger() {
     return this.messenger;
   }
 
-  async startPlatformConnection() {
+  async startClientConnection() {
     switch (this.clientSettings.type) {
       case 'dolphin':
-        await (await (await this.getClient()).profile(this.clientSettings.params.profile)).start();
-        return true;
+        const dolphinProfile = await (await this.getClient()).profile(this.clientSettings.params.profile);
+
+        if (!dolphinProfile) {
+          this.clientConnectionStatus = 0;
+          throw new Error(AccountBase.CLIENT_CONNECTION_STATUS[this.clientConnectionStatus]);
+        }
+
+        await dolphinProfile.start()
+
+        if (dolphinProfile.running === false) {
+          throw new Error(AccountBase.CLIENT_CONNECTION_STATUS[this.clientConnectionStatus = 1]);
+        } else if (dolphinProfile.running === true && dolphinProfile.wsEndpoint === null) {
+          throw new Error(AccountBase.CLIENT_CONNECTION_STATUS[this.clientConnectionStatus = 2]);
+        }
+
+        this.clientConnection = await dolphinProfile.openBrowser()
+        this.clientConnectionStatus = 3;
+
+        break;
     }
   }
 
+  async stopClientConnection() {
+    if (this.clientConnection.isAnyTabOpen()) {
+      this.clientConnection = null;
+      this.clientConnectionStatus = null;
+      return;
+    }
+
+    switch (this.clientSettings.type) {
+      case 'dolphin':
+        const dolphinProfile = await (await this.getClient()).profile(this.clientSettings.params.profile);
+        dolphinProfile.closeBrowser();
+        await dolphinProfile.stop();
+        break;
+    }
+
+    this.clientConnection = null;
+    this.clientConnectionStatus = null;
+  }
+
+  async startPlatformConnection() {
+    await this.clientConnection.openTab(this.platformSettings.name);
+  }
+
   async stopPlatformConnection() {
+    await this.clientConnection.closeTab(this.platformSettings.name);
   }
 
 }

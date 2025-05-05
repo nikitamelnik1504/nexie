@@ -14,6 +14,7 @@ class StartAccountCallback extends TelegramBotCommandBase {
     const socialsAgentAccount = socialsAgentService.getAccount(socialsAgentAccountId);
 
     try {
+      await socialsAgentAccount.startClientConnection();
       await socialsAgentAccount.startPlatformConnection();
       await this.context.reply('Account has been successfully started.');
     } catch (error) {
