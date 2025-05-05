@@ -4,7 +4,7 @@ import {computed, ref, watch} from "vue";
 import {useCoreStore} from "@/stores/core.ts";
 
 const appVersion = __APP_VERSION__;
-const socialsAgentVersion = '0.2.0';
+const socialsAgentVersion = '0.2.1';
 
 const route = useRoute();
 

@@ -232,10 +232,14 @@ class AddAccountScene extends TelegramBotSceneBase {
     const userText = context.message.text;
     const {socialAgentAccount} = vars;
 
-    if (!(await storage.getUserByUsername(userText))) {
-      await storage.addUser(userText, 'default');
+    const telegramUsernames = userText.split(',');
+    for (const username of telegramUsernames) {
+      if (!(await storage.getUserByUsername(username.trim()))) {
+        await storage.addUser(username.trim(), 'default');
+      }
+
+      await storage.setUserAccessToSocialAgentAccount(username.trim(), socialAgentAccount.id);
     }
-    await storage.setUserAccessToSocialAgentAccount(userText, socialAgentAccount.id);
 
     return context.scene.enter(context.wizard.state.from);
   }
