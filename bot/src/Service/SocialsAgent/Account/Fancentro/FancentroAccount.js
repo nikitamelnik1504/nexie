@@ -1,7 +1,7 @@
-import SocialsAgentAccountBase from "../SocialsAgentAccountBase.js";
+import AccountBase from "../AccountBase.js";
 import Messenger from "../../Platform/Fancentro/Messenger.js";
 
-class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
+class FancentroAccount extends AccountBase {
 
   static PLATFORM_CONNECTION_STATUS = {
     0: 'Account is not authorized',
@@ -23,21 +23,27 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
 
         if (!dolphinProfile) {
           this.platformConnectionStatus = 4;
-          throw new Error(SocialsAgentAccountFancentro.PLATFORM_CONNECTION_STATUS[this.platformConnectionStatus]);
+          throw new Error(FancentroAccount.PLATFORM_CONNECTION_STATUS[this.platformConnectionStatus]);
         }
 
         await dolphinProfile.start()
 
         if (dolphinProfile.running === false) {
           this.platformConnectionStatus = 2;
-          throw new Error(SocialsAgentAccountFancentro.PLATFORM_CONNECTION_STATUS[this.platformConnectionStatus]);
+          throw new Error(FancentroAccount.PLATFORM_CONNECTION_STATUS[this.platformConnectionStatus]);
         } else if (dolphinProfile.running === true && dolphinProfile.wsEndpoint === null) {
           this.platformConnectionStatus = 3;
-          throw new Error(SocialsAgentAccountFancentro.PLATFORM_CONNECTION_STATUS[this.platformConnectionStatus]);
+          throw new Error(FancentroAccount.PLATFORM_CONNECTION_STATUS[this.platformConnectionStatus]);
         }
 
         platformTab = await (await dolphinProfile.openBrowser()).openTab(this.platformSettings.name);
         break;
+    }
+
+    if (await platformTab.getAuthorizationStatus(this.platformSettings.username)) {
+      // if (!status) {
+      //   return;
+      // }
     }
 
     this.messenger = await Messenger.init(platformTab, this.platformSettings.username);
@@ -71,4 +77,4 @@ class SocialsAgentAccountFancentro extends SocialsAgentAccountBase {
 
 }
 
-export default SocialsAgentAccountFancentro;
+export default FancentroAccount;

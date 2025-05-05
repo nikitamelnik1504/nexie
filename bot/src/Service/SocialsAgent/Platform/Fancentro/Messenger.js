@@ -1,29 +1,21 @@
-import EventEmitter from "node:events";
 import Me from "./Dialog/Me.js";
 import DialogsCollection from "./Dialog/DialogsCollection.js";
 import Dialog from "./Dialog/Dialog.js";
 import Message from "./Dialog/Message.js";
+import PlatformMessengerBase from "../PlatformMessengerBase.js";
 
 /**
  * Central place where all messages related functionality located in.
  *
  * Here will be located cache, delayed messages and all custom functionality.
  */
-class Messenger extends EventEmitter {
+class Messenger extends PlatformMessengerBase {
 
   dialogs = null;
-
-  authorizationStatus;
-
-  clientBrowserTabEventEmitter;
 
   static async init(clientBrowserTab, username) {
     const instance = new this();
 
-    instance.authorizationStatus = await clientBrowserTab.getAuthorizationStatus(username);
-    // if (this.platformConnectionStatus !== 1) {
-    //   return;
-    // }
     instance.clientBrowserTabEventEmitter = clientBrowserTab.getEventEmitter();
 
     instance.clientBrowserTabEventEmitter.on('dialogs_update', (data) => {
@@ -71,10 +63,6 @@ class Messenger extends EventEmitter {
     return instance;
   }
 
-  getDialogs() {
-    return this.dialogs;
-  }
-
   getDialogMessages(dialogId) {
     const dialog = this.dialogs.getDialogById(dialogId);
 
@@ -93,6 +81,10 @@ class Messenger extends EventEmitter {
 
     messages.addMessage(message);
     this.clientBrowserTabEventEmitter.sendMessage(dialog.remoteId, message.text);
+  }
+
+  getDialogs() {
+    return this.dialogs;
   }
 }
 

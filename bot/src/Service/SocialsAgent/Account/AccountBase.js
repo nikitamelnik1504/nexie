@@ -1,4 +1,4 @@
-class SocialsAgentAccountBase {
+class AccountBase {
 
   id;
 
@@ -119,4 +119,4 @@ class SocialsAgentAccountBase {
 
 }
 
-export default SocialsAgentAccountBase;
+export default AccountBase;

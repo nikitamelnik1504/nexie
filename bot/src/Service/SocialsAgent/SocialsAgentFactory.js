@@ -1,5 +1,5 @@
 import {v4 as uuid} from 'uuid';
-import SocialsAgentAccountFancentro from "./Account/Fancentro/SocialsAgentAccountFancentro.js";
+import FancentroAccount from "./Account/Fancentro/FancentroAccount.js";
 
 class SocialsAgentFactory {
 
@@ -16,7 +16,7 @@ class SocialsAgentFactory {
 
     switch (data.platform.name) {
       case 'fancentro':
-        return new SocialsAgentAccountFancentro(
+        return new FancentroAccount(
           data.id,
           this.service,
           data.client.type,
