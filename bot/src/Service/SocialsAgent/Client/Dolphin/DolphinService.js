@@ -1,8 +1,5 @@
 import DolphinClient from "./DolphinClient.js";
 
-/**
- * @todo In next-gen version we may use multiple dolphin connections. It should be implemented as array of Communicators.
- */
 class DolphinService {
 
   sessions = [];

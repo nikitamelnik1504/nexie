@@ -6,9 +6,7 @@ class SocialsAgentService {
 
   storagePath;
 
-  clientServices = {
-    dolphin: null,
-  };
+  clientManager = null;
 
   factory;
 
@@ -21,8 +19,7 @@ class SocialsAgentService {
 
     instance.storagePath = storagePath;
 
-    const clientManager = ClientManager.init();
-    instance.clientServices.dolphin = clientManager.getDolphinService();
+    instance.clientManager = ClientManager.init();
 
     const storageFilePath = instance.storagePath + '/socialAccounts.json';
 
@@ -126,8 +123,8 @@ class SocialsAgentService {
     await fs.writeFile(this.storagePath + '/socialAccounts.json', JSON.stringify(accountsData), {'encoding': 'utf8'});
   }
 
-  getClientServices() {
-    return this.clientServices;
+  getClientManager() {
+    return this.clientManager;
   }
 
 }

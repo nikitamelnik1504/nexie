@@ -11,12 +11,12 @@ import PlatformMessengerBase from "../PlatformMessengerBase.js";
  */
 class Messenger extends PlatformMessengerBase {
 
-  dialogs = null;
-
   static async init(clientBrowserTab, username) {
     const instance = new this();
 
     instance.clientBrowserTabEventEmitter = clientBrowserTab.getEventEmitter();
+
+    instance.dialogs = new DialogsCollection();
 
     instance.clientBrowserTabEventEmitter.on('dialogs_update', (data) => {
       if (instance.dialogs === null) {

@@ -24,7 +24,7 @@ class AccountsListCommand extends TelegramBotCommandBase {
     for (const socialAgent of accounts) {
       const message = {text: null, keyboard: null};
 
-      const accountClientConnectionStatus = await socialAgent.getClientConnectionStatus();
+      const accountClientConnectionStatus = await socialAgent.getClientBrowserStatus();
       const accountPlatformConnectionStatus = await socialAgent.getPlatformConnectionStatus();
 
       let accountInfo;
@@ -38,7 +38,7 @@ class AccountsListCommand extends TelegramBotCommandBase {
           'Account': (await storage.getSocialAgentAccount({id: socialAgent.id})).name,
           'Client': socialAgent.getClientType(),
           'Client Status': !!(await socialAgent.getClient()) ? 'Connected' : 'Not Connected',
-          'Client Connection Status': accountClientConnectionStatus ? socialAgent.constructor.CLIENT_CONNECTION_STATUS[accountClientConnectionStatus] : 'Account is not running',
+          'Client Connection Status': accountClientConnectionStatus ? socialAgent.constructor.CLIENT_BROWSER_STATUS[accountClientConnectionStatus] : 'Account is not running',
           'Platform': socialAgent.getPlatformType(),
           'Platform Connection Status': accountPlatformConnectionStatus === null ? 'Account is not running' : socialAgent.constructor.PLATFORM_CONNECTION_STATUS[accountPlatformConnectionStatus],
           'Username': socialAgent.getPlatformUsername(),
@@ -51,7 +51,7 @@ class AccountsListCommand extends TelegramBotCommandBase {
           'Account': (await storage.getSocialAgentAccount({id: socialAgent.id})).name,
           'Client': socialAgent.getClientType(),
           'Client Status': !!(await socialAgent.getClient()) ? 'Connected' : 'Not Connected',
-          'Client Connection Status': accountClientConnectionStatus ? socialAgent.constructor.CLIENT_CONNECTION_STATUS[accountClientConnectionStatus] : 'Account is not running',
+          'Client Connection Status': accountClientConnectionStatus ? socialAgent.constructor.CLIENT_BROWSER_STATUS[accountClientConnectionStatus] : 'Account is not running',
           'Platform': socialAgent.getPlatformType(),
           'Platform Connection Status': accountPlatformConnectionStatus === null ? 'Account is not running' : socialAgent.constructor.PLATFORM_CONNECTION_STATUS[accountPlatformConnectionStatus],
           'Username': socialAgent.getPlatformUsername(),

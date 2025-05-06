@@ -1,5 +1,6 @@
 import {v4 as uuid} from 'uuid';
 import FancentroAccount from "./Account/Fancentro/FancentroAccount.js";
+import TonAccount from "./Account/Ton/TonAccount.js";
 
 class SocialsAgentFactory {
 
@@ -22,6 +23,17 @@ class SocialsAgentFactory {
           data.client.type,
           data.client.params,
           'fancentro',
+          data.platform.login !== undefined ? data.platform.login : null,
+          data.platform.password  !== undefined ? data.platform.password : null,
+          data.platform.username !== undefined ? data.platform.username : null,
+        );
+      case 'ton':
+        return new TonAccount(
+          data.id,
+          this.service,
+          data.client.type,
+          data.client.params,
+          'ton',
           data.platform.login !== undefined ? data.platform.login : null,
           data.platform.password  !== undefined ? data.platform.password : null,
           data.platform.username !== undefined ? data.platform.username : null,

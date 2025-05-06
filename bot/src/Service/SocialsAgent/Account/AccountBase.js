@@ -15,16 +15,16 @@ class AccountBase {
   };
 
   // @todo Implement dolphin client hierarchy.
-  static CLIENT_CONNECTION_STATUS = {
+  static CLIENT_BROWSER_STATUS = {
     0: 'Profile is not found',
     1: 'Profile is failed to start',
     2: 'Profile is running out of bot',
     3: 'Profile is successfully started'
   };
 
-  clientConnection;
+  clientBrowser;
 
-  clientConnectionStatus = null;
+  clientBrowserStatus = null;
   platformConnectionStatus = null;
 
   messenger = null;
@@ -96,12 +96,12 @@ class AccountBase {
   async getClient() {
     switch (this.clientSettings.type) {
       case 'dolphin':
-        return await this.service.getClientServices().dolphin.client(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
+        return await this.service.getClientManager().getDolphinClient(this.clientSettings.params.apiUrl, this.clientSettings.params.authToken);
     }
   }
 
-  async getClientConnectionStatus() {
-    return this.clientConnectionStatus;
+  async getClientBrowserStatus() {
+    return this.clientBrowserStatus;
   }
 
   async getPlatformConnectionStatus() {
@@ -112,35 +112,35 @@ class AccountBase {
     return this.messenger;
   }
 
-  async startClientConnection() {
+  async startClientBrowser() {
     switch (this.clientSettings.type) {
       case 'dolphin':
         const dolphinProfile = await (await this.getClient()).profile(this.clientSettings.params.profile);
 
         if (!dolphinProfile) {
-          this.clientConnectionStatus = 0;
-          throw new Error(AccountBase.CLIENT_CONNECTION_STATUS[this.clientConnectionStatus]);
+          this.clientBrowserStatus = 0;
+          throw new Error(AccountBase.CLIENT_BROWSER_STATUS[this.clientBrowserStatus]);
         }
 
-        await dolphinProfile.start()
+        await dolphinProfile.start();
 
         if (dolphinProfile.running === false) {
-          throw new Error(AccountBase.CLIENT_CONNECTION_STATUS[this.clientConnectionStatus = 1]);
+          throw new Error(AccountBase.CLIENT_BROWSER_STATUS[this.clientBrowserStatus = 1]);
         } else if (dolphinProfile.running === true && dolphinProfile.wsEndpoint === null) {
-          throw new Error(AccountBase.CLIENT_CONNECTION_STATUS[this.clientConnectionStatus = 2]);
+          throw new Error(AccountBase.CLIENT_BROWSER_STATUS[this.clientBrowserStatus = 2]);
         }
 
-        this.clientConnection = await dolphinProfile.openBrowser()
-        this.clientConnectionStatus = 3;
+        this.clientBrowser = await dolphinProfile.openBrowser();
+        this.clientBrowserStatus = 3;
 
         break;
     }
   }
 
-  async stopClientConnection() {
-    if (this.clientConnection.isAnyTabOpen()) {
-      this.clientConnection = null;
-      this.clientConnectionStatus = null;
+  async stopClientBrowser() {
+    if (this.clientBrowser.isAnyDaemonRunning()) {
+      this.clientBrowser = null;
+      this.clientBrowserStatus = null;
       return;
     }
 
@@ -152,16 +152,16 @@ class AccountBase {
         break;
     }
 
-    this.clientConnection = null;
-    this.clientConnectionStatus = null;
+    this.clientBrowser = null;
+    this.clientBrowserStatus = null;
   }
 
   async startPlatformConnection() {
-    await this.clientConnection.openTab(this.platformSettings.name);
+    await this.clientBrowser.launchDaemon(this.platformSettings.name);
   }
 
   async stopPlatformConnection() {
-    await this.clientConnection.closeTab(this.platformSettings.name);
+    await this.clientBrowser.stopDaemon(this.platformSettings.name);
   }
 
 }

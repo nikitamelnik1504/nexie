@@ -1,37 +1,65 @@
-class DialogsList {
+import Connection from "../Connection.js";
 
-  // RESPONSE = {
-  //   type: "dialogs_list",
-  //   data: []
-  // };
+function prepareResponseData(dialogs) {
+  const response = [];
+
+  for (const dialog of dialogs) {
+    const lastMessage = dialog.getMessages().lastMessage();
+
+    response.push({
+      id: dialog.id,
+      lastMessage: {
+        text: lastMessage.text,
+        timestamp: lastMessage.timestamp,
+        from: lastMessage.from.id,
+      },
+      member: {
+        id: dialog.member.id,
+        username: dialog.member.username,
+      },
+      unreadMessagesCount: 0,
+    });
+  }
+
+  return response;
+}
+
+class DialogsList {
 
   static async run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService) {
     const telegramUserData = await (await telegramBotService.getStorage()).getUserByUsername(telegramUserId);
 
     const response = {
-      type: "dialogs_list",
-      data: []
+      type: "dialogsList",
+      accountId: null,
+      me: null,
+      data: [],
     };
 
-    for (const socialAgentId of telegramUserData.social_agent_accounts) {
-      const responseItem = {accountId: null, dialogs: []};
+    const socialAgentAccountId = telegramUserData.social_agent_accounts.find(id => id === payload.accountId);
+    if (!socialAgentAccountId) return;
 
-      const socialAgentAccount = socialsAgentService.getAccount(socialAgentId);
-      const socialAgentAccountMessenger = await socialAgentAccount.getPlatformMessenger();
-      socialAgentAccountMessenger.removeAllListeners('dialogs_list_loaded'); // @todo Telegram multi-visitors impossibility risk.
-      socialAgentAccountMessenger.on('dialogs_list_loaded', () => this.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService));
+    const socialAgentAccount = socialsAgentService.getAccount(socialAgentAccountId);
 
-      try {
-        responseItem.dialogs = socialAgentAccountMessenger.getDialogs();
-      } catch (error) {
-        responseItem.dialogs = null;
-      }
-      responseItem.accountId = socialAgentAccount.id;
+    const socialAgentAccountMessenger = await socialAgentAccount.getPlatformMessenger();
 
-      response.data.push(responseItem);
+    if (!socialAgentAccountMessenger) {
+      return;
     }
 
-    wsClient.send(JSON.stringify(response));
+    const listener = (data) => {
+      response.accountId = socialAgentAccount.id;
+      response.me = socialAgentAccountMessenger.getMe().id;
+      response.data = prepareResponseData(data);
+      wsClient.send(JSON.stringify(response));
+    };
+
+    Connection.registerListener(wsClient, socialAgentAccountMessenger, 'dialogsList', listener);
+
+    const dialogs = socialAgentAccountMessenger.getDialogs().list(0, 30); // @todo Hardcoded pagination.
+    if (dialogs) {
+      listener(dialogs);
+    }
   }
 
 }

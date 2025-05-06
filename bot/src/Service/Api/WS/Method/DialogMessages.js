@@ -1,7 +1,24 @@
+import Connection from "../Connection.js";
+
+function prepareResponseData(messages) {
+  const response = [];
+
+  for (const message of messages) {
+    response.push({
+      id: message.id,
+      from: message.from.id,
+      timestamp: message.timestamp,
+      text: message.text,
+    });
+  }
+
+  return response;
+}
+
 class DialogMessages {
 
   // RESPONSE = {
-  //   type: "dialog_messages",
+  //   type: "dialogMessages",
   //   data: []
   // }
 
@@ -9,32 +26,38 @@ class DialogMessages {
     const telegramUserData = await (await telegramBotService.getStorage()).getUserByUsername(telegramUserId);
 
     const response = {
-      type: "dialog_messages",
-      data: {
-        accountId: null,
-        dialogId: null,
-        messages: null,
-      },
+      type: "dialogMessages",
+      accountId: null,
+      dialogId: null,
+      page: null,
+      data: []
     };
 
-    const socialAgentId = telegramUserData.social_agent_accounts.find(id => id === payload.data.accountId);
-    if (!socialAgentId) return;
+    const socialAgentAccountId = telegramUserData.social_agent_accounts.find(id => id === payload.data.accountId);
+    if (!socialAgentAccountId) return;
 
-    const socialAgentAccount = socialsAgentService.getAccount(socialAgentId);
+    const socialAgentAccount = socialsAgentService.getAccount(socialAgentAccountId);
 
     const socialAgentAccountMessenger = await socialAgentAccount.getPlatformMessenger();
 
-    socialAgentAccountMessenger.removeAllListeners('dialog_messages_update');
-    socialAgentAccountMessenger.on('dialog_messages_update', () => this.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService));
-
-    response.data.messages = socialAgentAccountMessenger.getDialogMessages(payload.data.dialogId);
-    if (response.data.messages === false) {
+    if (!socialAgentAccountMessenger) {
       return;
     }
-    response.data.accountId = socialAgentAccount.id;
-    response.data.dialogId = payload.data.dialogId;
 
-    wsClient.send(JSON.stringify(response))
+    const listener = (data) => {
+      response.accountId = socialAgentAccount.id;
+      response.dialogId = data[0]._collection._dialog.id;
+      response.data = prepareResponseData(data);
+      wsClient.send(JSON.stringify(response));
+    };
+
+    Connection.registerListener(wsClient, socialAgentAccountMessenger, 'messagesList', listener);
+
+    if (socialAgentAccountMessenger.getDialogs().dialog(payload.data.dialogId).getMessages().synced === true) {
+      listener(socialAgentAccountMessenger.getDialogs().dialog(payload.data.dialogId).getMessages().list());
+    } else {
+      socialAgentAccountMessenger.getDialogs().dialog(payload.data.dialogId).getMessages().list()
+    }
   }
 
 }

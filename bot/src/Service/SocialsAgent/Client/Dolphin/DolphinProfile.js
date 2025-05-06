@@ -4,77 +4,96 @@ import axios from "axios";
 
 class DolphinProfile {
 
-  communicator;
+  _client;
   browser = null;
 
-  constructor(profileData, dolphinCommunicator) {
+  constructor(profileData, dolphinClient) {
     this.id = profileData.id;
     this.userId = profileData.userId;
     this.name = profileData.name;
 
-    this.running = profileData.success !== undefined ? profileData.success : false;
+    this.running = false;
     this.port = null;
     this.wsEndpoint = null;
-    this.communicator = dolphinCommunicator;
+    this._client = dolphinClient;
   }
 
   async start() {
-    if (this.running === true) {
-      return this;
-    }
+    if (this.running) return this;
 
     try {
-      const profileData = (await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/start?automation=1`)).data;
+      const profileData = (await axios.get(this._client.apiUrl + `/browser_profiles/` + this.id + `/start?automation=1`)).data;
       this.running = profileData.success;
       this.port = profileData.automation.port;
       this.wsEndpoint = profileData.automation.wsEndpoint;
-      await this.openBrowser();
+
+      // Delay after open.
+      await new Promise(resolve => setTimeout(resolve, 5000));
     } catch (error) {
       if (error.response.data.errorObject !== undefined && error.response.data.errorObject.code === 'E_BROWSER_RUN_DUPLICATE') {
-        await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/stop`);
-
-        await new Promise((resolve) => {
-          setTimeout(() => resolve(), 5000);
-        });
-
-        return this.start();
+        this.running = true;
       }
+      console.log(error);
+    }
+
+    return this;
+  }
+
+  async stop() {
+    if (!this.running) return this;
+
+    try {
+      const {success} = (await axios.get(this._client.apiUrl + `/browser_profiles/` + this.id + `/stop`)).data;
+
+      if (success) {
+        this.running = false;
+        this.port = null;
+        this.wsEndpoint = null;
+
+        // Delay after close.
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    } catch (error) {
+      console.log(error);
     }
 
     return this;
   }
 
   async refresh() {
-    try {
-      await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/start?automation=1`);
-      await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/stop`);
-      this.running = false;
-      this.port = null;
-      this.wsEndpoint = null;
-    } catch (error) {
-      if (error.response.data.errorObject !== undefined && error.response.data.errorObject.code === 'E_BROWSER_RUN_DUPLICATE') {
-        this.running = true;
-      }
+    this.running = false;
+    this.port = null;
+    this.wsEndpoint = null;
+
+    await this.start();
+
+    if (this.running === true && this.wsEndpoint === null) {
+      return this;
     }
+
+    await this.stop();
 
     return this;
   }
 
   async exportCookies() {
-    const {data} = await axios.post(`https://sync.anty-api.com/?actionType=getCookies&browserProfileId=` + this.id, {}, {headers: {'Authorization': `Bearer ${this.communicator.authToken}`, 'Content-Type': 'application/json'}});
+    const {data} = await axios.post(`https://sync.anty-api.com/?actionType=getCookies&browserProfileId=` + this.id, {}, {
+      headers: {
+        'Authorization': `Bearer ${this._client.authToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
     return data.success ? data.data : false;
   }
 
   async importCookies(raw) {
     raw = JSON.stringify(raw);
-    return await axios.post(`https://sync.anty-api.com/?actionType=importCookies&browserProfileId=` + this.id, raw, {headers: {'Authorization': `Bearer ${this.communicator.authToken}`, 'Content-Type': 'application/json'}});
-  }
-
-  async stop() {
-    await axios.get(this.communicator.apiUrl + `/browser_profiles/` + this.id + `/stop`);
-    this.running = false;
-    this.port = null;
-    this.wsEndpoint = null;
+    return await axios.post(`https://sync.anty-api.com/?actionType=importCookies&browserProfileId=` + this.id, raw, {
+      headers: {
+        'Authorization': `Bearer ${this._client.authToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
   }
 
   async openBrowser() {
@@ -90,7 +109,9 @@ class DolphinProfile {
       browserWSEndpoint: `ws://127.0.0.1:${this.port}${this.wsEndpoint}`,
     })
 
-    return this.browser = new DolphinBrowser(this, browser);
+    //   const cookies = await instance.profile.exportCookies(); # pass to DolphinBrowser
+    //   await instance.page.setCookie(...cookies); # inside DolphinBrowser
+    return this.browser = new DolphinBrowser(browser);
   }
 
   closeBrowser() {

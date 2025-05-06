@@ -15,7 +15,7 @@ const accounts = coreStore.getAccounts(route.params.userId);
 const dialogs = computed(() => {
   let res = [];
   for (const account of accounts.value) {
-    const dialogsFromAccount = coreStore.getDialogs(route.params.userId, account.id).value;
+    const dialogsFromAccount = coreStore.getDialogs(account.id).value;
     const dialogsWithNewProperty = dialogsFromAccount.map(dialog => ({
       ...dialog,
       platform: account.platform,
@@ -28,7 +28,9 @@ const dialogs = computed(() => {
 
 watch(accounts, (newValue) => {
   if (newValue.length !== 0) {
-    coreStore.requestDialogs(route.params.userId);
+    for (const account of newValue) {
+      coreStore.requestDialogs(route.params.userId, account.id);
+    }
   }
 }, {immediate: true});
 
@@ -75,12 +77,15 @@ function formatTime(timestamp: number) {
             <h4>{{ dialog.platform }} - {{ dialog.username }}</h4>
           </div>
           <div class="dialog__message">
-            <p>{{ dialog.last_message.text }}</p>
+            <p>
+              <i v-if="dialog.lastMessage.from !== dialog.member.id">You: </i>
+             {{ dialog.lastMessage.text }}
+            </p>
           </div>
         </div>
         <div>
           <div class="dialog__date">
-            <p>{{ formatTime(dialog.last_message.timestamp) }}</p>
+            <p>{{ formatTime(dialog.lastMessage.timestamp) }}</p>
           </div>
           <div class="dialog__new_messages_count">
             <!--            <span>{{ dialog.new_messages_count }}</span>-->

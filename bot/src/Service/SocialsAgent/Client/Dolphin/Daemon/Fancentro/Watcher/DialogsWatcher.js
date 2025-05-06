@@ -127,7 +127,7 @@ class DialogsWatcher extends EventEmitter {
     await instance.page.exposeFunction("isAllRoomsCompletelyLoaded", instance.isAllRoomsCompletelyLoaded.bind(instance));
     await instance.page.exposeFunction("addUserDataToRoom", instance.addUserDataToRoom.bind(instance));
     await instance.page.exposeFunction("watcherEmit", instance.emit.bind(instance));
-      await instance.page.evaluate(async () => {
+    await instance.page.evaluate(async () => {
       window.ws.addEventListener("message", async (event) => {
         const data = event.data;
         if (!data.includes("42/fc,")) return;

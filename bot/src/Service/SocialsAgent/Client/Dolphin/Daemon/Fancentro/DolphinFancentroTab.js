@@ -1,24 +1,13 @@
-import EventeventEmitter from 'node:events';
+import EventEmitter from 'node:events';
 import AuthorizationWatcher from "./Watcher/AuthorizationWatcher.js";
 import AccountWatcher from "./Watcher/AccountWatcher.js";
 import DialogsWatcher from "./Watcher/DialogsWatcher.js";
 import MessagesWatcher from "./Watcher/MessagesWatcher.js";
+import DaemonBase from "../DaemonBase.js";
 
-class DolphinFancentroTab {
+class DolphinFancentroTab extends DaemonBase {
 
-  eventEmitter;
-
-  browser;
-  profile;
-
-  accountId = null;
-
-  page;
   cdp;
-
-  data = {
-    accountId: null,
-  };
 
   watchers = {
     authorization: null,
@@ -27,22 +16,12 @@ class DolphinFancentroTab {
     messages: null
   };
 
-  constructor(profile, browser) {
-    this.profile = profile;
-    this.browser = browser;
-  }
-
   static async open(profile, browser) {
     const instance = new this(profile, browser);
 
     // Init page.
     instance.page = await instance.browser.newPage();
-    // try {
-    //   const cookies = await instance.profile.exportCookies();
-    //   await instance.page.setCookie(...cookies);
-    // } catch (error) {
-    //   console.error(error);
-    // }
+
     await instance.page.setViewport({width: 414, height: 896});
 
     // Init CDP connection.
@@ -56,13 +35,15 @@ class DolphinFancentroTab {
     instance.watchers.messages = await MessagesWatcher.init(instance.page, instance.cdp);
 
     // Init event eventEmitters.
-    instance.eventEmitter = new class extends EventeventEmitter {
+    instance.eventEmitter = new class extends EventEmitter {
       me() {
         return instance.watchers.dialogs.getMe();
       }
+
       loadMessages(dialogId) {
         instance.watchers.messages.emit("loadMessages", dialogId);
       }
+
       sendMessage(dialogId, message) {
         instance.watchers.messages.emit("sendMessage", dialogId, message);
       }
@@ -89,10 +70,6 @@ class DolphinFancentroTab {
 
   async getAuthorizationStatus(username, login = null, password = null) {
     return await this.watchers.authorization.getStatus(username);
-  }
-
-  getEventEmitter() {
-    return this.eventEmitter;
   }
 
   async close() {

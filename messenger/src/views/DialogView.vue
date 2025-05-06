@@ -18,7 +18,7 @@ const account = computed(() => {
 const dialogs = computed(() => {
   let res = [];
   for (const account of accounts.value) {
-    const dialogsFromAccount = coreStore.getDialogs(route.params.userId, account.id).value;
+    const dialogsFromAccount = coreStore.getDialogs(account.id).value;
     const dialogsWithNewProperty = dialogsFromAccount.map(dialog => ({
       ...dialog,
       platform: account.platform,
@@ -38,7 +38,9 @@ const reversedMessages = computed(() => [...messages.value].sort((x, y) => x.tim
 
 watch(accounts, (newValue) => {
   if (newValue.length !== 0) {
-    coreStore.requestDialogs(route.params.userId);
+    for (const account of newValue) {
+      coreStore.requestDialogs(route.params.userId, account.id);
+    }
   }
 }, {immediate: true});
 
@@ -49,15 +51,21 @@ watch(dialogs, (newValue) => {
 })
 
 function formatTime(timestamp: number) {
-  return new Date(timestamp).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
-}
+  const isMilliseconds = timestamp > 9999999999;
 
+  const normalizedTimestamp = isMilliseconds ? timestamp : timestamp * 1000;
+
+  return new Date(normalizedTimestamp).toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 function sendMessage() {
   coreStore.messages.push({
     id: null,
     dialogId: route.params.dialogId,
     text: decodeURIComponent(message.value),
-    author: dialog.value.me.id,
+    author: account.value.me.id,
     timestamp: Date.now(),
     status: 'sending',
   });
@@ -97,8 +105,8 @@ function sendMessage() {
       <div v-if="messages.length !== 0" v-for="dialogMessage in reversedMessages" :key="dialogMessage.id"
            class="message"
            :class="{
-        'me': dialogMessage.author === dialog.me.id,
-        'not-me': dialogMessage.author !== dialog.me.id,
+        'me': dialogMessage.author === account.me.id,
+        'not-me': dialogMessage.author !== account.me.id,
       }"
       >
         <p>{{ dialogMessage.text }}</p>

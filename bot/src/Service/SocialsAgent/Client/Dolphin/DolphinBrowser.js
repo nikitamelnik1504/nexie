@@ -1,70 +1,74 @@
-import DolphinFancentroTab from "./BrowserTab/Fancentro/DolphinFancentroTab.js";
-import DolphinFanslyTab from "./BrowserTab/Fansly/DolphinFanslyTab.js";
-import DolphinTonTab from "./BrowserTab/Ton/DolphinTonTab.js";
+import DolphinFancentroTab from "./Daemon/Fancentro/DolphinFancentroTab.js";
+import DolphinFanslyTab from "./Daemon/Fansly/DolphinFanslyTab.js";
+import TonDaemon from "./Daemon/Ton/TonDaemon.js";
 
 class DolphinBrowser {
 
-  tabs = [];
-  profile;
+  daemons = [];
 
-  constructor(profile, browser) {
-    this.profile = profile;
+  constructor(browser) {
     this.browser = browser;
   }
 
-  async openTab(siteName) {
-    let tab;
+  async launchDaemon(siteName, username) {
+    let daemon;
 
-    let tabInstances = this.tabs.filter(tab => {
-        if (siteName === 'fancentro') {
-          return tab instanceof DolphinFancentroTab;
+    let daemonInstances = this.daemons.filter(daemon => {
+        switch (siteName) {
+          case 'fancentro':
+            return daemon instanceof DolphinFancentroTab;
+          case 'ton':
+            return daemon instanceof TonDaemon;
         }
       }
     );
-    if (tabInstances.length !== 0) {
-      tab = tabInstances[0];
+    if (daemonInstances.length !== 0) {
+      daemon = daemonInstances[0];
     } else {
       switch (siteName) {
         case 'fancentro':
-          tab = await DolphinFancentroTab.open(this.profile, await this.browser);
-          break;
-        case 'fansly':
-          tab = new DolphinFanslyTab(this.profile, await this.browser);
+          daemon = await DolphinFancentroTab.open(await this.browser);
           break;
         case 'ton':
-          tab = new DolphinTonTab(this.profile, await this.browser);
+          daemon = await TonDaemon.launch(await this.browser, username);
+          break;
+        case 'fansly':
+          daemon = new DolphinFanslyTab(await this.browser);
           break;
       }
-      this.tabs.push(tab);
+      this.daemons.push(daemon);
     }
 
-    return tab;
+    return daemon;
   }
 
-  async closeTab(siteName) {
-    let tabInstances = this.tabs.filter(tab => {
-        if (siteName === 'fancentro') {
-          return tab instanceof DolphinFancentroTab;
+  async stopDaemon(siteName) {
+    let daemonInstances = this.daemons.filter(daemon => {
+        switch (siteName) {
+          case 'fancentro':
+            return daemon instanceof DolphinFancentroTab;
+          case 'ton':
+            return daemon instanceof TonDaemon;
         }
       }
     );
 
-    if (tabInstances.length === 0) {
+    if (daemonInstances.length === 0) {
       return;
     }
 
-    const tabInstance = tabInstances[0];
+    const daemonInstance = daemonInstances[0];
 
-    await tabInstance.close();
+    await daemonInstance.close();
 
-    const index = this.tabs.indexOf(tabInstance);
+    const index = this.daemons.indexOf(daemonInstance);
     if (index > -1) {
-      this.tabs.splice(index, 1);
+      this.daemons.splice(index, 1);
     }
   }
 
-  isAnyTabOpen() {
-    return this.tabs.length > 0;
+  isAnyDaemonRunning() {
+    return this.daemons.length > 0;
   }
 
 }

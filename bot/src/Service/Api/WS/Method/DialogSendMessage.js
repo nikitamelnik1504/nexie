@@ -1,32 +1,51 @@
+import Connection from "../Connection.js";
+
+function prepareResponseData(message) {
+  return {
+    id: message.id,
+    from: message.from.id,
+    timestamp: message.timestamp,
+    text: message.text,
+  };
+}
+
 class DialogSendMessage {
 
   static async run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService) {
     const telegramUserData = await (await telegramBotService.getStorage()).getUserByUsername(telegramUserId);
 
     const response = {
-      type: "dialog_send_message",
-      data: {
-        accountId: null,
-        dialogId: null,
-      },
+      type: "dialogSendMessage",
+      accountId: null,
+      dialogId: null,
+      data: null,
     };
 
-    const socialAgentId = telegramUserData.social_agent_accounts.find(id => id === payload.data.accountId);
-    if (!socialAgentId) return;
+    const socialAgentAccountId = telegramUserData.social_agent_accounts.find(id => id === payload.accountId);
+    if (!socialAgentAccountId) return;
 
-    const socialAgentAccount = socialsAgentService.getAccount(socialAgentId);
+    const socialAgentAccount = socialsAgentService.getAccount(socialAgentAccountId);
 
     const socialAgentAccountMessenger = await socialAgentAccount.getPlatformMessenger();
 
-    socialAgentAccountMessenger.sendDialogMessage(payload.data);
+    if (!socialAgentAccountMessenger) {
+      return;
+    }
 
-    socialAgentAccountMessenger.removeAllListeners('dialog_message_sent');
-    socialAgentAccountMessenger.on('dialog_message_sent', (message) => {
-      response.data.accountId = socialAgentAccount.id;
-      response.data.dialogId = payload.data.dialogId;
-      response.data.message = message;
+    const listener = (data) => {
+      response.accountId = socialAgentAccount.id;
+      response.dialogId = data._collection._dialog.id;
+      response.data = prepareResponseData(data);
       wsClient.send(JSON.stringify(response));
-    });
+    }
+
+    Connection.registerListener(wsClient, socialAgentAccountMessenger, 'messageSent', listener);
+
+    const dialogMessages = socialAgentAccountMessenger.getDialogs().dialog(payload.dialogId).getMessages();
+
+    if (dialogMessages) {
+      dialogMessages.addMessage(socialAgentAccountMessenger.getFactory().createMessage(dialogMessages, payload.data));
+    }
   }
 
 }

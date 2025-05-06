@@ -10,30 +10,33 @@ type User = {
 }
 
 type Account = {
-  userId: string,
   id: string,
   username: string,
   platform: string,
+  userId: string,
+  me: Me | null,
+}
+
+type Member = {
+  id: string | null,
+  username: string,
+  image: string,
+}
+
+type Me = {
+  id: string,
 }
 
 type Dialog = {
   accountId: string,
   id: string;
-  member: {
-    id: string;
-    username: string;
-    image: unknown;
-  };
-  me: {
-    id: string;
-  };
-  last_message: {
+  member: Member,
+  lastMessage: {
     text: string;
     author: string;
     timestamp: number;
   };
-  new_messages_count: number;
-  messages: Array<Message>;
+  unreadMessagesCount: number;
 };
 
 type Message = {
@@ -78,50 +81,51 @@ export const useCoreStore = defineStore('core', () => {
             }
 
             accounts.value.push(<Account>{
-              userId,
               id: account.id,
               username: account.username,
               platform: account.platform,
+              userId,
+              me: null,
             });
           }
           break;
-        case 'dialogs_list':
+        case 'dialogsList':
+          const account = accounts.value.find(account => account.id === data.accountId);
+
+          if (account && account.me === null) {
+            account.me = <Me>{
+              id: data.me,
+            };
+          }
+
           dialogs.value.length = 0;
 
-          for (const item of data.data) {
+          for (const dialog of data.data) {
             // @todo High-level error handle needed.
-            if (item.dialogs === null) {
-              break;
-            }
-            for (const dialog of item.dialogs.collection) {
-              dialogs.value.push(<Dialog>{
-                accountId: item.accountId,
-                id: dialog.id,
-                member: {
-                  id: dialog.member.externalId,
-                  username: dialog.member.username,
-                  image: null,
-                },
-                me: {
-                  id: item.dialogs.me.id,
-                },
-                last_message: {
-                  text: decodeURIComponent(dialog.messages.collection[dialog.messages.collection.length - 1].text),
-                  author: dialog.messages.collection[dialog.messages.collection.length - 1].from,
-                  timestamp: dialog.messages.collection[dialog.messages.collection.length - 1].timestamp,
-                },
-                new_messages_count: 0,
-              })
-            }
+            dialogs.value.push(<Dialog>{
+              accountId: data.accountId,
+              id: dialog.id,
+              member: <Member>{
+                id: dialog.member.id,
+                username: dialog.member.username,
+                image: null,
+              },
+              lastMessage: {
+                text: dialog.lastMessage.text,
+                from: dialog.lastMessage.from,
+                timestamp: dialog.lastMessage.timestamp,
+              },
+              unreadMessagesCount: 0,
+            })
           }
           break;
-        case 'dialog_messages':
+        case 'dialogMessages':
           messages.value.length = 0;
 
-          for (const message of data.data.messages.collection) {
+          for (const message of data.data) {
             messages.value.push(<Message>{
               id: message.id,
-              dialogId: data.data.dialogId,
+              dialogId: data.dialogId,
               text: decodeURIComponent(message.text),
               author: message.from,
               timestamp: message.timestamp,
@@ -182,25 +186,26 @@ export const useCoreStore = defineStore('core', () => {
     return accounts.value.filter(account => account.userId === userId);
   });
 
-  const getDialogs = (userId: string, accountId: string) => computed(() => {
+  const getDialogs = (accountId: string) => computed(() => {
     return dialogs.value.filter(dialog => dialog.accountId === accountId);
   });
 
-  async function requestDialogs(userId) {
+  async function requestDialogs(userId, accountId) {
     const matchedUser = users.value.find(user => user.id === userId);
     return matchedUser.wsConnection.send(JSON.stringify({
-      type: 'dialogs_list',
+      type: 'dialogsList',
+      accountId
     }));
   }
 
-  const getMessages = (userId: sring, accountId: string, dialogId: string) => computed(() => {
+  const getMessages = (userId: string, accountId: string, dialogId: string) => computed(() => {
     return messages.value.filter(message => message.dialogId === dialogId);
   });
 
-  async function requestMessages(userId: sring, accountId: string, dialogId: string) {
+  async function requestMessages(userId: string, accountId: string, dialogId: string) {
     const matchedUser = users.value.find(user => user.id === userId);
     return matchedUser.wsConnection.send(JSON.stringify({
-      type: 'dialog_messages',
+      type: 'dialogMessages',
       data: {
         accountId,
         dialogId
@@ -211,16 +216,11 @@ export const useCoreStore = defineStore('core', () => {
   async function requestSendMessage(userId: sring, accountId: string, dialogId: string, message: string) {
     const matchedUser = users.value.find(user => user.id === userId);
     return matchedUser.wsConnection.send(JSON.stringify({
-      type: 'dialog_send_message',
+      type: 'dialogSendMessage',
+      accountId,
+      dialogId,
       data: {
-        accountId,
-        dialogId,
-        message: {
-          type: 'text',
-          data: {
-            text: message
-          }
-        }
+        text: message
       }
     }));
   }

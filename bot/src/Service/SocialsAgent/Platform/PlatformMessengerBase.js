@@ -1,7 +1,12 @@
 import EventEmitter from "node:events";
 
 class PlatformMessengerBase extends EventEmitter {
-  clientBrowserTabEventEmitter;
+  clientBrowserDaemonEventEmitter;
+  factory;
+
+  dialogs = null;
+
+  me = null;
 }
 
 export default PlatformMessengerBase;

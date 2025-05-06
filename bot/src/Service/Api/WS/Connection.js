@@ -1,9 +1,9 @@
 import DialogsList from "./Method/DialogsList.js";
 import DialogMessages from "./Method/DialogMessages.js";
 import DialogSendMessage from "./Method/DialogSendMessage.js";
-import DialogMessageNew from "./Method/DialogMessageNew.js";
 
 class Connection {
+  static listeners = new WeakMap();
 
   /**
    *  response = {
@@ -34,23 +34,50 @@ class Connection {
     }
     wsClient.send(JSON.stringify(response));
 
+    wsClient.on("close", () => this.cleanupListeners(wsClient));
+
     wsClient.on('message', (message) => {
       const payload = JSON.parse(message);
       switch (payload.type) {
-        case 'dialogs_list':
+        case 'dialogsList':
           DialogsList.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
-          DialogMessageNew.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
           break;
-        case 'dialog_messages':
+        case 'dialogMessages':
           DialogMessages.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
           break;
-        case 'dialog_send_message':
+        case 'dialogSendMessage':
           DialogSendMessage.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
           break;
       }
-    })
+    });
   }
 
+  static registerListener(wsClient, platformMessenger, eventType, listener) {
+    if (!Connection.listeners.has(wsClient)) {
+      Connection.listeners.set(wsClient, []);
+    }
+
+    const listeners = Connection.listeners.get(wsClient);
+
+    if (listeners.some(entry => entry.platformMessenger === platformMessenger && entry.eventType === eventType)) {
+      return;  // Listener already exists, skip.
+    }
+
+    const wrappedListener = (data) => listener(data);
+
+    listeners.push({ platformMessenger, eventType, listener: wrappedListener });
+    platformMessenger.on(eventType, wrappedListener);
+  }
+
+  static cleanupListeners(wsClient) {
+    const listeners = Connection.listeners.get(wsClient);
+    if (listeners) {
+      listeners.forEach(({ platformMessenger, eventType, listener }) => {
+        platformMessenger.removeListener(eventType, listener);
+      });
+      Connection.listeners.delete(wsClient);
+    }
+  }
 }
 
-export default Connection
+export default Connection;

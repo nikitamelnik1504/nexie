@@ -12,8 +12,8 @@ class ClientManager {
     return new this(new DolphinService());
   }
 
-  getDolphinService() {
-    return this.dolphinService;
+  async getDolphinClient(apiUrl, authToken) {
+    return this.dolphinService.client(apiUrl, authToken);
   }
 
 }
