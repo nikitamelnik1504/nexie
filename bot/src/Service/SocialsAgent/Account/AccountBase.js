@@ -1,3 +1,6 @@
+import FancentroMessenger from "../Platform/Fancentro/Messenger.js";
+import TonMessenger from "../Platform/Ton/Messenger.js";
+
 class AccountBase {
 
   id;
@@ -21,6 +24,11 @@ class AccountBase {
     2: 'Profile is running out of bot',
     3: 'Profile is successfully started'
   };
+
+  static PLATFORM_CONNECTION_STATUS = {
+    0: 'Account is not authorized',
+    1: 'Account is authorized',
+  }
 
   clientBrowser;
 
@@ -157,11 +165,33 @@ class AccountBase {
   }
 
   async startPlatformConnection() {
-    await this.clientBrowser.launchDaemon(this.platformSettings.name);
+    await this.startClientBrowser();
+
+    const clientBrowserDaemon = await this.clientBrowser.launchDaemon(this.platformSettings.name, this.platformSettings.username);
+
+    if (clientBrowserDaemon.watchers.dialogs === null) {
+      this.platformConnectionStatus = 0;
+      return;
+    }
+
+    switch (this.platformSettings.name) {
+      case 'fancentro':
+        this.messenger = await FancentroMessenger.init(clientBrowserDaemon);
+        break;
+      case 'ton':
+        this.messenger = await TonMessenger.init(clientBrowserDaemon);
+        break;
+    }
+
+    this.platformConnectionStatus = 1;
   }
 
   async stopPlatformConnection() {
     await this.clientBrowser.stopDaemon(this.platformSettings.name);
+    await this.stopClientBrowser();
+    // @todo Do messenger related things.
+    this.messenger = null;
+    this.platformConnectionStatus = null;
   }
 
 }

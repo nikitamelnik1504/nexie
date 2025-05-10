@@ -17,7 +17,6 @@ class DialogsWatcher extends EventEmitter {
 
     await this.createWsConnection(instance);
 
-    instance.page.exposeFunction("requestDialogs", instance.requestDialogs.bind(instance));
     instance.page.exposeFunction("formatDialogs", this.formatDialogs.bind(instance));
     instance.page.exposeFunction("dialogsWatcherEmit", instance.emit.bind(instance));
 

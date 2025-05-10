@@ -1,17 +1,8 @@
-class MessagesCollection {
+import MessagesCollectionBase from "../../MessagesCollectionBase.js";
 
-  _messenger;
-  _dialog;
-
-  clientBrowserDaemonEventEmitter;
-
-  collection = [];
+class MessagesCollection extends MessagesCollectionBase {
 
   synced = false;
-
-  constructor(clientBrowserDaemonEventEmitter) {
-    this.clientBrowserDaemonEventEmitter = clientBrowserDaemonEventEmitter;
-  }
 
   static create(_messenger, _dialog, clientBrowserDaemonEventEmitter) {
     const instance = new this(clientBrowserDaemonEventEmitter);
@@ -35,20 +26,6 @@ class MessagesCollection {
     return instance;
   }
 
-  addMessage(message) {
-    const existingMessageIndex = this.collection.findIndex(
-      messageFromCollection => message.remote.id === messageFromCollection.remote.id
-    );
-
-    if (existingMessageIndex !== -1) {
-      this.collection[existingMessageIndex] = message;
-    } else {
-      this.collection.push(message);
-    }
-
-    return message;
-  }
-
   list(offset = 0, limit = 30) {
     const availableItems = this.collection.toSorted((a, b) => b.timestamp - a.timestamp).slice(offset);
     const itemsToReturn = availableItems.slice(0, limit);
@@ -60,11 +37,6 @@ class MessagesCollection {
 
     return itemsToReturn;
   }
-
-  lastMessage() {
-    return this.collection.toSorted((a, b) => b.timestamp - a.timestamp)[0];
-  }
-
 
 }
 

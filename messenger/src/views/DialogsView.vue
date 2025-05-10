@@ -64,7 +64,13 @@ function formatTime(timestamp: number) {
       <div v-if="!dialogs || dialogs.length === 0" class="dialogs__loader">
         <v-progress-circular color="black" model-value="60" indeterminate/>
       </div>
-      <router-link v-else v-for="dialog in dialogs"
+      <router-link v-else v-for="dialog in dialogs.sort((x, y) => {
+          const xIsMilliseconds = x.lastMessage.timestamp > 9999999999;
+          const xNormalizedTimestamp = xIsMilliseconds ? x.lastMessage.timestamp : x.lastMessage.timestamp  * 1000;
+          const yIsMilliseconds = y.lastMessage.timestamp > 9999999999;
+          const yNormalizedTimestamp = yIsMilliseconds ? y.lastMessage.timestamp : y.lastMessage.timestamp  * 1000;
+        return yNormalizedTimestamp - xNormalizedTimestamp ;
+      })"
                    class="dialog__link"
                    :to="{ name: 'dialog', params: { userId: route.params.userId, accountId: dialog.accountId, dialogId: dialog.id }}">
         <div class="dialog__avatar">
@@ -76,13 +82,21 @@ function formatTime(timestamp: number) {
           <div class="dialog__username">
             <h2>{{ dialog.member.username }}</h2>
           </div>
-          <div class="dialog__platform">
+          <div class="dialog__platform" :class="{
+            'ton': dialog.platform === 'ton',
+            'fancentro': dialog.platform === 'fancentro',
+          }">
+            <div>
+              <img src="../assets/ton.svg" alt="" v-if="dialog.platform === 'ton'" class="ton-logo">
+              <img src="../assets/fancentro.png" alt="" v-else-if="dialog.platform === 'fancentro'" style="margin-top: -2px;"
+                   class="fancentro-logo">
+            </div>
             <h4>{{ dialog.platform }} - {{ dialog.username }}</h4>
           </div>
           <div class="dialog__message">
             <p>
-              <i v-if="dialog.lastMessage.from !== dialog.member.id">You: </i>
-             {{ dialog.lastMessage.text }}
+              <i v-if="dialog.lastMessage.author !== dialog.member.id">You: </i>
+              {{ dialog.lastMessage.text }}
             </p>
           </div>
         </div>
@@ -95,9 +109,9 @@ function formatTime(timestamp: number) {
           </div>
         </div>
       </router-link>
-<!--      <div v-else class="dialog__list__empty">-->
-<!--        There is no messages.-->
-<!--      </div>-->
+      <!--      <div v-else class="dialog__list__empty">-->
+      <!--        There is no messages.-->
+      <!--      </div>-->
     </div>
   </div>
 </template>
@@ -133,8 +147,46 @@ function formatTime(timestamp: number) {
       }
 
       .dialog__platform {
+        display: flex;
+        align-items: center;
+
         h4 {
-          font-size: 13px;
+          font-size: 12px;
+          display: flex;
+          align-items: center;
+          font-weight: bold;
+        }
+
+        div {
+          width: 18px;
+          margin-right: 3px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          img {
+            max-width: 100%;
+            max-height: 100%;
+          }
+        }
+
+        &.fancentro {
+          h4 {
+            color: #8954c8;
+          }
+
+          div {
+            img {
+              max-width: 80%;
+              max-height: 80%;
+            }
+          }
+        }
+
+        &.ton {
+          h4 {
+            color: #3380cc;
+          }
         }
       }
 

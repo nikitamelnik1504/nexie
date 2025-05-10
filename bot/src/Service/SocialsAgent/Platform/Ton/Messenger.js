@@ -15,18 +15,6 @@ class Messenger extends PlatformMessengerBase {
     return instance;
   }
 
-  getDialogs() {
-    return this.dialogs;
-  }
-
-  getMe() {
-    return this.me;
-  }
-
-  getFactory() {
-    return this.factory;
-  }
-
 }
 
 export default Messenger;

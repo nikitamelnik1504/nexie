@@ -3,21 +3,19 @@ import EventEmitter from "node:events";
 class AuthorizationWatcher extends EventEmitter {
 
   page;
-  cdpSession;
 
   username = null;
 
   status = null;
 
-  constructor(page, cdpSession) {
+  constructor(page) {
     super();
 
     this.page = page;
-    this.cdpSession = cdpSession;
   }
 
-  static async init(page, cdpSession) {
-    const instance = new this(page, cdpSession);
+  static async init(page) {
+    const instance = new this(page);
 
     instance.page.on("load", async () => {
       try {

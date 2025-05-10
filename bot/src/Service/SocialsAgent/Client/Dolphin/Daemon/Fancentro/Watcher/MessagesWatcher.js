@@ -3,18 +3,17 @@ import EventEmitter from "node:events";
 class MessagesWatcher extends EventEmitter {
 
   page;
-  cdpSession;
 
-  room = {};
+  account;
 
-  constructor(page, cdpSession) {
+  constructor(page, account) {
     super();
     this.page = page;
-    this.cdpSession = cdpSession;
+    this.account = account;
   }
 
-  static async init(page, cdpSession) {
-    const instance = new this(page, cdpSession);
+  static async init(page, account) {
+    const instance = new this(page, account);
 
     await this.extendWsConnection(instance);
 
@@ -22,9 +21,8 @@ class MessagesWatcher extends EventEmitter {
   }
 
   static async extendWsConnection(instance) {
-    await instance.page.exposeFunction("setRoom", instance.setRoom.bind(instance));
-    await instance.page.exposeFunction("addMessage", instance.addMessage.bind(instance));
     await instance.page.exposeFunction("messagesWatcherEmit", instance.emit.bind(instance));
+
     await instance.page.evaluate(async () => {
       const message_event = async (event) => {
         const data = event.data;
@@ -32,14 +30,9 @@ class MessagesWatcher extends EventEmitter {
         const parsed = JSON.parse(data.replace("42/fc,", ""));
 
         switch (parsed[0]) {
-          // @todo Implement buckets system.
-          case 'room_buckets':
-            await window.setRoom(parsed[1].buckets[0]);
-            window.messagesWatcherEmit("update");
-            break;
           case 'message':
-            await window.addMessage(parsed[1]);
-            window.messagesWatcherEmit("new", parsed[1].id);
+            // await window.addMessage(parsed[1]);
+            // window.messagesWatcherEmit("new", parsed[1].id);
             break;
         }
       };
@@ -47,16 +40,6 @@ class MessagesWatcher extends EventEmitter {
       window.ws.addEventListener("message", message_event);
     });
 
-    instance.on("loadMessages", async (dialogId) => {
-      await instance.page.evaluate(async (dialogId) => {
-        window.ws.send('42/fc,' + JSON.stringify(["room_buckets", {
-          minCount: 50,
-          position: "firstUnread",
-          roomId: dialogId,
-          withNextBuckets: false
-        }]));
-      }, dialogId);
-    });
 
     instance.on("sendMessage", async (dialogId, message) => {
       await instance.page.evaluate(async (dialogId, message) => {
@@ -76,24 +59,43 @@ class MessagesWatcher extends EventEmitter {
     })
   }
 
-  setRoom(data) {
-    this.room = data;
-  }
+  requestMessages(dialogId, bucketId) {
+    return this.page.evaluate(async (dialogId, bucketId) => {
+      const listener = async (event) => {
+        const data = event.data;
+        if (!data.includes("42/fc,")) return;
+        const parsed = JSON.parse(data.replace("42/fc,", ""));
 
-  addMessage(data) {
-    if (this.room.messages === undefined) {
-      this.room.messages = [];
-    }
+        if (parsed[0] !== 'room_buckets') {
+          return;
+        }
 
-    this.room.messages.push(data);
-  }
+        const messages = [];
+        for (const bucket of parsed[1].buckets) {
+          for (const message of bucket.messages) {
+            messages.push(message)
+          }
+        }
 
-  getRoom() {
-    return this.room;
-  }
+        window.ws.removeEventListener("message", listener);
 
-  getMessage(id) {
-    return this.room.messages.find(message => message.id === id);
+        await window.messagesWatcherEmit("messagesList", {
+          list: messages,
+          dialogId,
+          bucketId: parsed[1].buckets[0] ? parsed[1].buckets[0]._id : '',
+        });
+      }
+
+      window.ws.addEventListener("message", listener);
+
+      window.ws.send('42/fc,' + JSON.stringify(["room_buckets", {
+        bucketId,
+        direction: "top",
+        roomId: dialogId,
+        minCount: 50,
+        withNextBuckets: false
+      }]));
+    }, dialogId, bucketId);
   }
 
 }

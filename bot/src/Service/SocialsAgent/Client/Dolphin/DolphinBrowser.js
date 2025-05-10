@@ -1,4 +1,4 @@
-import DolphinFancentroTab from "./Daemon/Fancentro/DolphinFancentroTab.js";
+import FancentroDaemon from "./Daemon/Fancentro/FancentroDaemon.js";
 import DolphinFanslyTab from "./Daemon/Fansly/DolphinFanslyTab.js";
 import TonDaemon from "./Daemon/Ton/TonDaemon.js";
 
@@ -16,7 +16,7 @@ class DolphinBrowser {
     let daemonInstances = this.daemons.filter(daemon => {
         switch (siteName) {
           case 'fancentro':
-            return daemon instanceof DolphinFancentroTab;
+            return daemon instanceof FancentroDaemon;
           case 'ton':
             return daemon instanceof TonDaemon;
         }
@@ -27,7 +27,7 @@ class DolphinBrowser {
     } else {
       switch (siteName) {
         case 'fancentro':
-          daemon = await DolphinFancentroTab.open(await this.browser);
+          daemon = await FancentroDaemon.launch(await this.browser, username);
           break;
         case 'ton':
           daemon = await TonDaemon.launch(await this.browser, username);
@@ -46,7 +46,7 @@ class DolphinBrowser {
     let daemonInstances = this.daemons.filter(daemon => {
         switch (siteName) {
           case 'fancentro':
-            return daemon instanceof DolphinFancentroTab;
+            return daemon instanceof FancentroDaemon;
           case 'ton':
             return daemon instanceof TonDaemon;
         }

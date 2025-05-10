@@ -38,9 +38,9 @@ class TonDaemon extends DaemonBase {
     await instance.page.goto(`https://ton.place/im`, {waitUntil: 'networkidle2', timeout: 60000});
     // await new Promise(resolve => setTimeout(resolve, 5000));
 
-    if (instance.watchers.account.getAccount().username !== username) {
+/*    if (instance.watchers.account.getAccount().username !== username) {
       return instance;
-    }
+    }*/
 
     instance.watchers.dialogs.watcher = await DialogsWatcher.init(instance.page, instance.watchers.account.getAccount());
 
@@ -57,9 +57,9 @@ class TonDaemon extends DaemonBase {
         instance.watchers.dialogs.watcher.requestDialogs(instance.watchers.dialogs.store.requestDialogs.nextFrom);
       }
 
-      requestMessages(memberId, count) {
-        if (!(memberId in instance.watchers.messages.store.requestMessages)) {
-          instance.watchers.messages.store.requestMessages[memberId] = {
+      requestMessages(dialogId, count) {
+        if (!(dialogId in instance.watchers.messages.store.requestMessages)) {
+          instance.watchers.messages.store.requestMessages[dialogId] = {
             queue: 0,
             nextFrom: 0,
             cache: [],
@@ -67,17 +67,17 @@ class TonDaemon extends DaemonBase {
         }
 
         const MESSAGES_RETURNING_PER_REQUEST = 50;
-        instance.watchers.messages.store.requestMessages[memberId].queue = Math.ceil(+count / MESSAGES_RETURNING_PER_REQUEST);
+        instance.watchers.messages.store.requestMessages[dialogId].queue = Math.ceil(+count / MESSAGES_RETURNING_PER_REQUEST);
 
-        if (instance.watchers.messages.store.requestMessages[memberId].nextFrom === '') {
+        if (instance.watchers.messages.store.requestMessages[dialogId].nextFrom === '') {
           return;
         }
 
-        instance.watchers.messages.watcher.requestMessages(memberId, instance.watchers.messages.store.requestMessages[memberId].nextFrom);
+        instance.watchers.messages.watcher.requestMessages(dialogId, instance.watchers.messages.store.requestMessages[dialogId].nextFrom);
       }
-
-      sendMessage(memberId, message, _bag = {}) {
-        instance.watchers.messages.watcher.sendMessage(memberId, message, _bag);
+      
+      sendMessage(dialogId, message, _bag = {}) {
+        instance.watchers.messages.watcher.sendMessage(dialogId, message, _bag);
       }
     }();
 

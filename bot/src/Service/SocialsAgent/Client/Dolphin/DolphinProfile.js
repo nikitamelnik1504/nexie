@@ -61,6 +61,10 @@ class DolphinProfile {
   }
 
   async refresh() {
+    if (this.running === true && this.wsEndpoint !== null) {
+      return this;
+    }
+
     this.running = false;
     this.port = null;
     this.wsEndpoint = null;

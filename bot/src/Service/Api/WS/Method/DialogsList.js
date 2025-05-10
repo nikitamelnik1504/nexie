@@ -5,13 +5,12 @@ function prepareResponseData(dialogs) {
 
   for (const dialog of dialogs) {
     const lastMessage = dialog.getMessages().lastMessage();
-
     response.push({
       id: dialog.id,
       lastMessage: {
-        text: lastMessage.text,
-        timestamp: lastMessage.timestamp,
-        from: lastMessage.from.id,
+        text: lastMessage ? lastMessage.text : null,
+        timestamp: lastMessage ? lastMessage.timestamp : null,
+        from: lastMessage ? lastMessage.from.id : null,
       },
       member: {
         id: dialog.member.id,
@@ -57,7 +56,7 @@ class DialogsList {
     Connection.registerListener(wsClient, socialAgentAccountMessenger, 'dialogsList', listener);
 
     const dialogs = socialAgentAccountMessenger.getDialogs().list(0, 30); // @todo Hardcoded pagination.
-    if (dialogs) {
+    if (dialogs.length > 0) {
       listener(dialogs);
     }
   }

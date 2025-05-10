@@ -14,7 +14,7 @@ class DaemonBase {
     this.browser = browser;
   }
 
-  static async open(browser) {
+  static async launch(browser) {
     const instance = new this(browser);
     instance.page = await instance.browser.newPage();
     instance.eventEmitter = new class extends EventEmitter {}();

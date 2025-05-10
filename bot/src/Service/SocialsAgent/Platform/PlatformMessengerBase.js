@@ -7,6 +7,18 @@ class PlatformMessengerBase extends EventEmitter {
   dialogs = null;
 
   me = null;
+
+  getMe() {
+    return this.me;
+  }
+
+  getDialogs() {
+    return this.dialogs;
+  }
+
+  getFactory() {
+    return this.factory;
+  }
 }
 
 export default PlatformMessengerBase;

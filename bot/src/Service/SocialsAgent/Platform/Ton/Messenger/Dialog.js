@@ -1,22 +1,10 @@
 import {v4 as uuid} from "uuid";
-import Member from "./Member.js";
+import DialogBase from "../../DialogBase.js";
 
-class Dialog {
-
-  _messenger;
-  _collection;
-
-  clientBrowserDaemonEventEmitter;
-
-  remote = {
-    id: null,
-  };
-
-  id;
-  member;
-  messages;
+class Dialog extends DialogBase {
 
   constructor(clientBrowserDaemonEventEmitter, data) {
+    super();
     this.clientBrowserDaemonEventEmitter = clientBrowserDaemonEventEmitter;
 
     this.id = uuid();
@@ -34,7 +22,7 @@ class Dialog {
 
     if (data.messages) {
       for (const message of data.messages) {
-        instance.messages.addMessage(instance._messenger.getFactory().createMessage(instance.messages, message),);
+        instance.messages.addMessage(instance._messenger.getFactory().createMessage(instance.messages, message));
       }
     }
 
@@ -43,10 +31,6 @@ class Dialog {
     });
 
     return instance;
-  }
-
-  getMessages() {
-    return this.messages;
   }
 
 }

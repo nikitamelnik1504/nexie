@@ -37,18 +37,20 @@ const messages = coreStore.getMessages(route.params.userId, route.params.account
 const reversedMessages = computed(() => [...messages.value].sort((x, y) => x.timestamp - y.timestamp).reverse());
 
 watch(accounts, (newValue) => {
-  if (newValue.length !== 0) {
-    for (const account of newValue) {
-      coreStore.requestDialogs(route.params.userId, account.id);
-    }
+  if (newValue.length !== 0 && !dialog.value) {
+    coreStore.requestDialogs(route.params.userId, account.value.id);
   }
 }, {immediate: true});
 
-watch(dialogs, (newValue) => {
+watch(dialog, (newValue) => {
   if (newValue.length !== 0) {
     coreStore.requestMessages(route.params.userId, route.params.accountId, route.params.dialogId);
   }
 })
+
+if (dialogs.value.length !== 0) {
+  coreStore.requestMessages(route.params.userId, route.params.accountId, route.params.dialogId);
+}
 
 function formatTime(timestamp: number) {
   const isMilliseconds = timestamp > 9999999999;
@@ -91,7 +93,15 @@ function sendMessage() {
           <div class="dialog__user__name">
             <h2>{{ dialog ? dialog.member.username : 'Loading...' }}</h2>
           </div>
-          <div class="dialog__user__platform">
+          <div class="dialog__user__platform" :class="{
+            'ton': dialog.platform === 'ton',
+            'fancentro': dialog.platform === 'fancentro',
+          }">
+            <div>
+              <img src="../assets/ton.svg" alt="" v-if="dialog.platform === 'ton'">
+              <img src="../assets/fancentro.png" alt="" v-else-if="dialog.platform === 'fancentro'"
+                   class="fancentro-logo">
+            </div>
             <h4>{{ dialog ? dialog.platform : 'Loading...' }} -
               {{ dialog ? dialog.username : 'Loading...' }}</h4>
           </div>
@@ -160,11 +170,49 @@ function sendMessage() {
         font-size: 15px;
       }
 
-      .dialog__user__platform h4 {
-        font-size: 13px;
-        line-height: 14px;
-        opacity: 0.7;
-        padding-bottom: 4px;
+      .dialog__user__platform {
+        display: flex;
+        align-items: center;
+        padding-bottom: 2px;
+
+        div {
+          width: 18px;
+          margin-right: 3px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          img {
+            max-width: 100%;
+            max-height: 100%;
+          }
+        }
+
+        h4 {
+          font-size: 13px;
+          line-height: 14px;
+          opacity: 0.7;
+          font-weight: bold;
+        }
+
+        &.ton {
+          h4 {
+            color: #3380cc;
+          }
+        }
+
+        &.fancentro {
+          div {
+            img {
+              max-width: 80%;
+              max-height: 80%;
+            }
+          }
+
+          h4 {
+            color: #8954c8;
+          }
+        }
       }
 
       .dialog__user__image {

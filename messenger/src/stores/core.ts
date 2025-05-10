@@ -98,27 +98,42 @@ export const useCoreStore = defineStore('core', () => {
             };
           }
 
-          dialogs.value.length = 0;
-
           for (const dialog of data.data) {
+            const existingDialog = dialogs.value.find(existDialog =>
+              existDialog.id === dialog.id &&
+              existDialog.accountId === data.accountId
+            );
+
             // @todo High-level error handle needed.
-            dialogs.value.push(<Dialog>{
-              accountId: data.accountId,
-              id: dialog.id,
-              member: <Member>{
-                id: dialog.member.id,
-                username: dialog.member.username,
-                image: null,
-              },
-              lastMessage: {
-                text: dialog.lastMessage.text,
-                from: dialog.lastMessage.from,
-                timestamp: dialog.lastMessage.timestamp,
-              },
-              unreadMessagesCount: 0,
-            })
+            if (existingDialog) {
+              existingDialog.member.id = dialog.member.id;
+              existingDialog.member.username = dialog.member.username;
+              existingDialog.member.image = dialog.member.image || null;
+
+              existingDialog.lastMessage.text = dialog.lastMessage.text;
+              existingDialog.lastMessage.author = dialog.lastMessage.from;
+              existingDialog.lastMessage.timestamp = dialog.lastMessage.timestamp;
+
+              existingDialog.unreadMessagesCount = dialog.unreadMessagesCount || 0; // Update unread messages
+            } else {
+              // Add new dialog if it doesn't exist
+              dialogs.value.push(<Dialog>{
+                accountId: data.accountId,
+                id: dialog.id,
+                member: <Member>{
+                  id: dialog.member.id,
+                  username: dialog.member.username,
+                  image: null,
+                },
+                lastMessage: {
+                  text: dialog.lastMessage.text,
+                  author: dialog.lastMessage.from,
+                  timestamp: dialog.lastMessage.timestamp,
+                },
+                unreadMessagesCount: 0,
+              });
+            }
           }
-          break;
         case 'dialogMessages':
           messages.value.length = 0;
 
