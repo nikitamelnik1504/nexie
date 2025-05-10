@@ -38,13 +38,16 @@ function formatTime(timestamp: number) {
   const now = Date.now();
   const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
 
-  if (timestamp < twentyFourHoursAgo) {
+  const isMilliseconds = timestamp > 9999999999;
+  const normalizedTimestamp = isMilliseconds ? timestamp : timestamp * 1000;
+
+  if (normalizedTimestamp < twentyFourHoursAgo) {
     return new Intl.DateTimeFormat('en-GB', {
       day: '2-digit',
       month: 'short',
-    }).format(new Date(timestamp));
+    }).format(new Date(normalizedTimestamp));
   } else {
-    return new Date(timestamp).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+    return new Date(normalizedTimestamp).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
   }
 }
 </script>
