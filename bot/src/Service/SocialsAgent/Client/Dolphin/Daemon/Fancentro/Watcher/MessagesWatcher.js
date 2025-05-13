@@ -31,8 +31,7 @@ class MessagesWatcher extends EventEmitter {
 
         switch (parsed[0]) {
           case 'message':
-            // await window.addMessage(parsed[1]);
-            // window.messagesWatcherEmit("new", parsed[1].id);
+            await window.messagesWatcherEmit("messageNew", parsed[1]);
             break;
         }
       };
@@ -41,22 +40,22 @@ class MessagesWatcher extends EventEmitter {
     });
 
 
-    instance.on("sendMessage", async (dialogId, message) => {
-      await instance.page.evaluate(async (dialogId, message) => {
-        window.ws.send('42/fc,' + JSON.stringify(["message", {
-          additionalData: {recipientGroup: "followers"},
-          data: {text: message},
-          edited: 0,
-          isBulk: false,
-          muted: false,
-          price: null,
-          reactions: [],
-          room: dialogId,
-          state: 2,
-          type: "text"
-        }]));
-      }, dialogId, message);
-    })
+    // instance.on("sendMessage", async (dialogId, message) => {
+    //   await instance.page.evaluate(async (dialogId, message) => {
+    //     window.ws.send('42/fc,' + JSON.stringify(["message", {
+    //       additionalData: {recipientGroup: "followers"},
+    //       data: {text: message},
+    //       edited: 0,
+    //       isBulk: false,
+    //       muted: false,
+    //       price: null,
+    //       reactions: [],
+    //       room: dialogId,
+    //       state: 2,
+    //       type: "text"
+    //     }]));
+    //   }, dialogId, message);
+    // })
   }
 
   requestMessages(dialogId, bucketId) {

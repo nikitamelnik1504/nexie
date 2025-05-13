@@ -139,6 +139,7 @@ export const useCoreStore = defineStore('core', () => {
 
           for (const message of data.data) {
             messages.value.push(<Message>{
+              // @todo ACCOUNT ID??????
               id: message.id,
               dialogId: data.dialogId,
               text: decodeURIComponent(message.text),
@@ -148,20 +149,26 @@ export const useCoreStore = defineStore('core', () => {
             })
           }
           break;
-        case 'dialog_message_new':
-          const dialog = dialogs.value.find((dialog) => dialog.id === data.data.dialogId && dialog.accountId === data.data.accountId);
-          dialog.last_message.text = decodeURIComponent(data.data.message.text);
-          dialog.last_message.author = data.data.message.from;
-          dialog.last_message.timestamp = data.data.message.timestamp;
-
+        case 'dialogMessageNew':
           messages.value.push(<Message>{
-            id: data.data.message.id,
-            dialogId: data.data.dialogId,
-            text: decodeURIComponent(data.data.message.text),
-            author: data.data.message.from,
-            timestamp: data.data.message.timestamp,
+            // @todo ACCOUNT ID??????
+            id: data.data.id,
+            dialogId: data.dialogId,
+            text: decodeURIComponent(data.data.text),
+            author: data.data.from,
+            timestamp: data.data.timestamp,
             status: 'sent',
           })
+
+          const existingDialog = dialogs.value.find(existDialog =>
+            existDialog.id === data.dialogId
+            // existDialog.accountId === data.accountId
+          );
+
+          existingDialog.lastMessage.text = decodeURIComponent(data.data.text);
+          existingDialog.lastMessage.author = data.data.from;
+          existingDialog.lastMessage.timestamp = data.data.timestamp;
+
           break;
       }
     }

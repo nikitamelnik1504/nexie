@@ -1,30 +1,43 @@
+import Connection from "../Connection.js";
+
+function prepareResponseData(message) {
+  return {
+    id: message.id,
+    from: message.from.id,
+    timestamp: message.timestamp,
+    text: message.text,
+  };
+}
+
 class DialogMessageNew {
 
   static async run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService) {
     const telegramUserData = await (await telegramBotService.getStorage()).getUserByUsername(telegramUserId);
 
     const response = {
-      type: "dialog_message_new",
-      data: {
-        accountId: null,
-        dialogId: null,
-        message: null,
-      }
+      type: "dialogMessageNew",
+      accountId: null,
+      dialogId: null,
+      data: null,
     };
 
-    for (const socialAgentId of telegramUserData.social_agent_accounts) {
-      const socialAgentAccount = socialsAgentService.getAccount(socialAgentId);
-      const socialAgentAccountMessenger = await socialAgentAccount.getPlatformMessenger();
+    const socialAgentAccountId = telegramUserData.social_agent_accounts.find(id => id === payload.accountId);
+    if (!socialAgentAccountId) return;
 
-      socialAgentAccountMessenger.removeAllListeners('dialog_message_new');
-      socialAgentAccountMessenger.on('dialog_message_new', (message) => {
-        response.data.accountId = socialAgentAccount.id;
-        response.data.dialogId = message._collection._dialog.id;
-        response.data.message = message;
-
-        wsClient.send(JSON.stringify(response));
-      });
+    const socialAgentAccount = socialsAgentService.getAccount(socialAgentAccountId);
+    const socialAgentAccountMessenger = await socialAgentAccount.getPlatformMessenger();
+    if (!socialAgentAccountMessenger) {
+      return;
     }
+
+    const listener = (message) => {
+      response.accountId = socialAgentAccount.id;
+      response.dialogId = message._collection._dialog.id;
+      response.data = prepareResponseData(message);
+      wsClient.send(JSON.stringify(response));
+    }
+
+    Connection.registerListener(wsClient, socialAgentAccountMessenger, 'messageNew', listener);
   }
 }
 

@@ -20,7 +20,10 @@ class MessagesCollection extends MessagesCollectionBase {
     })
 
     instance.clientBrowserDaemonEventEmitter.on('messageNew:' + instance._dialog.remote.id, (data) => {
+      const message = _messenger.getFactory().createMessage(instance, data);
+      instance.addMessage(message);
 
+      instance._messenger.emit('messageNew', instance.message(message.id)); // @todo Replace with actually added.
     });
 
     return instance;
@@ -36,6 +39,10 @@ class MessagesCollection extends MessagesCollectionBase {
     }
 
     return itemsToReturn;
+  }
+
+  message(id) {
+    return this.collection.find(message => message.id === id);
   }
 
 }

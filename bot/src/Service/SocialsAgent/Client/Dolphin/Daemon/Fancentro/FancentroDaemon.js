@@ -126,6 +126,10 @@ class FancentroDaemon extends DaemonBase {
       }
     })
 
+    instance.watchers.messages.watcher.on("messageNew", (data) => {
+      instance.eventEmitter.emit('messageNew:' + data.room, data);
+    })
+
     // await cdp.detach();
 
     return instance;

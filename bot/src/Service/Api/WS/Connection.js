@@ -1,6 +1,7 @@
 import DialogsList from "./Method/DialogsList.js";
 import DialogMessages from "./Method/DialogMessages.js";
 import DialogSendMessage from "./Method/DialogSendMessage.js";
+import DialogMessageNew from "./Method/DialogMessageNew.js";
 
 class Connection {
   static listeners = new WeakMap();
@@ -41,6 +42,7 @@ class Connection {
       switch (payload.type) {
         case 'dialogsList':
           DialogsList.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
+          DialogMessageNew.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
           break;
         case 'dialogMessages':
           DialogMessages.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
