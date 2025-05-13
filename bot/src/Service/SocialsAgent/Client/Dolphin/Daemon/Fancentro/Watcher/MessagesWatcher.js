@@ -73,6 +73,10 @@ class MessagesWatcher extends EventEmitter {
         const messages = [];
         for (const bucket of parsed[1].buckets) {
           for (const message of bucket.messages) {
+            if (message.data.text) {
+              message.data.text = decodeURIComponent(message.data.text);
+            }
+
             messages.push(message)
           }
         }
