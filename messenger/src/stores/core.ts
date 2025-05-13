@@ -142,7 +142,7 @@ export const useCoreStore = defineStore('core', () => {
               // @todo ACCOUNT ID??????
               id: message.id,
               dialogId: data.dialogId,
-              text: decodeURIComponent(message.text),
+              text: message.text,
               author: message.from,
               timestamp: message.timestamp,
               status: 'sent',
@@ -154,7 +154,7 @@ export const useCoreStore = defineStore('core', () => {
             // @todo ACCOUNT ID??????
             id: data.data.id,
             dialogId: data.dialogId,
-            text: decodeURIComponent(data.data.text),
+            text: data.data.text,
             author: data.data.from,
             timestamp: data.data.timestamp,
             status: 'sent',
@@ -165,7 +165,7 @@ export const useCoreStore = defineStore('core', () => {
             // existDialog.accountId === data.accountId
           );
 
-          existingDialog.lastMessage.text = decodeURIComponent(data.data.text);
+          existingDialog.lastMessage.text = data.data.text;
           existingDialog.lastMessage.author = data.data.from;
           existingDialog.lastMessage.timestamp = data.data.timestamp;
 

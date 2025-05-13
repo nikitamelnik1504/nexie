@@ -66,7 +66,7 @@ function sendMessage() {
   coreStore.messages.push({
     id: null,
     dialogId: route.params.dialogId,
-    text: decodeURIComponent(message.value),
+    text: message.value,
     author: account.value.me.id,
     timestamp: Date.now(),
     status: 'sending',
