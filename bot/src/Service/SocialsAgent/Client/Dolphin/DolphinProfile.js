@@ -43,9 +43,10 @@ class DolphinProfile {
     if (!this.running) return this;
 
     try {
-      const {success} = (await axios.get(this._client.apiUrl + `/browser_profiles/` + this.id + `/stop`)).data;
-
-      if (success) {
+      // @todo Replace this shit.
+      if (this.browser) {
+        this.browser.close();
+        this.browser = null;
         this.running = false;
         this.port = null;
         this.wsEndpoint = null;
@@ -53,6 +54,17 @@ class DolphinProfile {
         // Delay after close.
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
+
+      // const {success} = (await axios.get(this._client.apiUrl + `/browser_profiles/` + this.id + `/stop`)).data;
+
+      // if (success) {
+      //   this.running = false;
+      //   this.port = null;
+      //   this.wsEndpoint = null;
+      //
+      //   // Delay after close.
+      //   await new Promise(resolve => setTimeout(resolve, 5000));
+      // }
     } catch (error) {
       console.log(error);
     }

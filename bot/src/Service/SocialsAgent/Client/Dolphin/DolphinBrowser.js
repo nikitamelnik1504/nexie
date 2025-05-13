@@ -71,6 +71,10 @@ class DolphinBrowser {
     return this.daemons.length > 0;
   }
 
+  close() {
+    return this.browser.close();
+  }
+
 }
 
 export default DolphinBrowser;
