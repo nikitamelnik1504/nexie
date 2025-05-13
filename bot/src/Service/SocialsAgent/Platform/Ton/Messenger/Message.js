@@ -52,9 +52,9 @@ class Message {
         instance.timestamp = instance.remote.timestamp;
         instance.text = instance.remote.text;
 
-        instance.clientBrowserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {
-          // @todo Logic.
-        });
+        // instance.clientBrowserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {
+        //   // @todo Logic.
+        // });
 
         // @todo Remove messageSent listener.
 

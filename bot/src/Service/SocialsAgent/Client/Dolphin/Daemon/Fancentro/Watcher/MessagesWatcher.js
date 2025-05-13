@@ -23,7 +23,7 @@ class MessagesWatcher extends EventEmitter {
   static async extendWsConnection(instance) {
     await instance.page.exposeFunction("messagesWatcherEmit", instance.emit.bind(instance));
 
-    await instance.page.evaluate(async () => {
+    await instance.page.evaluate(async (accountId) => {
       const message_event = async (event) => {
         const data = event.data;
         if (!data.includes("42/fc,")) return;
@@ -32,6 +32,11 @@ class MessagesWatcher extends EventEmitter {
         switch (parsed[0]) {
           case 'message':
             const message = parsed[1];
+
+            if (message.authorId === accountId) {
+              return;
+            }
+
             if (message.data.text) {
               message.data.text = decodeURIComponent(message.data.text);
             }
@@ -42,25 +47,7 @@ class MessagesWatcher extends EventEmitter {
       };
 
       window.ws.addEventListener("message", message_event);
-    });
-
-
-    // instance.on("sendMessage", async (dialogId, message) => {
-    //   await instance.page.evaluate(async (dialogId, message) => {
-    //     window.ws.send('42/fc,' + JSON.stringify(["message", {
-    //       additionalData: {recipientGroup: "followers"},
-    //       data: {text: message},
-    //       edited: 0,
-    //       isBulk: false,
-    //       muted: false,
-    //       price: null,
-    //       reactions: [],
-    //       room: dialogId,
-    //       state: 2,
-    //       type: "text"
-    //     }]));
-    //   }, dialogId, message);
-    // })
+    }, instance.account.id);
   }
 
   requestMessages(dialogId, bucketId) {
@@ -104,6 +91,48 @@ class MessagesWatcher extends EventEmitter {
         withNextBuckets: false
       }]));
     }, dialogId, bucketId);
+  }
+
+  sendMessage(dialogId, message, _bag) {
+    return this.page.evaluate(async (dialogId, message, _bag) => {
+      const listener = async (event) => {
+        const data = event.data;
+        if (!data.includes("42/fc,")) return;
+        const parsed = JSON.parse(data.replace("42/fc,", ""));
+
+        if (parsed[0] !== 'message') {
+          return;
+        }
+
+        const message = parsed[1];
+        if (message.data.text) {
+          message.data.text = decodeURIComponent(message.data.text);
+        }
+
+        window.ws.removeEventListener("message", listener);
+
+        await window.messagesWatcherEmit("messageSent", message, _bag);
+      }
+
+      window.ws.addEventListener("message", listener);
+
+      const requestBody = {
+        additionalData: {recipientGroup: "followers"},
+        data: {text: message},
+        edited: 0,
+        isBulk: false,
+        muted: false,
+        price: null,
+        reactions: [],
+        room: dialogId,
+        state: 2,
+        type: "text"
+      };
+
+      window.ws.send('42/fc,' + JSON.stringify(["message", requestBody]));
+
+
+    }, dialogId, message, _bag);
   }
 
 }

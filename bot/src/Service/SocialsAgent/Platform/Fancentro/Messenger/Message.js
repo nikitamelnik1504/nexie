@@ -44,17 +44,17 @@ class Message {
         }
 
         instance.remote.id = data.id;
-        instance.remote.from = data.fromId;
-        instance.remote.timestamp = data.createdAt;
-        instance.remote.text = data.text;
+        instance.remote.from = data.authorId;
+        instance.remote.timestamp = data.timestamp;
+        instance.remote.text = data.data.text ? data.data.text : null;
 
         instance.from = _messenger.me;
         instance.timestamp = instance.remote.timestamp;
         instance.text = instance.remote.text;
 
-        instance.clientBrowserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {
-          // @todo Logic.
-        });
+        // instance.clientBrowserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {
+        //   // @todo Logic.
+        // });
 
         // @todo Remove messageSent listener.
 

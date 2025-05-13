@@ -72,6 +72,10 @@ class FancentroDaemon extends DaemonBase {
 
         instance.watchers.messages.watcher.requestMessages(dialogId, instance.watchers.messages.store.requestMessages[dialogId].bucketId);
       }
+
+      sendMessage(dialogId, message, _bag = {}) {
+        instance.watchers.messages.watcher.sendMessage(dialogId, message, _bag);
+      }
     }();
 
     instance.watchers.dialogs.watcher.on("dialogsList", (data) => {
@@ -125,6 +129,10 @@ class FancentroDaemon extends DaemonBase {
         instance.watchers.messages.store.requestMessages[data.dialogId].cache.length = 0;
       }
     })
+
+    instance.watchers.messages.watcher.on("messageSent", (data, _bag) => {
+      instance.eventEmitter.emit('messageSent:' + data.room, data, _bag);
+    });
 
     instance.watchers.messages.watcher.on("messageNew", (data) => {
       instance.eventEmitter.emit('messageNew:' + data.room, data);
