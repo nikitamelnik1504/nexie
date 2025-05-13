@@ -31,7 +31,12 @@ class MessagesWatcher extends EventEmitter {
 
         switch (parsed[0]) {
           case 'message':
-            await window.messagesWatcherEmit("messageNew", parsed[1]);
+            const message = parsed[1];
+            if (message.data.text) {
+              message.data.text = decodeURIComponent(message.data.text);
+            }
+
+            await window.messagesWatcherEmit("messageNew", message);
             break;
         }
       };
