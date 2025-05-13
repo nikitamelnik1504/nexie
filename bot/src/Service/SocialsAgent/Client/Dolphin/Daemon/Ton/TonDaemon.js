@@ -137,6 +137,9 @@ class TonDaemon extends DaemonBase {
       instance.eventEmitter.emit('messageSent:' + data.memberId, data, _bag);
     });
 
+    instance.watchers.messages.watcher.on("messageNew", (data) => {
+      instance.eventEmitter.emit('messageNew:' + data.user.id, data.message);
+    });
     return instance;
   }
 

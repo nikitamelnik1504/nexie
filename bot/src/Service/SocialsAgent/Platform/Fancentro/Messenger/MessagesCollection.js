@@ -23,7 +23,7 @@ class MessagesCollection extends MessagesCollectionBase {
       const message = _messenger.getFactory().createMessage(instance, data);
       instance.addMessage(message);
 
-      instance._messenger.emit('messageNew', instance.message(message.id)); // @todo Replace with actually added.
+      instance._messenger.emit('messageNew', instance.message(message.id));
     });
 
     return instance;

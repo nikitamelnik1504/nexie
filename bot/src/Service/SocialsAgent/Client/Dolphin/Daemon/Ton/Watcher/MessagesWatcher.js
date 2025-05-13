@@ -26,17 +26,21 @@ class MessagesWatcher extends EventEmitter {
   }
 
   static async extendWsConnection(instance) {
-    await instance.page.evaluate(async () => {
+    await instance.page.evaluate(async (memberId) => {
       window.ws.addEventListener("message", async (event) => {
         const data = JSON.parse(event.data);
 
         switch (data.type) {
           case 'message':
-            console.log(data);
+            if (data.body.message.fromId === memberId) {
+              return;
+            }
+
+            await window.messagesWatcherEmit("messageNew", window.formatMessage(data.body))
             break;
         }
       });
-    })
+    }, instance.account.id)
   }
 
   async requestMessages(memberId, startFrom) {

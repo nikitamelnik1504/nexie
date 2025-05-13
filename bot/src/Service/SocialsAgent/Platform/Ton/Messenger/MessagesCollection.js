@@ -20,7 +20,10 @@ class MessagesCollection extends MessagesCollectionBase {
     })
 
     instance.clientBrowserDaemonEventEmitter.on('messageNew:' + instance._dialog.member.remote.id, (data) => {
+      const message = _messenger.getFactory().createMessage(instance, data);
+      instance.addMessage(message);
 
+      instance._messenger.emit('messageNew', instance.message(message.id));
     });
 
     return instance;
