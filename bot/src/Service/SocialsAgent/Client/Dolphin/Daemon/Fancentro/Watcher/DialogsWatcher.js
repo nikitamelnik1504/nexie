@@ -122,7 +122,7 @@ class DialogsWatcher extends EventEmitter {
         return new Promise((resolveBrowser) => {
           const ws = new WebSocket('wss://im.fancentro.com/socket.io/?EIO=4&transport=websocket');
 
-          ws.onmessage = (event) => {
+          ws.addEventListener("message", (event) => {
             const data = event.data;
 
             if (data.startsWith('0{"sid"')) {
@@ -141,8 +141,10 @@ class DialogsWatcher extends EventEmitter {
               setInterval(() => {
                 ws.send("3");
               }, 20000);
+            } else if (data === "2") {
+              ws.send("3");
             }
-          };
+          });
         });
       }, instance.account.authKey, instance.account.sessionHash);
 
