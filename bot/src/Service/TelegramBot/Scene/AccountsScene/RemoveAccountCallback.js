@@ -15,8 +15,8 @@ class RemoveAccountCallback extends TelegramBotCommandBase {
       const storage = await this.service.getStorage();
 
       // @todo Implement client independence or check including platform type.
-      if (await socialsAgentAccount.getPlatformConnectionStatus() !== null) {
-        await socialsAgentAccount.stopPlatformConnection();
+      if (await socialsAgentAccount.getMessenger() !== null) {
+        await socialsAgentAccount.stopMessenger();
       }
 
       for (const telegramUser of await storage.getAllUsersWithAccessToSocialAgentAccount(socialsAgentAccountId)) {

@@ -24,8 +24,7 @@ class AccountsListCommand extends TelegramBotCommandBase {
     for (const socialAgent of accounts) {
       const message = {text: null, keyboard: null};
 
-      const accountClientConnectionStatus = await socialAgent.getClientBrowserStatus();
-      const accountPlatformConnectionStatus = await socialAgent.getPlatformConnectionStatus();
+      const accountMessenger = await socialAgent.getMessenger();
 
       let accountInfo;
       if (user.role === 'admin') {
@@ -37,10 +36,8 @@ class AccountsListCommand extends TelegramBotCommandBase {
         accountInfo = {
           'Account': (await storage.getSocialAgentAccount({id: socialAgent.id})).name,
           'Client': socialAgent.getClientType(),
-          'Client Status': !!(await socialAgent.getClient()) ? 'Connected' : 'Not Connected',
-          'Client Connection Status': accountClientConnectionStatus ? socialAgent.constructor.CLIENT_BROWSER_STATUS[accountClientConnectionStatus] : 'Account is not running',
           'Platform': socialAgent.getPlatformType(),
-          'Platform Connection Status': accountPlatformConnectionStatus === null ? 'Account is not running' : socialAgent.constructor.PLATFORM_CONNECTION_STATUS[accountPlatformConnectionStatus],
+          'Connection Status': accountMessenger === null ? 'Account is not running' : 'Account is running',
           'Username': socialAgent.getPlatformUsername(),
           'Login': socialAgent.getPlatformLogin(),
           'Password': socialAgent.getPlatformPassword(),
@@ -50,10 +47,8 @@ class AccountsListCommand extends TelegramBotCommandBase {
         accountInfo = {
           'Account': (await storage.getSocialAgentAccount({id: socialAgent.id})).name,
           'Client': socialAgent.getClientType(),
-          'Client Status': !!(await socialAgent.getClient()) ? 'Connected' : 'Not Connected',
-          'Client Connection Status': accountClientConnectionStatus ? socialAgent.constructor.CLIENT_BROWSER_STATUS[accountClientConnectionStatus] : 'Account is not running',
           'Platform': socialAgent.getPlatformType(),
-          'Platform Connection Status': accountPlatformConnectionStatus === null ? 'Account is not running' : socialAgent.constructor.PLATFORM_CONNECTION_STATUS[accountPlatformConnectionStatus],
+          'Connection Status': accountMessenger === null ? 'Account is not running' : 'Account is running',
           'Username': socialAgent.getPlatformUsername(),
         };
       }
@@ -66,7 +61,7 @@ class AccountsListCommand extends TelegramBotCommandBase {
       message.text = accountInfoString;
 
       if (user.role === 'admin') {
-        switch (accountPlatformConnectionStatus) {
+        switch (accountMessenger) {
           case null:
             message.keyboard = Markup.inlineKeyboard(
               [
@@ -75,27 +70,7 @@ class AccountsListCommand extends TelegramBotCommandBase {
               ],
             );
             break;
-          case 0:
-            message.keyboard = Markup.inlineKeyboard(
-              [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
-            );
-            break;
-          case 1:
-            message.keyboard = Markup.inlineKeyboard(
-              [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
-            );
-            break;
-          case 2:
-            message.keyboard = Markup.inlineKeyboard(
-              [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
-            );
-            break;
-          case 3:
-            message.keyboard = Markup.inlineKeyboard(
-              [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
-            );
-            break;
-          case 4:
+          default:
             message.keyboard = Markup.inlineKeyboard(
               [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
             );

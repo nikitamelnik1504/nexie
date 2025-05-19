@@ -1,4 +1,3 @@
-import DolphinBrowser from "./DolphinBrowser.js";
 import puppeteer from "puppeteer-core";
 import axios from "axios";
 
@@ -45,7 +44,7 @@ class DolphinProfile {
     try {
       // @todo Replace this shit.
       if (this.browser) {
-        this.browser.close();
+        await this.browser.close();
         this.browser = null;
         this.running = false;
         this.port = null;
@@ -112,7 +111,7 @@ class DolphinProfile {
     });
   }
 
-  async openBrowser() {
+  async getBrowser() {
     if (this.running === false) {
       throw new Error('Profile is not running!');
     }
@@ -121,19 +120,15 @@ class DolphinProfile {
       return this.browser;
     }
 
-    const browser = await puppeteer.connect({
+    if (this.port === null || this.wsEndpoint === null) {
+      throw new Error('Profile is running, but not in scope of the SocialsAgent Service!');
+    }
+
+    //   const cookies = await instance.profile.exportCookies();
+    //   await instance.page.setCookie(...cookies);
+    return this.browser = await puppeteer.connect({
       browserWSEndpoint: `ws://127.0.0.1:${this.port}${this.wsEndpoint}`,
     })
-
-    //   const cookies = await instance.profile.exportCookies(); # pass to DolphinBrowser
-    //   await instance.page.setCookie(...cookies); # inside DolphinBrowser
-    return this.browser = new DolphinBrowser(browser);
-  }
-
-  closeBrowser() {
-    if (this.browser !== null) {
-      this.browser = null;
-    }
   }
 
 }

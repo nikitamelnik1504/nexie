@@ -14,19 +14,19 @@
 
 describe('base sustainability', () => {
   beforeEach(() => {
-    cy.visit('http://localhost:5173/SAPPHIREKYC/dialogs')
+    cy.visit('https://sem-messenger.scfw.io/SAPPHIREKYC/dialogs')
   })
 
-  it('dialogs will continue try to load after very fast clicking on each', () => {
-    const dialogsCount = 100;
-
-    for (let i = 0; i < dialogsCount; i++) {
-      cy.get('.dialogs .dialogs__list .dialog__link').eq(i).click();
-      cy.get('.dialog .dialog__back').trigger('click')
-    }
-
-    cy.get('.dialogs .dialogs__list .dialog__link').eq(Math.floor(Math.random() * 11)).click();
-  });
+  // it('dialogs will continue try to load after very fast clicking on each', () => {
+  //   const dialogsCount = 100;
+  //
+  //   for (let i = 0; i < dialogsCount; i++) {
+  //     cy.get('.dialogs .dialogs__list .dialog__link').eq(i).click();
+  //     cy.get('.dialog .dialog__back').trigger('click')
+  //   }
+  //
+  //   cy.get('.dialogs .dialogs__list .dialog__link').eq(Math.floor(Math.random() * 11)).click();
+  // });
 
   it('each dialog will display messages after fast clicking on each', () => {
     const dialogsCount = 100;

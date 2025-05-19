@@ -1,7 +1,8 @@
 {
   "scripts": {
     "start": "node --env-file=.env index.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test:functional": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/functional",
+    "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/unit"
   },
   "type": "module",
   "version": "0.2.2",

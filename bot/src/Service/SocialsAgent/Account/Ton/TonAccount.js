@@ -1,4 +1,4 @@
-import AccountBase from "../AccountBase.js";
+import AccountBase from "../../AccountBase.js";
 
 class TonAccount extends AccountBase {
 }

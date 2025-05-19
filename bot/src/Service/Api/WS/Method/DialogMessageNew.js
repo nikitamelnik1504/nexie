@@ -25,7 +25,7 @@ class DialogMessageNew {
     if (!socialAgentAccountId) return;
 
     const socialAgentAccount = socialsAgentService.getAccount(socialAgentAccountId);
-    const socialAgentAccountMessenger = await socialAgentAccount.getPlatformMessenger();
+    const socialAgentAccountMessenger = await socialAgentAccount.getMessenger();
     if (!socialAgentAccountMessenger) {
       return;
     }
