@@ -128,6 +128,7 @@ function sendMessage() {
     </div>
     <div class="dialog__field">
       <input v-model="message" placeholder="Please write the message"/>
+      <button class="attachment d-flex justify-center"><img alt="attachment" src="../assets/attachment.svg" width="21"/></button>
       <button @click="sendMessage" :disabled="!message" :class="{'v-btn--disabled': !message}">Send</button>
     </div>
   </div>
@@ -294,6 +295,11 @@ function sendMessage() {
       background: black;
       color: white;
       margin-left: 8px;
+
+      &.attachment {
+        border-radius: 12px;
+        width: 48px;
+      }
     }
   }
 }
