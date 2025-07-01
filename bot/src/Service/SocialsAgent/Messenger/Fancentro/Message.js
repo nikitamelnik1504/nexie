@@ -5,7 +5,7 @@ class Message {
   _messenger;
   _collection;
 
-  clientBrowserDaemonEventEmitter;
+  browserDaemonEventEmitter;
 
   remote = {
     id: null,
@@ -19,8 +19,8 @@ class Message {
   timestamp;
   text;
 
-  constructor(clientBrowserDaemonEventEmitter, data) {
-    this.clientBrowserDaemonEventEmitter = clientBrowserDaemonEventEmitter;
+  constructor(browserDaemonEventEmitter, data) {
+    this.browserDaemonEventEmitter = browserDaemonEventEmitter;
 
     this.id = uuid();
 
@@ -32,13 +32,13 @@ class Message {
     }
   }
 
-  static create(_messenger, _collection, clientBrowserDaemonEventEmitter, data) {
-    const instance = new this(clientBrowserDaemonEventEmitter, data);
+  static create(_messenger, _collection, browserDaemonEventEmitter, data) {
+    const instance = new this(browserDaemonEventEmitter, data);
     instance._messenger = _messenger;
     instance._collection = _collection;
 
     if (!instance.remote.id) {
-      instance.clientBrowserDaemonEventEmitter.on('messageSent:' + instance._collection._dialog.remote.id, (data, _bag) => {
+      instance.browserDaemonEventEmitter.on('messageSent:' + instance._collection._dialog.remote.id, (data, _bag) => {
         if (_bag.messageId !== instance.id) {
           return;
         }
@@ -52,7 +52,7 @@ class Message {
         instance.timestamp = instance.remote.timestamp;
         instance.text = instance.remote.text;
 
-        // instance.clientBrowserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {
+        // instance.browserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {
         //   // @todo Logic.
         // });
 
@@ -61,7 +61,7 @@ class Message {
         instance._messenger.emit('messageSent', instance);
       });
 
-      instance.clientBrowserDaemonEventEmitter.sendMessage(instance._collection._dialog.remote.id, data.text, {
+      instance.browserDaemonEventEmitter.sendMessage(instance._collection._dialog.remote.id, data.text, {
         messageId: instance.id
       });
     } else {
@@ -74,7 +74,7 @@ class Message {
       instance.timestamp = instance.remote.timestamp;
       instance.text = instance.remote.text;
 
-      // instance.clientBrowserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {
+      // instance.browserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {
       //   // @todo Logic.
       // });
     }

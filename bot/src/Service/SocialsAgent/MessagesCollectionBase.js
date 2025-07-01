@@ -2,12 +2,12 @@ class MessagesCollectionBase {
   _messenger;
   _dialog;
 
-  clientBrowserDaemonEventEmitter;
+  browserDaemonEventEmitter;
 
   collection = [];
 
-  constructor(clientBrowserDaemonEventEmitter) {
-    this.clientBrowserDaemonEventEmitter = clientBrowserDaemonEventEmitter;
+  constructor(browserDaemonEventEmitter) {
+    this.browserDaemonEventEmitter = browserDaemonEventEmitter;
   }
 
   addMessage(message) {

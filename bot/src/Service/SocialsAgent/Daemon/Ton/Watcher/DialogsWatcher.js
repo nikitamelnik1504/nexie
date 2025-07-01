@@ -1,7 +1,7 @@
 import EventEmitter from "node:events";
 
-const HTTP_API_URL = 'https://apiv3.ton.place';
-const WS_API_URL = 'wss://apiv3.ton.place';
+const HTTP_API_URL = 'https://api.tonplace.net';
+const WS_API_URL = 'wss://api.tonplace.net';
 
 class DialogsWatcher extends EventEmitter {
 

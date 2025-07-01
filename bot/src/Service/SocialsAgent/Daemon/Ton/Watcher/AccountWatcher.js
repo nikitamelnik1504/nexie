@@ -1,4 +1,4 @@
-const HTTP_API_URL = 'https://apiv3.ton.place';
+const HTTP_API_URL = 'https://api.tonplace.net';
 
 class AccountWatcher {
 

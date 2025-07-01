@@ -2,7 +2,7 @@ import {v4 as uuid} from "uuid";
 
 class Member {
 
-  clientBrowserDaemonEventEmitter;
+  browserDaemonEventEmitter;
 
   _messenger;
   _dialog;
@@ -15,16 +15,16 @@ class Member {
     avatar: null,
   };
 
-  constructor(clientBrowserDaemonEventEmitter, data) {
-    this.clientBrowserDaemonEventEmitter = clientBrowserDaemonEventEmitter;
+  constructor(browserDaemonEventEmitter, data) {
+    this.browserDaemonEventEmitter = browserDaemonEventEmitter;
     this.id = uuid();
 
     this.remote.id = data.id;
     this.username = data.firstName;
   }
 
-  static create(_messenger, _dialog, clientBrowserDaemonEventEmitter, data) {
-    const instance = new this(clientBrowserDaemonEventEmitter, data);
+  static create(_messenger, _dialog, browserDaemonEventEmitter, data) {
+    const instance = new this(browserDaemonEventEmitter, data);
     instance._messenger = _messenger;
     instance._dialog = _dialog;
     return instance;

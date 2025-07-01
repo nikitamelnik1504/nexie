@@ -3,11 +3,19 @@ import AccountWatcher from "./Watcher/AccountWatcher.js";
 import DialogsWatcher from "./Watcher/DialogsWatcher.js";
 import MessagesWatcher from "./Watcher/MessagesWatcher.js";
 import PuppeteerBrowserDaemonBase from "../../PuppeteerBrowserDaemonBase.js";
+import PhotosWatcher from "./Watcher/PhotosWatcher.js";
 
 class TonDaemon extends PuppeteerBrowserDaemonBase {
 
   watchers = {
-    account: null,
+    account: {
+      store: {},
+      watcher: null,
+    },
+    photos: {
+      store: {},
+      watcher: null,
+    },
     dialogs: {
       store: {
         requestDialogs: {
@@ -36,7 +44,7 @@ class TonDaemon extends PuppeteerBrowserDaemonBase {
     await page.setViewport({width: 414, height: 896});
     await page.setRequestInterception(true);
 
-    this.watchers.account = await AccountWatcher.init(page);
+    this.watchers.account.watcher = await AccountWatcher.init(page);
     await page.goto(`https://ton.place/im`, {waitUntil: 'networkidle2', timeout: 60000});
     // await new Promise(resolve => setTimeout(resolve, 5000));
 
@@ -44,9 +52,11 @@ class TonDaemon extends PuppeteerBrowserDaemonBase {
       return instance;
     }*/
 
-    this.watchers.dialogs.watcher = await DialogsWatcher.init(page, this.watchers.account.getAccount());
+    this.watchers.dialogs.watcher = await DialogsWatcher.init(page, this.watchers.account.watcher.getAccount());
 
-    this.watchers.messages.watcher = await MessagesWatcher.init(page, this.watchers.account.getAccount());
+    this.watchers.messages.watcher = await MessagesWatcher.init(page, this.watchers.account.watcher.getAccount());
+
+    this.watchers.photos.watcher = await PhotosWatcher.init(page, this.watchers.account.watcher.getAccount());
 
     const instance = this;
     this.eventEmitter = new class extends EventEmitter {
@@ -77,6 +87,10 @@ class TonDaemon extends PuppeteerBrowserDaemonBase {
         }
 
         instance.watchers.messages.watcher.requestMessages(dialogId, instance.watchers.messages.store.requestMessages[dialogId].nextFrom);
+      }
+
+      requestAlbums() {
+        instance.watchers.photos.watcher.requestAlbums();
       }
       
       sendMessage(dialogId, message, _bag = {}) {

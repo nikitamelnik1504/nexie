@@ -3,16 +3,16 @@ import DialogBase from "../../DialogBase.js";
 
 class Dialog extends DialogBase {
 
-  constructor(clientBrowserDaemonEventEmitter, data) {
+  constructor(browserDaemonEventEmitter, data) {
     super();
-    this.clientBrowserDaemonEventEmitter = clientBrowserDaemonEventEmitter;
+    this.browserDaemonEventEmitter = browserDaemonEventEmitter;
 
     this.id = uuid();
     this.remote.id = data.id;
   }
 
-  static create(_messenger, _collection, clientBrowserDaemonEventEmitter, data) {
-    const instance = new this(clientBrowserDaemonEventEmitter, data);
+  static create(_messenger, _collection, browserDaemonEventEmitter, data) {
+    const instance = new this(browserDaemonEventEmitter, data);
     instance._messenger = _messenger;
     instance._collection = _collection;
 
@@ -26,7 +26,7 @@ class Dialog extends DialogBase {
       }
     }
 
-    instance.clientBrowserDaemonEventEmitter.on('dialogUpdate:' + instance.remote.id, (data) => {
+    instance.browserDaemonEventEmitter.on('dialogUpdate:' + instance.remote.id, (data) => {
       // @todo Logic.
     });
 

@@ -7,33 +7,33 @@ import Member from "./Member.js";
 
 class MessengerFactory {
 
-  constructor(messenger, clientBrowserDaemonEventEmitter) {
+  constructor(messenger, browserDaemonEventEmitter) {
     this.messenger = messenger;
-    this.clientBrowserDaemonEventEmitter = clientBrowserDaemonEventEmitter;
+    this.browserDaemonEventEmitter = browserDaemonEventEmitter;
   }
 
   createMe(data) {
-    return Me.create(this.messenger, this.clientBrowserDaemonEventEmitter, data);
+    return Me.create(this.messenger, this.browserDaemonEventEmitter, data);
   }
 
   createMember(_dialog, data) {
-    return Member.create(this.messenger, _dialog, this.clientBrowserDaemonEventEmitter, data);
+    return Member.create(this.messenger, _dialog, this.browserDaemonEventEmitter, data);
   }
 
   createDialogsCollection() {
-    return DialogsCollection.create(this.messenger, this.clientBrowserDaemonEventEmitter);
+    return DialogsCollection.create(this.messenger, this.browserDaemonEventEmitter);
   }
 
   createDialog(_collection, data) {
-    return Dialog.create(this.messenger, _collection, this.clientBrowserDaemonEventEmitter, data);
+    return Dialog.create(this.messenger, _collection, this.browserDaemonEventEmitter, data);
   }
 
   createMessagesCollection(_dialog) {
-    return MessagesCollection.create(this.messenger, _dialog, this.clientBrowserDaemonEventEmitter);
+    return MessagesCollection.create(this.messenger, _dialog, this.browserDaemonEventEmitter);
   }
 
   createMessage(_collection, data) {
-    return Message.create(this.messenger, _collection, this.clientBrowserDaemonEventEmitter, data);
+    return Message.create(this.messenger, _collection, this.browserDaemonEventEmitter, data);
   }
 }
 

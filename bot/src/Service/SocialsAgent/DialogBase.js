@@ -3,7 +3,7 @@ class DialogBase {
   _messenger;
   _collection;
 
-  clientBrowserDaemonEventEmitter;
+  browserDaemonEventEmitter;
 
   remote = {
     id: null,

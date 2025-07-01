@@ -1,20 +1,39 @@
 <script setup lang="ts">
 import {useRoute} from "vue-router";
-import {ref, computed, watch} from "vue";
+import {ref, computed, watch, type Ref} from "vue";
 import {useCoreStore} from "@/stores/core.ts";
 
+type Album = {
+  id: string,
+  name: string,
+  timestamp?: any,
+  preview_image_src: string,
+  images: Image[],
+  videos: Video[] | null,
+}
+
+type Image = {
+  id: string,
+  name: string,
+  timestamp: string,
+  src: string
+}
+
+type Video = {
+  id: string,
+  name: string,
+  timestamp: string,
+  src: string
+}
+
 const route = useRoute();
-
-const message = ref('');
-
 const coreStore = useCoreStore();
 
+const message = ref('');
 const accounts = coreStore.getAccounts(route.params.userId);
-
 const account = computed(() => {
   return accounts.value.find(account => account.id === route.params.accountId);
 });
-
 const dialogs = computed(() => {
   let res = [];
   for (const account of accounts.value) {
@@ -28,13 +47,77 @@ const dialogs = computed(() => {
   }
   return res;
 });
-
 const dialog = computed(() => {
   return dialogs.value.find(dialog => dialog.accountId === route.params.accountId && dialog.id === route.params.dialogId);
 });
-
 const messages = coreStore.getMessages(route.params.userId, route.params.accountId, route.params.dialogId);
 const reversedMessages = computed(() => [...messages.value].sort((x, y) => x.timestamp - y.timestamp).reverse());
+
+const mediaBrowserOpen = ref(false);
+const mediaAttachmentMenuOpen = ref(false);
+const mediaBrowserSelectedAlbum = ref();
+const mediaBrowserItemsSelected = ref([])
+const mediaBrowserSnackbar = ref(false);
+const albums: Ref<Album[]> = ref([{
+  id: 'test_id',
+  name: 'Test Name',
+  timestamp: '',
+  cover: 'https://posterjack.ca/cdn/shop/articles/Tips_for_Taking_Photos_at_the_Beach_55dd7d25-11df-4acf-844f-a5b4ebeff4df.jpg?v=1738158629&width=1500',
+  images: [
+    { id: 1, name: 'Test Image 1', src: 'https://posterjack.ca/cdn/shop/articles/Tips_for_Taking_Photos_at_the_Beach_55dd7d25-11df-4acf-844f-a5b4ebeff4df.jpg?v=1738158629&width=1500', selected: false, timestamp: '' }
+  ],
+  videos: [],
+}]);
+
+const paidMessageModal = ref(false);
+const messagePrice = ref(0);
+
+function openAlbum(album) {
+  mediaBrowserSelectedAlbum.value = album
+  updateSelectedImages()
+}
+
+function toggleImage(image) {
+  image.selected = !image.selected
+  updateSelectedImages()
+}
+
+function updateSelectedImages() {
+  if (mediaBrowserSelectedAlbum.value) {
+    mediaBrowserItemsSelected.value = mediaBrowserSelectedAlbum.value.images.filter(img => img.selected)
+  }
+}
+
+function mediaBrowserBackButton() {
+  if (mediaBrowserSelectedAlbum.value) {
+    mediaBrowserSelectedAlbum.value = false;
+  }
+  else {
+    mediaBrowserItemsSelected.value.length = 0;
+    for (const album of albums.value) {
+      for (const image of album.images) {
+        image.selected = false;
+      }
+    }
+    mediaBrowserSnackbar.value = false;
+    mediaBrowserOpen.value = false;
+  }
+}
+
+function mediaBrowserAttachButton() {
+  mediaBrowserOpen.value = false;
+  mediaBrowserSelectedAlbum.value = false;
+}
+
+watch(mediaBrowserOpen, (newValue) => {
+  if (newValue) {
+
+  }
+});
+
+watch(mediaBrowserItemsSelected, (val) => {
+  mediaBrowserSnackbar.value = val.length > 0;
+})
 
 watch(accounts, (newValue) => {
   if (newValue.length !== 0 && !dialog.value) {
@@ -127,11 +210,150 @@ function sendMessage() {
       </div>
     </div>
     <div class="dialog__field">
-      <input v-model="message" placeholder="Please write the message"/>
-      <button class="attachment d-flex justify-center"><img alt="attachment" src="../assets/attachment.svg" width="21"/></button>
+      <div class="position-relative wrapper" style="flex: 1">
+        <input v-model="message" placeholder="Please write the message" class="position-relative" style="padding-right: 39px;"/>
+        <button class="position-absolute d-flex justify-end w-auto" :class="{'v-btn--disabled': mediaBrowserItemsSelected.length === 0}" style="top: 3px; right: 2px"><img src="../assets/dollar.svg" alt="" width="40" @click="paidMessageModal = true"></button>
+      </div>
+      <button class="attachment d-flex justify-center position-relative" @click="mediaAttachmentMenuOpen = true">
+        <img alt="attachment" src="../assets/attachment.svg" width="21"/>
+        <span v-if="mediaBrowserItemsSelected.length > 0" class="px-1" style="position:absolute;right: -5px;top: -5px;background: white;color: black;border-radius: 20px;border: solid 4px black;font-size: 12px;line-height: 16px">{{ mediaBrowserItemsSelected.length }}</span>
+      </button>
       <button @click="sendMessage" :disabled="!message" :class="{'v-btn--disabled': !message}">Send</button>
     </div>
   </div>
+  <v-bottom-sheet v-model="mediaAttachmentMenuOpen">
+    <v-list>
+      <v-list-subheader title="Select attachment type"></v-list-subheader>
+
+      <v-list-item
+          v-for="tile in [{ title: 'Cloud'}, {title: 'Upload'}]"
+          :key="tile.title"
+          :title="tile.title"
+          @click="mediaAttachmentMenuOpen = false; mediaBrowserOpen = true"
+      >
+        <!--            :prepend-avatar="`https://dn.vuetifyjs.com/images/bottom-sheets/${tile.img}`"-->
+      </v-list-item>
+    </v-list>
+  </v-bottom-sheet>
+  <v-dialog
+      transition="dialog-bottom-transition"
+      fullscreen
+      v-model="mediaBrowserOpen"
+  >
+    <v-card>
+      <v-toolbar>
+        <v-btn @click="mediaBrowserBackButton" style="z-index: 1">
+          <img src="../assets/arrow-back.svg" alt="back" width="26" />
+        </v-btn>
+        <v-toolbar-title
+            style="position: absolute; left: 0; right: 0"
+        >
+          Cloud Storage
+        </v-toolbar-title>
+      </v-toolbar>
+
+      <v-list
+          multiple
+      >
+        <div v-if="!mediaBrowserSelectedAlbum">
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-list-subheader style="padding: 0 !important;">Albums</v-list-subheader>
+              </v-col>
+              <v-col
+                  v-for="album in albums"
+                  :key="album.id"
+                  cols="6"
+                  md="4"
+                  lg="3"
+              >
+                <v-card @click="openAlbum(album)" class="hoverable" :image="album.cover" height="180" color="surface-variant">
+                  <p class="ma-2 position-absolute bottom-0">{{ album.name }}</p>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
+        </div>
+        <div v-else>
+<!--            <v-chip>{{ selectedImages.length }} selected</v-chip>-->
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-list-subheader style="padding: 0 !important;">Images - {{ mediaBrowserSelectedAlbum.name }}</v-list-subheader>
+              </v-col>
+              <v-col
+                  v-for="image in mediaBrowserSelectedAlbum.images"
+                  :key="image.id"
+                  cols="4"
+                  md="4"
+                  lg="3"
+              >
+                <v-card
+                    @click="toggleImage(image)"
+                    class="mx-auto"
+                    color="surface-variant"
+                    :image="image.src"
+                    height="120"
+                >
+                    <v-btn
+                        icon
+                        size="21"
+                        :color="image.selected ? 'black' : 'white'"
+                        :style="{border: image.selected ? 'solid 6px white' : 'none'}"
+                        class="ma-2"
+                        @click.stop="toggleImage(image)"
+                    />
+                  <p style="position: absolute; right: 0; top: 0" class="ma-2">01:20</p>
+                  <p style="position: absolute; right: 0; bottom: 0" class="ma-2">9 июня</p>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
+        </div>
+      </v-list>
+      <v-snackbar v-model="mediaBrowserSnackbar" timeout="-1" color="black">
+        Selected {{ mediaBrowserItemsSelected.length }} items.
+        <template v-slot:actions>
+          <v-btn
+              color="white"
+              variant="text"
+              @click="mediaBrowserAttachButton"
+          >
+            Attach
+          </v-btn>
+        </template>
+      </v-snackbar>
+    </v-card>
+  </v-dialog>
+  <v-dialog v-model="paidMessageModal" class="paid-message-dialog">
+    <v-card
+        title="Paid message"
+    >
+      <template v-slot:default>
+        <v-container fluid>
+          <v-row class="px-2">
+            <v-col cols="12">
+              <label>
+                Price (EUR)
+                <input v-model="messagePrice" type="number" step="0.01">
+              </label>
+            </v-col>
+          </v-row>
+        </v-container>
+      </template>
+      <template v-slot:actions>
+        <v-spacer></v-spacer>
+        <v-btn @click="paidMessageModal = false; messagePrice = 0">
+          Cancel
+        </v-btn>
+
+        <v-btn @click="paidMessageModal = false">
+          Submit
+        </v-btn>
+      </template>
+    </v-card>
+  </v-dialog>
 </template>
 
 
@@ -277,14 +499,20 @@ function sendMessage() {
     border-top: solid 1px rgba(0, 0, 0, 0.09);
     display: flex;
 
-    input {
-      font-size: 14px;
-      padding: 12px 14px;
-      background-color: #EFEFEF;
-      border: none;
-      border-radius: 20px;
-      width: 73%;
-      flex: 1;
+    .wrapper {
+      input {
+        font-size: 14px;
+        padding: 12px 14px;
+        background-color: #EFEFEF;
+        border: none;
+        border-radius: 20px;
+        width: 100%;
+        flex: 1;
+      }
+
+      button {
+        background: none;
+      }
     }
 
     button {
@@ -301,6 +529,16 @@ function sendMessage() {
         width: 48px;
       }
     }
+  }
+}
+.paid-message-dialog {
+  input {
+    font-size: 14px;
+    padding: 12px 14px;
+    background-color: #EFEFEF;
+    border: none;
+    width: 100%;
+    flex: 1;
   }
 }
 </style>

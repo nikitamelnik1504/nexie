@@ -2,6 +2,7 @@ import DialogsList from "./Method/DialogsList.js";
 import DialogMessages from "./Method/DialogMessages.js";
 import DialogSendMessage from "./Method/DialogSendMessage.js";
 import DialogMessageNew from "./Method/DialogMessageNew.js";
+import MyPhotos from "./Method/MyPhotos.js";
 
 class Connection {
   static listeners = new WeakMap();
@@ -49,6 +50,9 @@ class Connection {
           break;
         case 'dialogSendMessage':
           DialogSendMessage.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
+          break;
+        case 'myPhotos':
+          MyPhotos.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
           break;
       }
     });

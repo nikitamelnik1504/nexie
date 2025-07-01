@@ -2,20 +2,20 @@ class DialogsCollectionBase {
 
   _messenger;
 
-  clientBrowserDaemonEventEmitter;
+  browserDaemonEventEmitter;
 
   collection = [];
 
-  constructor(clientBrowserDaemonEventEmitter) {
-    this.clientBrowserDaemonEventEmitter = clientBrowserDaemonEventEmitter;
+  constructor(browserDaemonEventEmitter) {
+    this.browserDaemonEventEmitter = browserDaemonEventEmitter;
   }
 
-  static create(_messenger, clientBrowserDaemonEventEmitter) {
-    const instance = new this(clientBrowserDaemonEventEmitter);
+  static create(_messenger, browserDaemonEventEmitter) {
+    const instance = new this(browserDaemonEventEmitter);
     instance._messenger = _messenger;
 
     // Can be very proactive. `dialogsUpdate:<username>`
-    instance.clientBrowserDaemonEventEmitter.on('dialogsList', (data) => {
+    instance.browserDaemonEventEmitter.on('dialogsList', (data) => {
       for (const dialog of data) {
         instance.addDialog(_messenger.getFactory().createDialog(instance, dialog));
       }
@@ -34,7 +34,7 @@ class DialogsCollectionBase {
 
     if (itemsToReturn.length < limit) {
       const remainingDialogs = limit - itemsToReturn.length;
-      this.clientBrowserDaemonEventEmitter.requestDialogs(remainingDialogs);
+      this.browserDaemonEventEmitter.requestDialogs(remainingDialogs);
     }
 
     return itemsToReturn;

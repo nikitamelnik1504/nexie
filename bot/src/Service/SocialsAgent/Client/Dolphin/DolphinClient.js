@@ -14,7 +14,7 @@ class DolphinClient {
   }
 
   static async connect(apiUrl, authToken) {
-    // await axios.post(apiUrl + `/auth/login-with-token`, {token: authToken}, {headers: {'Content-Type': 'application/json'}});
+    await axios.post(apiUrl + `/auth/login-with-token`, {token: authToken}, {headers: {'Content-Type': 'application/json'}});
     return new this(apiUrl, authToken);
   }
 

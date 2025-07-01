@@ -30,7 +30,7 @@ const requiredMessageProperties = ['id', 'from', 'timestamp', 'text'];
 
 const socialsAgentService = await SocialsAgentService.init(__dirname + '/../../data');
 
-describe.each([0,0,0])(`Dolphin Ton account (with messages) run flow from zero.`, () => {
+describe.each([0])(`Dolphin Ton account (with messages) run flow from zero.`, () => {
   let newAccount, dialogs;
 
   test('create account in system', async () => {

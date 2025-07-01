@@ -4,7 +4,7 @@ class Me {
 
   _messenger;
 
-  clientBrowserDaemonEventEmitter;
+  browserDaemonEventEmitter;
 
   id;
 
@@ -15,8 +15,8 @@ class Me {
 
   username = null;
 
-  constructor(clientBrowserDaemonEventEmitter, data) {
-    this.clientBrowserDaemonEventEmitter = clientBrowserDaemonEventEmitter;
+  constructor(browserDaemonEventEmitter, data) {
+    this.browserDaemonEventEmitter = browserDaemonEventEmitter;
 
     this.id = uuid();
     this.remote.id = data.id;
@@ -24,8 +24,8 @@ class Me {
     this.username = data.username;
   }
 
-  static create(_messenger, clientBrowserDaemonEventEmitter, data) {
-    const instance = new this(clientBrowserDaemonEventEmitter, data);
+  static create(_messenger, browserDaemonEventEmitter, data) {
+    const instance = new this(browserDaemonEventEmitter, data);
     instance._messenger = _messenger;
     return instance;
   }
