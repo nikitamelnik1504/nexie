@@ -25,6 +25,10 @@ class MessengerFactory {
     return AlbumsCollection.create(this.messenger, this.browserDaemonEventEmitter);
   }
 
+  createAlbum() {
+
+  }
+
   createDialogsCollection() {
     return DialogsCollection.create(this.messenger, this.browserDaemonEventEmitter);
   }

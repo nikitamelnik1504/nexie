@@ -111,7 +111,7 @@ function mediaBrowserAttachButton() {
 
 watch(mediaBrowserOpen, (newValue) => {
   if (newValue) {
-
+    coreStore.requestMedia(route.params.userId, route.params.accountId);
   }
 });
 

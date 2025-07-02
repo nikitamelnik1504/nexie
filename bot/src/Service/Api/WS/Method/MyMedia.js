@@ -4,13 +4,13 @@ function prepareResponseData(data) {
 
 }
 
-class MyPhotos {
+class MyMedia {
 
   static async run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService) {
     const telegramUserData = await (await telegramBotService.getStorage()).getUserByUsername(telegramUserId);
 
     const response = {
-      type: "myPhotos",
+      type: "myMedia",
       accountId: null,
       me: null,
       data: [],
@@ -33,9 +33,9 @@ class MyPhotos {
       wsClient.send(JSON.stringify(response));
     };
 
-    Connection.registerListener(wsClient, socialAgentAccountMessenger, 'myPhotos', listener);
+    Connection.registerListener(wsClient, socialAgentAccountMessenger, 'albumsList', listener);
 
-    const photos = socialAgentAccountMessenger.getPhotos().list(0, 2);
+    const photos = socialAgentAccountMessenger.getMedia().list(0, 30);
     if (photos.length > 0) {
       listener(photos);
     }
@@ -43,4 +43,4 @@ class MyPhotos {
 
 }
 
-export default MyPhotos;
+export default MyMedia;

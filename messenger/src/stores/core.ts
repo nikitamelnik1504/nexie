@@ -247,6 +247,14 @@ export const useCoreStore = defineStore('core', () => {
     }));
   }
 
+  async function requestMedia(userId: string, accountId: string) {
+    const matchedUser = users.value.find(user => user.id === userId);
+    return matchedUser.wsConnection.send(JSON.stringify({
+      type: 'myMedia',
+      accountId,
+    }));
+  }
+
   return {
     users,
     user,
@@ -262,6 +270,7 @@ export const useCoreStore = defineStore('core', () => {
     requestSendMessage,
     notifications,
     addNotification,
-    removeNotification
+    removeNotification,
+    requestMedia
   }
 });
