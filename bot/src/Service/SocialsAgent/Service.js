@@ -85,6 +85,25 @@ class Service {
             throw new Error('Account with specified client, platform and username already exist.');
           }
           break;
+        case 'system':
+          // Check if account with specified client, client profile and platform exist.
+          if (
+            existAccount.id !== account.id &&
+            'system' === existAccount.getClientType() &&
+            account.getPlatformType() === existAccount.getPlatformType()
+          ) {
+            throw new Error('Account with specified client, platform and profile is already exist.');
+          }
+
+          // Check if account with specified client, platform and username exist.
+          if (
+            existAccount.id !== account.id &&
+            'system' === existAccount.getClientType() &&
+            account.getPlatformType() === existAccount.getPlatformType() &&
+            account.getPlatformUsername() === existAccount.getPlatformUsername()) {
+            throw new Error('Account with specified client, platform and username already exist.');
+          }
+          break;
       }
     }
   }

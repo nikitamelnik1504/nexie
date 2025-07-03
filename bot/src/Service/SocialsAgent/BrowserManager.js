@@ -1,3 +1,5 @@
+import DolphinBrowser from "./Browser/DolphinBrowser.js";
+
 class BrowserManager {
 
   #browsers = [];
@@ -10,6 +12,10 @@ class BrowserManager {
   get(clientParams) {
     if (clientParams.type === 'dolphin') {
       const match = this.#browsers.find(b => b.clientParams.authToken === clientParams.authToken && b.clientParams.apiUrl === clientParams.apiUrl && b.clientParams.profile === clientParams.profile);
+      return match ? match.browser : match;
+    }
+    if (clientParams.type === 'system') {
+      const match = this.#browsers.find(b => !(b.browser instanceof DolphinBrowser));
       return match ? match.browser : match;
     }
 
