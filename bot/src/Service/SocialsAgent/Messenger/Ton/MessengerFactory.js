@@ -5,6 +5,10 @@ import MessagesCollection from "./MessagesCollection.js";
 import Message from "./Message.js";
 import Member from "./Member.js";
 import AlbumsCollection from "./AlbumsCollection.js";
+import Album from "./Album.js";
+import Image from "./Image.js";
+import MediasCollection from "./MediasCollection.js";
+import Video from "./Video.js";
 
 class MessengerFactory {
 
@@ -25,8 +29,21 @@ class MessengerFactory {
     return AlbumsCollection.create(this.messenger, this.browserDaemonEventEmitter);
   }
 
-  createAlbum() {
+  createAlbum(_collection, data) {
+    return Album.create(this.messenger, _collection, this.browserDaemonEventEmitter, data);
+  }
 
+  createMediasCollection(_album) {
+    return MediasCollection.create(this.messenger, _album, this.browserDaemonEventEmitter);
+  }
+
+  createMedia(data, _collection = null) {
+    switch (data.elementType) {
+      case 'photo':
+        return Image.create(this.messenger, _collection, this.browserDaemonEventEmitter, data);
+      case 'video':
+        return Video.create(this.messenger, _collection, this.browserDaemonEventEmitter, data);
+    }
   }
 
   createDialogsCollection() {

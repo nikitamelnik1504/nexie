@@ -20,7 +20,7 @@ class MessengerBase extends EventEmitter {
 
   dialogs = null;
   me = null;
-  media = null;
+  albums = null;
 
   static PLATFORM_CONNECTION_STATUS = {
     0: 'Account is not authorized',
@@ -75,8 +75,8 @@ class MessengerBase extends EventEmitter {
     return this.dialogs;
   }
 
-  getMedia() {
-    return this.media;
+  getAlbums() {
+    return this.albums;
   }
 
   getFactory() {

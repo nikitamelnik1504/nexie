@@ -54,12 +54,37 @@ type Notification = {
   pinned: boolean;
 }
 
+type Album = {
+  id: string,
+  title: string,
+  cover: string,
+  timestamp: string,
+  medias: Array<any>,
+  accountId: string
+}
+
+type Image = {
+  id: string,
+  src: string,
+  timestamp: string,
+  selected?: boolean,
+  type: 'image'
+}
+
+type Video = {
+  id: string,
+  src: string,
+  selected?: boolean,
+  type: 'video'
+}
+
 export const useCoreStore = defineStore('core', () => {
   const users: Ref<Array<User>> = ref([]);
   const accounts: Ref<Array<Account>> = ref([]);
   const dialogs: Ref<Array<Dialog>> = ref([]);
   const messages: Ref<Array<Message>> = ref([]);
   const notifications: Ref<Array<Notification>> = ref([]);
+  const albums: Ref<Array<Album>> = ref([]);
 
   const apiStore = useApiStore();
 
@@ -134,6 +159,7 @@ export const useCoreStore = defineStore('core', () => {
               });
             }
           }
+          break;
         case 'dialogMessages':
           messages.value.length = 0;
 
@@ -169,6 +195,40 @@ export const useCoreStore = defineStore('core', () => {
           existingDialog.lastMessage.author = data.data.from;
           existingDialog.lastMessage.timestamp = data.data.timestamp;
 
+          break;
+        case 'albumsList':
+          albums.value.length = 0;
+
+          for (const album of data.data) {
+            albums.value.push(<Album>{
+              id: album.id,
+              title: album.title,
+              cover: album.coverUrl,
+              timestamp: album.timestamp,
+              medias: [],
+              accountId: data.accountId,
+            });
+          }
+          break;
+        case 'albumMediasList':
+          const album = albums.value.find(album => album.id === data.albumId);
+          for (const media of data.data) {
+            if (media.type === 'image') {
+              album?.medias.push(<Image>{
+                id: media.id,
+                src: media.src,
+                timestamp: media.timestamp,
+                type: 'image'
+              });
+            } else if (media.type === 'video') {
+              album?.medias.push(<Video>{
+                id: media.id,
+                src: media.src,
+                timestamp: media.timestamp,
+                type: 'video',
+              });
+            }
+          }
           break;
       }
     }
@@ -212,6 +272,10 @@ export const useCoreStore = defineStore('core', () => {
     return dialogs.value.filter(dialog => dialog.accountId === accountId);
   });
 
+  const getAlbums = (accountId: string) => computed(() => {
+    return albums.value.filter(album => album.accountId === accountId);
+  })
+
   async function requestDialogs(userId, accountId) {
     const matchedUser = users.value.find(user => user.id === userId);
     return matchedUser.wsConnection.send(JSON.stringify({
@@ -235,7 +299,7 @@ export const useCoreStore = defineStore('core', () => {
     }));
   }
 
-  async function requestSendMessage(userId: sring, accountId: string, dialogId: string, message: string) {
+  async function requestSendMessage(userId: string, accountId: string, dialogId: string, message: string) {
     const matchedUser = users.value.find(user => user.id === userId);
     return matchedUser.wsConnection.send(JSON.stringify({
       type: 'dialogSendMessage',
@@ -247,11 +311,20 @@ export const useCoreStore = defineStore('core', () => {
     }));
   }
 
-  async function requestMedia(userId: string, accountId: string) {
+  async function requestAlbums(userId: string, accountId: string) {
     const matchedUser = users.value.find(user => user.id === userId);
     return matchedUser.wsConnection.send(JSON.stringify({
-      type: 'myMedia',
+      type: 'albumsList',
       accountId,
+    }));
+  }
+
+  async function requestAlbumMedias(userId: string, accountId: string, albumId: string) {
+    const matchedUser = users.value.find(user => user.id === userId);
+    return matchedUser.wsConnection.send(JSON.stringify({
+      type: 'albumMediasList',
+      accountId,
+      albumId,
     }));
   }
 
@@ -271,6 +344,9 @@ export const useCoreStore = defineStore('core', () => {
     notifications,
     addNotification,
     removeNotification,
-    requestMedia
+    albums,
+    getAlbums,
+    requestAlbums,
+    requestAlbumMedias,
   }
 });

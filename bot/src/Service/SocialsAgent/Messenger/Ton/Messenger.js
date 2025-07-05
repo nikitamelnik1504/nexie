@@ -8,7 +8,7 @@ class Messenger extends MessengerBase {
     this.factory = new MessengerFactory(this, this.daemon.getEventEmitter());
 
     this.me = this.factory.createMe(this.daemon.getEventEmitter().getMe());
-    this.media = this.factory.createAlbumsCollection();
+    this.albums = this.factory.createAlbumsCollection();
     this.dialogs = this.factory.createDialogsCollection();
 
     return this;

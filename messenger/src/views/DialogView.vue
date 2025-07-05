@@ -58,33 +58,24 @@ const mediaAttachmentMenuOpen = ref(false);
 const mediaBrowserSelectedAlbum = ref();
 const mediaBrowserItemsSelected = ref([])
 const mediaBrowserSnackbar = ref(false);
-const albums: Ref<Album[]> = ref([{
-  id: 'test_id',
-  name: 'Test Name',
-  timestamp: '',
-  cover: 'https://posterjack.ca/cdn/shop/articles/Tips_for_Taking_Photos_at_the_Beach_55dd7d25-11df-4acf-844f-a5b4ebeff4df.jpg?v=1738158629&width=1500',
-  images: [
-    { id: 1, name: 'Test Image 1', src: 'https://posterjack.ca/cdn/shop/articles/Tips_for_Taking_Photos_at_the_Beach_55dd7d25-11df-4acf-844f-a5b4ebeff4df.jpg?v=1738158629&width=1500', selected: false, timestamp: '' }
-  ],
-  videos: [],
-}]);
+const mediaBrowserAlbums = coreStore.getAlbums(route.params.accountId);
 
 const paidMessageModal = ref(false);
 const messagePrice = ref(0);
 
 function openAlbum(album) {
   mediaBrowserSelectedAlbum.value = album
-  updateSelectedImages()
+  updateSelectedMedias()
 }
 
-function toggleImage(image) {
-  image.selected = !image.selected
-  updateSelectedImages()
+function toggleMedia(media) {
+  media.selected = !media.selected
+  updateSelectedMedias()
 }
 
-function updateSelectedImages() {
+function updateSelectedMedias() {
   if (mediaBrowserSelectedAlbum.value) {
-    mediaBrowserItemsSelected.value = mediaBrowserSelectedAlbum.value.images.filter(img => img.selected)
+    mediaBrowserItemsSelected.value = mediaBrowserSelectedAlbum.value.medias.filter(media => media.selected)
   }
 }
 
@@ -94,11 +85,11 @@ function mediaBrowserBackButton() {
   }
   else {
     mediaBrowserItemsSelected.value.length = 0;
-    for (const album of albums.value) {
-      for (const image of album.images) {
-        image.selected = false;
-      }
-    }
+    // for (const album of mediaBrowserAlbums.value) {
+    //   for (const image of album.images) {
+    //     image.selected = false;
+      // }
+    // }
     mediaBrowserSnackbar.value = false;
     mediaBrowserOpen.value = false;
   }
@@ -111,9 +102,15 @@ function mediaBrowserAttachButton() {
 
 watch(mediaBrowserOpen, (newValue) => {
   if (newValue) {
-    coreStore.requestMedia(route.params.userId, route.params.accountId);
+    coreStore.requestAlbums(route.params.userId, route.params.accountId);
   }
 });
+
+watch(mediaBrowserSelectedAlbum, (newValue) => {
+  if (newValue) {
+    coreStore.requestAlbumMedias(route.params.userId, route.params.accountId, newValue.id);
+  }
+})
 
 watch(mediaBrowserItemsSelected, (val) => {
   mediaBrowserSnackbar.value = val.length > 0;
@@ -262,14 +259,14 @@ function sendMessage() {
                 <v-list-subheader style="padding: 0 !important;">Albums</v-list-subheader>
               </v-col>
               <v-col
-                  v-for="album in albums"
+                  v-for="album in mediaBrowserAlbums"
                   :key="album.id"
                   cols="6"
                   md="4"
                   lg="3"
               >
                 <v-card @click="openAlbum(album)" class="hoverable" :image="album.cover" height="180" color="surface-variant">
-                  <p class="ma-2 position-absolute bottom-0">{{ album.name }}</p>
+                  <p class="ma-2 position-absolute bottom-0">{{ album.title }}</p>
                 </v-card>
               </v-col>
             </v-row>
@@ -280,32 +277,32 @@ function sendMessage() {
           <v-container>
             <v-row>
               <v-col cols="12">
-                <v-list-subheader style="padding: 0 !important;">Images - {{ mediaBrowserSelectedAlbum.name }}</v-list-subheader>
+                <v-list-subheader style="padding: 0 !important;">Images - {{ mediaBrowserSelectedAlbum.title }}</v-list-subheader>
               </v-col>
               <v-col
-                  v-for="image in mediaBrowserSelectedAlbum.images"
-                  :key="image.id"
+                  v-for="media in mediaBrowserSelectedAlbum.medias"
+                  :key="media.id"
                   cols="4"
                   md="4"
                   lg="3"
               >
                 <v-card
-                    @click="toggleImage(image)"
+                    @click="toggleMedia(media)"
                     class="mx-auto"
                     color="surface-variant"
-                    :image="image.src"
+                    :image="media.src"
                     height="120"
                 >
                     <v-btn
                         icon
                         size="21"
-                        :color="image.selected ? 'black' : 'white'"
-                        :style="{border: image.selected ? 'solid 6px white' : 'none'}"
+                        :color="media.selected ? 'black' : 'white'"
+                        :style="{border: media.selected ? 'solid 6px white' : 'none'}"
                         class="ma-2"
-                        @click.stop="toggleImage(image)"
+                        @click.stop="toggleMedia(media)"
                     />
-                  <p style="position: absolute; right: 0; top: 0" class="ma-2">01:20</p>
-                  <p style="position: absolute; right: 0; bottom: 0" class="ma-2">9 июня</p>
+                  <p v-if="media.type === 'video'" style="position: absolute; right: 0; top: 0" class="ma-2">{{ media.timestamp }}</p>
+<!--                  <p style="position: absolute; right: 0; bottom: 0" class="ma-2">9 июня</p>-->
                 </v-card>
               </v-col>
             </v-row>

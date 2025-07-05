@@ -2,7 +2,8 @@ import DialogsList from "./Method/DialogsList.js";
 import DialogMessages from "./Method/DialogMessages.js";
 import DialogSendMessage from "./Method/DialogSendMessage.js";
 import DialogMessageNew from "./Method/DialogMessageNew.js";
-import MyMedia from "./Method/MyMedia.js";
+import AlbumsList from "./Method/AlbumsList.js";
+import AlbumMediasList from "./Method/AlbumMediasList.js";
 
 class Connection {
   static listeners = new WeakMap();
@@ -51,8 +52,11 @@ class Connection {
         case 'dialogSendMessage':
           DialogSendMessage.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
           break;
-        case 'myMedia':
-          MyMedia.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
+        case 'albumsList':
+          AlbumsList.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
+          break;
+        case 'albumMediasList':
+          AlbumMediasList.run(wsClient, telegramUserId, payload, telegramBotService, socialsAgentService);
           break;
       }
     });

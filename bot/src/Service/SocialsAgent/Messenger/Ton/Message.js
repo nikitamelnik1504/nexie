@@ -18,6 +18,7 @@ class Message {
   from;
   timestamp;
   text;
+  attachments = [];
 
   constructor(browserDaemonEventEmitter, data) {
     this.browserDaemonEventEmitter = browserDaemonEventEmitter;

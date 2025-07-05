@@ -1,17 +1,15 @@
 import {v4 as uuid} from 'uuid';
 
-class AlbumBase {
+class MediaBase {
 
   _messenger;
-  _collection;
+  _collection = null;
 
   browserDaemonEventEmitter;
 
   remote = {};
 
-  id = null;
-
-  medias;
+  id;
 
   constructor(browserDaemonEventEmitter, data) {
     this.browserDaemonEventEmitter = browserDaemonEventEmitter;
@@ -19,20 +17,12 @@ class AlbumBase {
     this.id = uuid();
   }
 
-  static create(_messenger, _collection, browserDaemonEventEmitter, data) {
+  static create(_messenger, _collection = null, browserDaemonEventEmitter, data) {
     const instance = new this(browserDaemonEventEmitter, data);
     instance._messenger = _messenger;
     instance._collection = _collection;
-
-    instance.medias = instance._messenger.getFactory().createMediasCollection(instance);
-
     return instance;
   }
-
-  getMedias() {
-    return this.medias;
-  }
-
 }
 
-export default AlbumBase;
+export default MediaBase;

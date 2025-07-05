@@ -3,7 +3,7 @@ import AccountWatcher from "./Watcher/AccountWatcher.js";
 import DialogsWatcher from "./Watcher/DialogsWatcher.js";
 import MessagesWatcher from "./Watcher/MessagesWatcher.js";
 import PuppeteerBrowserDaemonBase from "../../PuppeteerBrowserDaemonBase.js";
-import PhotosWatcher from "./Watcher/PhotosWatcher.js";
+import MediaWatcher from "./Watcher/MediaWatcher.js";
 
 class TonDaemon extends PuppeteerBrowserDaemonBase {
 
@@ -12,7 +12,7 @@ class TonDaemon extends PuppeteerBrowserDaemonBase {
       store: {},
       watcher: null,
     },
-    photos: {
+    media: {
       store: {},
       watcher: null,
     },
@@ -56,7 +56,7 @@ class TonDaemon extends PuppeteerBrowserDaemonBase {
 
     this.watchers.messages.watcher = await MessagesWatcher.init(page, this.watchers.account.watcher.getAccount());
 
-    this.watchers.photos.watcher = await PhotosWatcher.init(page, this.watchers.account.watcher.getAccount());
+    this.watchers.media.watcher = await MediaWatcher.init(page, this.watchers.account.watcher.getAccount());
 
     const instance = this;
     this.eventEmitter = new class extends EventEmitter {
@@ -90,7 +90,11 @@ class TonDaemon extends PuppeteerBrowserDaemonBase {
       }
 
       requestAlbums() {
-        instance.watchers.photos.watcher.requestAlbums();
+        instance.watchers.media.watcher.requestAlbums();
+      }
+
+      requestMedia(albumId, count) {
+        instance.watchers.media.watcher.requestMedia(albumId, 0);
       }
       
       sendMessage(dialogId, message, _bag = {}) {
@@ -157,6 +161,15 @@ class TonDaemon extends PuppeteerBrowserDaemonBase {
     this.watchers.messages.watcher.on("messageNew", (data) => {
       this.eventEmitter.emit('messageNew:' + data.user.id, data.message);
     });
+
+    this.watchers.media.watcher.on("albumsList", (data) => {
+      this.eventEmitter.emit('albumsList', data.list);
+    });
+
+    this.watchers.media.watcher.on("albumMediasList", (data) => {
+      this.eventEmitter.emit('albumMediasList:' + data.albumId, data.list);
+    });
+
     return instance;
   }
 
