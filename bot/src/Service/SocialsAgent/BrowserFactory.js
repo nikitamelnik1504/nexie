@@ -1,4 +1,5 @@
 import DolphinBrowser from "./Browser/DolphinBrowser.js";
+import SystemBrowser from "./Browser/SystemBrowser.js";
 
 class BrowserFactory {
 
@@ -11,6 +12,10 @@ class BrowserFactory {
   createBrowser(settings) {
     if (settings.type === 'dolphin') {
       return new DolphinBrowser(this._clientManager, settings.params.apiUrl, settings.params.authToken, settings.params.profile);
+    }
+
+    if (settings.type === 'system') {
+      return new SystemBrowser(this._clientManager);
     }
   }
 

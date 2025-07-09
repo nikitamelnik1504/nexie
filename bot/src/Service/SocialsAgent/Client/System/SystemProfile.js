@@ -7,6 +7,7 @@ class SystemProfile {
   port = '';
   wsEndpoint = '/devtools/browser/<unique_id>';
 
+
   _client;
 
   browser = null;
