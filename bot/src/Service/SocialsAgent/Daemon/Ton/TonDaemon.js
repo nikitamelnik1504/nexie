@@ -97,7 +97,7 @@ class TonDaemon extends PuppeteerBrowserDaemonBase {
         instance.watchers.media.watcher.requestMedia(albumId, 0);
       }
       
-      sendMessage(dialogId, message, _bag = {}) {
+      sendMessage(dialogId, message, attachments = [], _bag = {}) {
         instance.watchers.messages.watcher.sendMessage(dialogId, message, _bag);
       }
     }();

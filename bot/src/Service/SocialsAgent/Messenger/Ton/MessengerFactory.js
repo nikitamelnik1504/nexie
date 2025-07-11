@@ -7,9 +7,10 @@ import Member from "./Member.js";
 import AlbumsCollection from "./AlbumsCollection.js";
 import Album from "./Album.js";
 import Image from "./Image.js";
-import MediasCollection from "./MediasCollection.js";
 import Video from "./Video.js";
 import ImageAttachment from "./ImageAttachment.js";
+import AlbumItem from "./AlbumItem.js";
+import AlbumItemsCollection from "./AlbumItemsCollection.js";
 
 class MessengerFactory {
 
@@ -34,16 +35,21 @@ class MessengerFactory {
     return Album.create(this.messenger, _collection, this.browserDaemonEventEmitter, data);
   }
 
-  createMediasCollection(_album) {
-    return MediasCollection.create(this.messenger, _album, this.browserDaemonEventEmitter);
+  createAlbumItemsCollection(_album = null) {
+    return AlbumItemsCollection.create(this.messenger, _album, this.browserDaemonEventEmitter);
   }
 
-  createMedia(data, _collection = null) {
-    switch (data.elementType) {
+  createAlbumItem(_collection, data) {
+    return AlbumItem.create(this.messenger, _collection, this.browserDaemonEventEmitter, data);
+  }
+
+  createMedia(type, data) {
+    switch (type) {
       case 'photo':
-        return Image.create(this.messenger, _collection, this.browserDaemonEventEmitter, data);
+      case 'image':
+        return Image.create(this.messenger, this.browserDaemonEventEmitter, data.photo ? data.photo : data);
       case 'video':
-        return Video.create(this.messenger, _collection, this.browserDaemonEventEmitter, data);
+        return Video.create(this.messenger, this.browserDaemonEventEmitter, data);
     }
   }
 
@@ -64,8 +70,8 @@ class MessengerFactory {
   }
 
   createAttachment(_message, data) {
-    if (data.type === 'photo') {
-      ImageAttachment.create(this.messenger, _message, this.browserDaemonEventEmitter, data);
+    if (data.type === 'photo' || data.type === 'image') {
+      return ImageAttachment.create(this.messenger, _message, this.browserDaemonEventEmitter, data);
     }
   }
 }

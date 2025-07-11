@@ -46,6 +46,13 @@ type Message = {
   author: string;
   timestamp: number;
   status: string;
+  attachments: Array<Attachment> | [];
+};
+
+type Attachment = {
+  type: string;
+  id: string;
+  src: string;
 };
 
 type Notification = {
@@ -172,6 +179,7 @@ export const useCoreStore = defineStore('core', () => {
               author: message.from,
               timestamp: message.timestamp,
               status: 'sent',
+              attachments: message.attachments,
             })
           }
           break;
@@ -299,14 +307,15 @@ export const useCoreStore = defineStore('core', () => {
     }));
   }
 
-  async function requestSendMessage(userId: string, accountId: string, dialogId: string, message: string) {
+  async function requestSendMessage(userId: string, accountId: string, dialogId: string, message: string, attachments: Array<Attachment> = []) {
     const matchedUser = users.value.find(user => user.id === userId);
     return matchedUser.wsConnection.send(JSON.stringify({
       type: 'dialogSendMessage',
       accountId,
       dialogId,
       data: {
-        text: message
+        text: message,
+        attachments
       }
     }));
   }

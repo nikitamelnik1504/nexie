@@ -4,21 +4,33 @@ class Image extends ImageBase {
 
   remote = {
     id: null,
-    timestamp: null,
     src: null,
   };
 
   constructor(browserDaemonEventEmitter, data) {
     super(browserDaemonEventEmitter, data);
 
+    // @todo Replace that shit.
+    // If it builds from album item.
     if (data.id) {
       this.remote.id = data.id;
     }
-    if (data.createdAt) {
-      this.remote.timestamp = this.timestamp = data.createdAt;
+    // If it builds from attachment.
+    else if (data.photoId) {
+      this.remote.id = data.photoId;
     }
+
+    // If it builds from album item.
     if (data.path) {
       this.remote.src = this.src = data.path;
+    }
+    // @todo Security vulnerability.
+    else if (data.src) {
+      this.remote.src = this.src = data.src;
+    }
+    // If it builds from attachment.
+    else if (data.photoLarge) {
+      this.remote.src = this.src = data.photoLarge;
     }
   }
 }

@@ -31,17 +31,18 @@ class Message {
       this.remote.timestamp = data.createdAt;
       this.remote.text = data.text;
     }
-    if (data.attachments && data.attachments.length > 0) {
-      for (const attachment of data.attachments) {
-        this._messenger.getFactory().createAttachment(this, attachment);
-      }
-    }
   }
 
   static create(_messenger, _collection, browserDaemonEventEmitter, data) {
     const instance = new this(browserDaemonEventEmitter, data);
     instance._messenger = _messenger;
     instance._collection = _collection;
+
+    if (data.attachments && data.attachments.length > 0) {
+      for (const attachment of data.attachments) {
+        instance.attachments.push(instance._messenger.getFactory().createAttachment(instance, attachment));
+      }
+    }
 
     if (!instance.remote.id) {
       instance.browserDaemonEventEmitter.on('messageSent:' + instance._collection._dialog.member.remote.id, (data, _bag) => {
@@ -67,7 +68,8 @@ class Message {
         instance._messenger.emit('messageSent', instance);
       });
 
-      instance.browserDaemonEventEmitter.sendMessage(instance._collection._dialog.member.remote.id, data.text, {
+      instance.text = data.text;
+      instance.browserDaemonEventEmitter.sendMessage(instance._collection._dialog.member.remote.id, instance.text, [], {
         messageId: instance.id
       });
     } else {

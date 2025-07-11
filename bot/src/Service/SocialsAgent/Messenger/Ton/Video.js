@@ -4,7 +4,6 @@ class Video extends VideoBase {
 
   remote = {
     id: null,
-    timestamp: null,
     src: null,
     duration: null,
   };
@@ -16,9 +15,6 @@ class Video extends VideoBase {
 
     if (data.id) {
       this.remote.id = data.id;
-    }
-    if (data.createdAt) {
-      this.remote.timestamp = this.timestamp = data.createdAt;
     }
     if (data.path) {
       const pathData = JSON.parse(data.path);

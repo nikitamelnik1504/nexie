@@ -4,22 +4,26 @@ import ImageBase from "../../../SocialsAgent/ImageBase.js";
 
 function prepareResponseData(data) {
   const response = [];
-  for (const media of data) {
+
+  for (const albumItem of data) {
+    const media = albumItem.getMedia();
+
     const response_item = {
       id: media.id,
       src: media.src,
-      timestamp: media.timestamp,
+      timestamp: albumItem.timestamp,
       type: null,
     };
 
     if (media instanceof VideoBase) {
       response_item.type = 'video';
-    } else if (media instanceof ImageBase) {
+    } else if (albumItem.media instanceof ImageBase) {
       response_item.type = 'image';
     }
 
     response.push(response_item);
   }
+
   return response;
 }
 
@@ -61,9 +65,9 @@ class AlbumMediasList {
       return
     }
 
-    const medias = album.getMedias().list(0, 30);
-    if (medias.length > 0) {
-      listener(medias);
+    const albumItems = album.getItems().list(0, 30);
+    if (albumItems.length > 0) {
+      listener(albumItems);
     }
   }
 

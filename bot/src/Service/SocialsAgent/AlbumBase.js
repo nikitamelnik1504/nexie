@@ -11,7 +11,7 @@ class AlbumBase {
 
   id = null;
 
-  medias;
+  items;
 
   constructor(browserDaemonEventEmitter, data) {
     this.browserDaemonEventEmitter = browserDaemonEventEmitter;
@@ -24,13 +24,13 @@ class AlbumBase {
     instance._messenger = _messenger;
     instance._collection = _collection;
 
-    instance.medias = instance._messenger.getFactory().createMediasCollection(instance);
+    instance.items = instance._messenger.getFactory().createAlbumItemsCollection(instance);
 
     return instance;
   }
 
-  getMedias() {
-    return this.medias;
+  getItems() {
+    return this.items;
   }
 
 }

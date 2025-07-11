@@ -7,6 +7,10 @@ class AttachmentBase {
 
   browserDaemonEventEmitter;
 
+  remote = {};
+
+  media;
+
   id;
 
   constructor(browserDaemonEventEmitter, data) {
@@ -19,7 +23,15 @@ class AttachmentBase {
     const instance = new this(browserDaemonEventEmitter, data);
     instance._messenger = _messenger;
     instance._message = _message;
+
+    // @todo Hardcoded photo.
+    instance.media = instance._messenger.getFactory().createMedia(data.type, data);
+
     return instance;
+  }
+
+  getMedia() {
+    return this.media;
   }
 
 }

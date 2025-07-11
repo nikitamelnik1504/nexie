@@ -3,7 +3,6 @@ import {v4 as uuid} from 'uuid';
 class MediaBase {
 
   _messenger;
-  _collection = null;
 
   browserDaemonEventEmitter;
 
@@ -17,10 +16,9 @@ class MediaBase {
     this.id = uuid();
   }
 
-  static create(_messenger, _collection = null, browserDaemonEventEmitter, data) {
+  static create(_messenger, browserDaemonEventEmitter, data) {
     const instance = new this(browserDaemonEventEmitter, data);
     instance._messenger = _messenger;
-    instance._collection = _collection;
     return instance;
   }
 }

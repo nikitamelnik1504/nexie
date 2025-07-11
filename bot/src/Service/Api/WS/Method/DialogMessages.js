@@ -1,15 +1,29 @@
 import Connection from "../Connection.js";
+import ImageAttachment from "../../../SocialsAgent/Messenger/Ton/ImageAttachment.js";
 
 function prepareResponseData(messages) {
   const response = [];
 
   for (const message of messages) {
-    response.push({
+    const response_item = {
       id: message.id,
       from: message.from.id,
       timestamp: message.timestamp,
       text: message.text,
-    });
+      attachments: [],
+    };
+
+    for (const attachment of message.attachments) {
+      if (attachment instanceof ImageAttachment) {
+        response_item.attachments.push({
+          type: 'image',
+          id: attachment.id,
+          src: attachment.getMedia().src,
+        })
+      }
+    }
+
+    response.push(response_item);
   }
 
   return response;
