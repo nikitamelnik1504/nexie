@@ -9,6 +9,7 @@ import Album from "./Album.js";
 import Image from "./Image.js";
 import MediasCollection from "./MediasCollection.js";
 import Video from "./Video.js";
+import ImageAttachment from "./ImageAttachment.js";
 
 class MessengerFactory {
 
@@ -60,6 +61,12 @@ class MessengerFactory {
 
   createMessage(_collection, data) {
     return Message.create(this.messenger, _collection, this.browserDaemonEventEmitter, data);
+  }
+
+  createAttachment(_message, data) {
+    if (data.type === 'photo') {
+      ImageAttachment.create(this.messenger, _message, this.browserDaemonEventEmitter, data);
+    }
   }
 }
 

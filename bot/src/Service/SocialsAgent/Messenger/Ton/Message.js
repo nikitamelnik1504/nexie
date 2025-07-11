@@ -31,6 +31,11 @@ class Message {
       this.remote.timestamp = data.createdAt;
       this.remote.text = data.text;
     }
+    if (data.attachments && data.attachments.length > 0) {
+      for (const attachment of data.attachments) {
+        this._messenger.getFactory().createAttachment(this, attachment);
+      }
+    }
   }
 
   static create(_messenger, _collection, browserDaemonEventEmitter, data) {
