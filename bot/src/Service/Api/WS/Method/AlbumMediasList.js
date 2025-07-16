@@ -1,6 +1,6 @@
 import Connection from "../Connection.js";
-import VideoBase from "../../../SocialsAgent/VideoBase.js";
-import ImageBase from "../../../SocialsAgent/ImageBase.js";
+import VideoBase from "../../../SocialsAgent/lib/Messenger/VideoBase.js";
+import ImageBase from "../../../SocialsAgent/lib/Messenger/ImageBase.js";
 
 function prepareResponseData(data) {
   const response = [];

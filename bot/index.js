@@ -5,7 +5,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 import TelegramBotService from "./src/Service/TelegramBot/TelegramBotService.js";
-import SocialsAgentService from "./src/Service/SocialsAgent/Service.js";
+import SocialsAgentService from "./src/Service/SocialsAgent/lib/Service.js";
 import ApiService from "./src/Service/Api/ApiService.js";
 
 const socialsAgentService = await SocialsAgentService.init(__dirname + '/data');

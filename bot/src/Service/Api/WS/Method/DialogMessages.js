@@ -1,5 +1,5 @@
 import Connection from "../Connection.js";
-import ImageAttachment from "../../../SocialsAgent/Messenger/Ton/ImageAttachment.js";
+import ImageAttachment from "../../../SocialsAgent/user/Messenger/Ton/ImageAttachment.js";
 
 function prepareResponseData(messages) {
   const response = [];

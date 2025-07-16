@@ -6,7 +6,7 @@ import {
     expect,
     jest,
 } from '@jest/globals';
-import SocialsAgentService from '../../src/Service/SocialsAgent/Service.js';
+import SocialsAgentService from '../../src/Service/SocialsAgent/lib/Service.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { setTimeout as delay } from 'timers/promises';
