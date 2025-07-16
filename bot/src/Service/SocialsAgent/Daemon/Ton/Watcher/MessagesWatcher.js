@@ -67,10 +67,10 @@ class MessagesWatcher extends EventEmitter {
     }, this.account.token, memberId, startFrom, HTTP_API_URL);
   }
 
-  async sendMessage(memberId, message, _bag) {
-    return this.page.evaluate(async (accessToken, memberId, message, _bag, httpApiUrl) => {
+  async sendMessage(memberId, message, attachments = [], _bag) {
+    return this.page.evaluate(async (accessToken, memberId, message, attachments, _bag, httpApiUrl) => {
       const requestBody = {
-        attachments: [],
+        attachments,
         randomId: -1,
         text: message
       };
@@ -88,7 +88,7 @@ class MessagesWatcher extends EventEmitter {
           memberId,
         }, _bag);
       });
-    }, this.account.token, memberId, message, _bag, HTTP_API_URL);
+    }, this.account.token, memberId, message, attachments, _bag, HTTP_API_URL);
   }
 
   static formatMessages(responseBody) {

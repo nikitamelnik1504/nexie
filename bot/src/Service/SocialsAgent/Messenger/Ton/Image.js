@@ -12,12 +12,14 @@ class Image extends ImageBase {
 
     // @todo Replace that shit.
     // If it builds from album item.
-    if (data.id) {
-      this.remote.id = data.id;
+    if (data.elementId) {
+      this.remote.id = data.elementId;
     }
     // If it builds from attachment.
     else if (data.photoId) {
       this.remote.id = data.photoId;
+    } else if (data.id) {
+      this.remote.id = data.id;
     }
 
     // If it builds from album item.

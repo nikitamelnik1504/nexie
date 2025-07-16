@@ -1,4 +1,5 @@
 import {v4 as uuid} from "uuid";
+import ImageAttachment from "./ImageAttachment.js";
 
 class Message {
 
@@ -69,7 +70,16 @@ class Message {
       });
 
       instance.text = data.text;
-      instance.browserDaemonEventEmitter.sendMessage(instance._collection._dialog.member.remote.id, instance.text, [], {
+      const attachmentsForDaemon = [];
+      for (const attachment of instance.attachments) {
+        if (attachment instanceof ImageAttachment) {
+          attachmentsForDaemon.push({type: 'photo',
+          photo: {
+            photoId: attachment.getMedia().remote.id
+          }});
+        }
+      }
+      instance.browserDaemonEventEmitter.sendMessage(instance._collection._dialog.member.remote.id, instance.text, attachmentsForDaemon, {
         messageId: instance.id
       });
     } else {
