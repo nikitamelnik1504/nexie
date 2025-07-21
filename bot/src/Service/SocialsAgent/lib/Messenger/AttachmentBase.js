@@ -24,18 +24,23 @@ class AttachmentBase {
     instance._messenger = _messenger;
     instance._message = _message;
 
-    // @todo Hardcoded photo.
-
     // @todo Checked not all albums.
-    for (const album of instance._messenger.getAlbums().list(0, 30)) {
-      for (const albumItem of album.getItems().list(0, 30)) {
-        if (albumItem.getMedia().id.toString() === data.id.toString()) {
-          instance.media = albumItem.getMedia();
+    if (_message.from.id === _messenger.me.id) {
+      if (data.id) {
+        for (const album of instance._messenger.getAlbums().list()) {
+          for (const albumItem of album.getItems().list()) {
+            if (albumItem.getMedia().id.toString() === data.id) {
+              instance.media = albumItem.getMedia();
+            }
+          }
         }
       }
-    }
 
-    if (!instance.media) {
+      // @todo Temporary.
+      if (!instance.media) {
+        instance.media = instance._messenger.getFactory().createMedia(data.type, data);
+      }
+    } else {
       instance.media = instance._messenger.getFactory().createMedia(data.type, data);
     }
 

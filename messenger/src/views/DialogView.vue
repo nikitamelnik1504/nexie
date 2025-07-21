@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useRoute} from "vue-router";
-import {ref, computed, watch, type Ref} from "vue";
+import {ref, computed, watch} from "vue";
 import {useCoreStore} from "@/stores/core.ts";
 
 type Album = {
@@ -149,11 +149,12 @@ function sendMessage() {
     author: account.value.me.id,
     timestamp: Date.now(),
     status: 'sending',
-    attachments: mediaBrowserItemsSelected.value
+    attachments: [...mediaBrowserItemsSelected.value]
   });
 
   coreStore.requestSendMessage(route.params.userId, route.params.accountId, route.params.dialogId, message.value, mediaBrowserItemsSelected.value);
   message.value = '';
+  mediaBrowserItemsSelected.value.length = 0;
 }
 
 </script>
@@ -253,7 +254,7 @@ function sendMessage() {
             mediaBrowserItemsSelected.length
           }}</span>
       </button>
-      <button @click="sendMessage" :disabled="!message" :class="{'v-btn--disabled': !message}">Send</button>
+      <button @click="sendMessage" :disabled="!message && mediaBrowserItemsSelected.length === 0" :class="{'v-btn--disabled': !message && mediaBrowserItemsSelected.length === 0}">Send</button>
     </div>
   </div>
   <v-bottom-sheet v-model="mediaAttachmentMenuOpen">

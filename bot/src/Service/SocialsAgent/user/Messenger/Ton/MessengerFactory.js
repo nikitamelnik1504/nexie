@@ -67,7 +67,7 @@ class MessengerFactory {
   }
 
   createMessage(_collection, data) {
-    return Message.create(this.messenger, _collection, this.browserDaemonEventEmitter, data);
+    return new Message(this.messenger, _collection, this.browserDaemonEventEmitter, data);
   }
 
   createAttachment(_message, data) {

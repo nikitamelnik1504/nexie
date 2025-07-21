@@ -12,10 +12,9 @@ class Messenger extends MessengerBase {
     this.dialogs = this.factory.createDialogsCollection();
 
     const browserDaemonEventEmitter = this.daemon.getEventEmitter();
-    // Can be very proactive. `dialogsUpdate:<username>`
     browserDaemonEventEmitter.on('dialogsList', (data) => {
       for (const dialog of data) {
-        this.getDialogs().addDialog(this.getFactory().createDialog(this, dialog));
+        this.getDialogs().addDialog(this.getFactory().createDialog(this.getDialogs(), dialog));
       }
 
       // const matchedDialogIndex = instance.collection.findIndex((existDialog) => existDialog.id === dialog.id);
@@ -23,9 +22,8 @@ class Messenger extends MessengerBase {
       this.emit('dialogsList', this.dialogs.collection); // @todo Replace with actually added.
     });
 
-    browserDaemonEventEmitter.on('dialogUpdate', (data) => {
-      // @todo Logic.
-    });
+    // Can be very proactive. `dialogsUpdate:<username>`
+    // @todo browserDaemonEventEmitter.on('dialogUpdate', (data) => {});
 
     browserDaemonEventEmitter.on('messagesList', (data) => {
       let currentDialog;
@@ -45,6 +43,35 @@ class Messenger extends MessengerBase {
       this.emit('messagesList', currentDialog.getMessages().collection); // @todo Replace with actually added.
     })
 
+    browserDaemonEventEmitter.on('messageSent', (data, _bag) => {
+      let currentDialog, currentMessage;
+
+      for (const dialog of this.getDialogs().list()) {
+        if (dialog.member.remote.id === data.memberId) {
+          currentDialog = dialog;
+        }
+      }
+
+      for (const message of currentDialog.getMessages().list()) {
+        if (message.id === _bag.messageId) {
+          currentMessage = message;
+        }
+      }
+
+      currentMessage.remote.id = data.id;
+      currentMessage.remote.from = data.fromId;
+      currentMessage.remote.timestamp = data.createdAt;
+      currentMessage.remote.text = data.text;
+
+      currentMessage.timestamp = currentMessage.remote.timestamp;
+      currentMessage.text = currentMessage.remote.text;
+
+      // @todo Remove messageSent listener.
+      this.emit('messageSent', currentMessage);
+    });
+
+    // @todo browserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {});
+
     browserDaemonEventEmitter.on('messageNew', (data) => {
       // let currentDialog;
 
@@ -59,6 +86,32 @@ class Messenger extends MessengerBase {
       // currentDialog.getMessages().addMessage(message);
 
       // this.emit('messageNew', currentDialog.getMessages().message(message.id));
+    });
+
+    browserDaemonEventEmitter.on('albumsList', (data) => {
+      for (const album of data) {
+        this.albums.addAlbum(this.getFactory().createAlbum(this.albums, album));
+      }
+
+      // const matchedDialogIndex = instance.collection.findIndex((existDialog) => existDialog.id === dialog.id);
+
+      this.emit('albumsList', this.albums.collection); // @todo Replace with actually added.
+    });
+
+    browserDaemonEventEmitter.on('albumMediasList', (data) => {
+      let currentAlbum;
+
+      for (const album of this.albums.list()) {
+        if (album.remote.id === data.albumId) {
+          currentAlbum = album;
+        }
+      }
+
+      for (const albumItem of data.data) {
+        currentAlbum.getItems().addItem(this.getFactory().createAlbumItem(currentAlbum.getItems(), albumItem));
+      }
+
+      this.emit('albumMediasList', currentAlbum.getItems().collection);
     });
 
     return this;
