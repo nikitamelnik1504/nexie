@@ -67,12 +67,13 @@ class MessagesWatcher extends EventEmitter {
     }, this.account.token, memberId, startFrom, HTTP_API_URL);
   }
 
-  async sendMessage(memberId, message, attachments = [], _bag) {
-    return this.page.evaluate(async (accessToken, memberId, message, attachments, _bag, httpApiUrl) => {
+  async sendMessage(memberId, message, attachments = [], charge = {}, _bag) {
+    return this.page.evaluate(async (accessToken, memberId, message, attachments, charge, _bag, httpApiUrl) => {
       const requestBody = {
         attachments,
         randomId: -1,
-        text: message
+        text: message,
+        ...charge
       };
 
       fetch(httpApiUrl + '/im/' + memberId + '/send', {
@@ -88,7 +89,7 @@ class MessagesWatcher extends EventEmitter {
           memberId,
         }, _bag);
       });
-    }, this.account.token, memberId, message, attachments, _bag, HTTP_API_URL);
+    }, this.account.token, memberId, message, attachments, charge, _bag, HTTP_API_URL);
   }
 
   static formatMessages(responseBody) {

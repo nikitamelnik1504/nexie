@@ -46,6 +46,11 @@ type Message = {
   author: string;
   timestamp: number;
   status: string;
+  charge?: {
+    price: number,
+    paid: boolean,
+    currency: string
+  };
   attachments: Array<Attachment> | [];
 };
 
@@ -307,7 +312,7 @@ export const useCoreStore = defineStore('core', () => {
     }));
   }
 
-  async function requestSendMessage(userId: string, accountId: string, dialogId: string, message: string, attachments: Array<Attachment> = []) {
+  async function requestSendMessage(userId: string, accountId: string, dialogId: string, message: string, attachments: Array<Attachment> = [], charge = {}) {
     const matchedUser = users.value.find(user => user.id === userId);
     return matchedUser.wsConnection.send(JSON.stringify({
       type: 'dialogSendMessage',
@@ -315,7 +320,8 @@ export const useCoreStore = defineStore('core', () => {
       dialogId,
       data: {
         text: message,
-        attachments
+        attachments,
+        ...charge
       }
     }));
   }

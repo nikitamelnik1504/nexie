@@ -29,7 +29,7 @@ type Video = {
 const route = useRoute();
 const coreStore = useCoreStore();
 
-const message = ref('');
+const messageText = ref('');
 const accounts = coreStore.getAccounts(route.params.userId);
 const account = computed(() => {
   return accounts.value.find(account => account.id === route.params.accountId);
@@ -141,19 +141,30 @@ function formatTime(timestamp: number) {
     minute: '2-digit',
   });
 }
+
 function sendMessage() {
-  coreStore.messages.push({
+  const message = {
     id: null,
     dialogId: route.params.dialogId,
-    text: message.value,
+    text: messageText.value,
     author: account.value.me.id,
     timestamp: Date.now(),
     status: 'sending',
     attachments: [...mediaBrowserItemsSelected.value]
-  });
+  };
 
-  coreStore.requestSendMessage(route.params.userId, route.params.accountId, route.params.dialogId, message.value, mediaBrowserItemsSelected.value);
-  message.value = '';
+  if (messagePrice.value !== 0) {
+    message.charge = {
+      price: messagePrice.value,
+      currency: 'eur',
+      paid: false,
+    };
+  }
+
+  coreStore.messages.push(message);
+  coreStore.requestSendMessage(route.params.userId, route.params.accountId, route.params.dialogId, messageText.value, mediaBrowserItemsSelected.value, message.charge ? message.charge : {});
+  messagePrice.value = 0;
+  messageText.value = '';
   mediaBrowserItemsSelected.value.length = 0;
 }
 
@@ -241,11 +252,14 @@ function sendMessage() {
     </div>
     <div class="dialog__field">
       <div class="position-relative wrapper" style="flex: 1">
-        <input v-model="message" placeholder="Please write the message" class="position-relative"
+        <input v-model="messageText" placeholder="Please write the message" class="position-relative"
                style="padding-right: 39px;"/>
         <button class="position-absolute d-flex justify-end w-auto"
                 :class="{'v-btn--disabled': mediaBrowserItemsSelected.length === 0}" style="top: 3px; right: 2px"><img
-            src="../assets/dollar.svg" alt="" width="40" @click="paidMessageModal = true"></button>
+            src="../assets/dollar.svg" alt="" width="40" @click="paidMessageModal = true">
+          <span v-if="messagePrice !== 0" class="position-absolute"
+                style="width: 4px;height: 4px;border-radius: 10px;right: 17.6px;top: 34px;background: black;"/>
+        </button>
       </div>
       <button class="attachment d-flex justify-center position-relative" @click="mediaAttachmentMenuOpen = true">
         <img alt="attachment" src="../assets/attachment.svg" width="21"/>
@@ -254,7 +268,9 @@ function sendMessage() {
             mediaBrowserItemsSelected.length
           }}</span>
       </button>
-      <button @click="sendMessage" :disabled="!message && mediaBrowserItemsSelected.length === 0" :class="{'v-btn--disabled': !message && mediaBrowserItemsSelected.length === 0}">Send</button>
+      <button @click="sendMessage" :disabled="!messageText && mediaBrowserItemsSelected.length === 0"
+              :class="{'v-btn--disabled': !messageText && mediaBrowserItemsSelected.length === 0}">Send
+      </button>
     </div>
   </div>
   <v-bottom-sheet v-model="mediaAttachmentMenuOpen">
@@ -371,6 +387,7 @@ function sendMessage() {
   <v-dialog v-model="paidMessageModal" class="paid-message-dialog">
     <v-card
         title="Chargeable message"
+        style="box-shadow: none"
     >
       <template v-slot:default>
         <v-container fluid>

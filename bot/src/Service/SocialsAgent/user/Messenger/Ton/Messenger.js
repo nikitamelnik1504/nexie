@@ -62,7 +62,9 @@ class Messenger extends MessengerBase {
       currentMessage.remote.from = data.fromId;
       currentMessage.remote.timestamp = data.createdAt;
       currentMessage.remote.text = data.text;
-
+      currentMessage.remote.price.value = data.price;
+      currentMessage.remote.price.currency = data.currency;
+      currentMessage.remote.price.paid = !data.isHidden;
       currentMessage.timestamp = currentMessage.remote.timestamp;
       currentMessage.text = currentMessage.remote.text;
 
