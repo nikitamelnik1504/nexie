@@ -8,16 +8,32 @@ class Message extends MessageBase {
     from: null,
     timestamp: null,
     text: null,
+    price: {
+      currency: null,
+      paid: null,
+      value: null,
+    },
   }
 
   from;
   timestamp;
   text;
+  chargeable;
 
   attachments = [];
 
   constructor(_messenger, _collection, browserDaemonEventEmitter, data) {
     super(_messenger, _collection, browserDaemonEventEmitter, data);
+
+    if (data.price !== undefined) {
+      this.remote.price.value = data.price;
+    }
+    if (data.currency !== undefined) {
+      this.remote.price.currency = data.currency;
+    }
+    if (data.isHidden !== undefined) {
+      this.remote.price.paid = !data.isHidden;
+    }
 
     if (data.id) {
       this.remote.id = data.id;

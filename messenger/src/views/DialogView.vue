@@ -265,6 +265,7 @@ function sendMessage() {
           v-for="tile in [{ title: 'Cloud'}, {title: 'Upload'}]"
           :key="tile.title"
           :title="tile.title"
+          :disabled="tile.title === 'Upload'"
           @click="mediaAttachmentMenuOpen = false; mediaBrowserOpen = true"
       >
         <!--            :prepend-avatar="`https://dn.vuetifyjs.com/images/bottom-sheets/${tile.img}`"-->
@@ -369,15 +370,15 @@ function sendMessage() {
   </v-dialog>
   <v-dialog v-model="paidMessageModal" class="paid-message-dialog">
     <v-card
-        title="Paid message"
+        title="Chargeable message"
     >
       <template v-slot:default>
         <v-container fluid>
           <v-row class="px-2">
-            <v-col cols="12">
-              <label>
+            <v-col cols="12" class="py-0">
+              <label class="ms-1">
                 Price (EUR)
-                <input v-model="messagePrice" type="number" step="0.01">
+                <input v-model="messagePrice" type="number" step="0.01" class="mt-1" style="border-radius: 5px">
               </label>
             </v-col>
           </v-row>
