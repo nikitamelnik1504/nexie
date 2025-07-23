@@ -26,6 +26,32 @@ type Video = {
   src: string
 }
 
+type Attachment = {
+  type: string;
+  id: string;
+  src: string;
+};
+
+type Message = {
+  id: string;
+  dialogId: string;
+  text: string;
+  author: string;
+  timestamp: number;
+  status: string;
+  attachments: Array<Attachment> | [];
+};
+
+type Separator = { 
+  type: 'separator'; 
+  id: string;
+  label: string; 
+};
+
+type MessageItem = Message & { type: 'message' };
+
+type ChatListItem = MessageItem | Separator;
+
 const route = useRoute();
 const coreStore = useCoreStore();
 
@@ -51,7 +77,6 @@ const dialog = computed(() => {
   return dialogs.value.find(dialog => dialog.accountId === route.params.accountId && dialog.id === route.params.dialogId);
 });
 const messages = coreStore.getMessages(route.params.userId, route.params.accountId, route.params.dialogId);
-const reversedMessages = computed(() => [...messages.value].sort((x, y) => x.timestamp - y.timestamp).reverse());
 
 const mediaBrowserOpen = ref(false);
 const mediaAttachmentMenuOpen = ref(false);
@@ -168,6 +193,38 @@ function sendMessage() {
   mediaBrowserItemsSelected.value.length = 0;
 }
 
+function formatDate(timestamp: number) {
+  const isMilliseconds = timestamp > 9999999999;
+  const normalizedTimestamp = isMilliseconds ? timestamp : timestamp * 1000;
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+  }).format(new Date(normalizedTimestamp));
+}
+
+const reversedMessagesWithSeparators = computed <ChatListItem[]> (() => {
+  const items: ChatListItem[] = [];
+  let lastLabel = '';
+
+  const asc = [...messages.value].sort((x, y) => x.timestamp - y.timestamp);
+
+  for (const msg of asc) {
+    const label = formatDate(msg.timestamp);
+
+    if (label !== lastLabel) {
+      items.push({ type: 'separator', id: `sep-${msg.timestamp}`, label });
+      lastLabel = label;
+    }
+
+    items.push({
+      ...msg,
+      type: 'message',
+    });
+  }
+  return items.reverse();
+})
+
 </script>
 
 <template>
@@ -205,47 +262,57 @@ function sendMessage() {
       </div>
     </header>
     <div class="dialog__messages">
-      <div v-if="messages.length !== 0" v-for="dialogMessage in reversedMessages" :key="dialogMessage.id"
+      <div v-if="messages.length !== 0" v-for="item in reversedMessagesWithSeparators" :key="item.id"
            class="message"
            :class="{
-        'me': dialogMessage.author === account.me.id,
-        'not-me': dialogMessage.author !== account.me.id,
+        'me': item.author === account.me.id,
+        'not-me': item.author !== account.me.id && item.type !== 'separator',
+        'message-separator': item.type === 'separator'
       }"
       >
-        <v-container v-if="dialogMessage.attachments.length !== 0">
-          <v-row class="justify-end">
-            <v-col :cols="(() => {
-              if (dialogMessage.attachments.length === 1) {
-                return 12;
-              }
-              if (dialogMessage.attachments.length === 2) {
-                return 6;
-              }
-               if (dialogMessage.attachments.length >= 3) {
-                return 4;
-              }
-            })()" v-for="attachment in dialogMessage.attachments" :key="attachment.id">
-              <v-img
-                  class="mx-auto"
-                  max-width="300"
-                  min-width="60"
-                  :src="attachment.src"
-              >
-                <template v-slot:placeholder>
-                  <div class="d-flex align-center justify-center fill-height">
-                    <v-progress-circular
-                        color="grey-lighten-4"
-                        indeterminate
-                    ></v-progress-circular>
-                  </div>
-                </template>
-              </v-img>
-            </v-col>
-          </v-row>
-        </v-container>
-        <p>{{ dialogMessage.text }}</p>
-        <span>{{ formatTime(dialogMessage.timestamp) }}</span>
+        <template
+          v-if="item.type === 'separator'"
+        >
+          <span>{{ item.label }}</span>
+        </template>
+
+        <template v-else>
+          <v-container v-if="item.attachments.length !== 0">
+            <v-row class="justify-end">
+              <v-col :cols="(() => {
+                if (item.attachments.length === 1) {
+                  return 12;
+                }
+                if (item.attachments.length === 2) {
+                  return 6;
+                }
+                if (item.attachments.length >= 3) {
+                  return 4;
+                }
+              })()" v-for="attachment in item.attachments" :key="attachment.id">
+                <v-img
+                    class="mx-auto"
+                    max-width="300"
+                    min-width="60"
+                    :src="attachment.src"
+                >
+                  <template v-slot:placeholder>
+                    <div class="d-flex align-center justify-center fill-height">
+                      <v-progress-circular
+                          color="grey-lighten-4"
+                          indeterminate
+                      ></v-progress-circular>
+                    </div>
+                  </template>
+                </v-img>
+              </v-col>
+            </v-row>
+          </v-container>
+          <p>{{ item.text }}</p>
+          <span>{{ formatTime(item.timestamp) }}</span>
+        </template>
       </div>
+
       <div v-else class="dialog__messages__loader">
         <v-progress-circular color="black" model-value="60" indeterminate/>
       </div>
@@ -550,6 +617,23 @@ function sendMessage() {
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+
+    .message-separator {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-width: 100%;
+      background: #fff;
+
+      span {
+        font-size: 12px;
+        color: #000;
+        text-align: center;
+        margin-bottom: 10px;
+        padding: 8px 14px;
+        border-radius: 12px;
+      }
     }
   }
 
