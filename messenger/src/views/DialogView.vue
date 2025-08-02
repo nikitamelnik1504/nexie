@@ -3,49 +3,10 @@ import {useRoute} from "vue-router";
 import {ref, computed, watch} from "vue";
 import {useCoreStore} from "@/stores/core.ts";
 
-type Album = {
-  id: string,
-  name: string,
-  timestamp?: any,
-  preview_image_src: string,
-  images: Image[],
-  videos: Video[] | null,
-}
-
-type Image = {
-  id: string,
-  name: string,
-  timestamp: string,
-  src: string
-}
-
-type Video = {
-  id: string,
-  name: string,
-  timestamp: string,
-  src: string
-}
-
-type Attachment = {
-  type: string;
+type Separator = {
+  type: 'separator';
   id: string;
-  src: string;
-};
-
-type Message = {
-  id: string;
-  dialogId: string;
-  text: string;
-  author: string;
-  timestamp: number;
-  status: string;
-  attachments: Array<Attachment> | [];
-};
-
-type Separator = { 
-  type: 'separator'; 
-  id: string;
-  label: string; 
+  label: string;
 };
 
 type MessageItem = Message & { type: 'message' };
@@ -203,7 +164,7 @@ function formatDate(timestamp: number) {
   }).format(new Date(normalizedTimestamp));
 }
 
-const reversedMessagesWithSeparators = computed <ChatListItem[]> (() => {
+const reversedMessagesWithSeparators = computed<ChatListItem[]>(() => {
   const items: ChatListItem[] = [];
   let lastLabel = '';
 
@@ -213,7 +174,7 @@ const reversedMessagesWithSeparators = computed <ChatListItem[]> (() => {
     const label = formatDate(msg.timestamp);
 
     if (label !== lastLabel) {
-      items.push({ type: 'separator', id: `sep-${msg.timestamp}`, label });
+      items.push({type: 'separator', id: `sep-${msg.timestamp}`, label});
       lastLabel = label;
     }
 
@@ -271,11 +232,10 @@ const reversedMessagesWithSeparators = computed <ChatListItem[]> (() => {
       }"
       >
         <template
-          v-if="item.type === 'separator'"
+            v-if="item.type === 'separator'"
         >
           <span>{{ item.label }}</span>
         </template>
-
         <template v-else>
           <v-container v-if="item.attachments.length !== 0">
             <v-row class="justify-end">
@@ -309,7 +269,18 @@ const reversedMessagesWithSeparators = computed <ChatListItem[]> (() => {
             </v-row>
           </v-container>
           <p>{{ item.text }}</p>
-          <span>{{ formatTime(item.timestamp) }}</span>
+          <img v-if="item.charge" src="../assets/dollar.svg" width="14" height="14" alt="" style="filter: contrast(0%)">
+          <div class="d-flex w-100" :class="{
+            'justify-end': item.author === account.me.id,
+            'justify-start': item.author !== account.me.id,
+          }">
+            <span>{{ formatTime(item.timestamp) }}</span>
+            <span v-if="item.author === account.me.id" class="d-flex align-center">
+              <img v-if="item.status === 'sending'" src="../assets/clock.svg" alt="" width="14" height="14" class="ms-1">
+              <img v-else-if="item.status === 'sent'" src="../assets/check.svg" alt="" width="14" height="14" class="ms-1">
+              <img v-else-if="item.status === 'seen'" src="../assets/eye.svg" alt="" width="14" height="14" class="ms-1">
+            </span>
+          </div>
         </template>
       </div>
 
@@ -418,7 +389,7 @@ const reversedMessagesWithSeparators = computed <ChatListItem[]> (() => {
                     class="mx-auto"
                     color="surface-variant"
                     :image="media.src"
-                    height="120"
+                    height="160"
                 >
                   <v-btn
                       icon
@@ -516,7 +487,7 @@ const reversedMessagesWithSeparators = computed <ChatListItem[]> (() => {
 
       .dialog__user__name h2 {
         font-weight: bold;
-        font-size: 15px;
+        font-size: 14px;
       }
 
       .dialog__user__platform {
@@ -525,7 +496,7 @@ const reversedMessagesWithSeparators = computed <ChatListItem[]> (() => {
         padding-bottom: 2px;
 
         div {
-          width: 18px;
+          width: 16px;
           margin-right: 3px;
           display: flex;
           align-items: center;
@@ -538,7 +509,7 @@ const reversedMessagesWithSeparators = computed <ChatListItem[]> (() => {
         }
 
         h4 {
-          font-size: 13px;
+          font-size: 12px;
           line-height: 14px;
           opacity: 0.7;
           font-weight: bold;
@@ -674,6 +645,7 @@ const reversedMessagesWithSeparators = computed <ChatListItem[]> (() => {
     }
   }
 }
+
 .paid-message-dialog {
   input {
     font-size: 14px;

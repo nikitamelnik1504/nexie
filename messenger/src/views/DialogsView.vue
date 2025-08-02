@@ -95,6 +95,10 @@ function formatTime(timestamp: number) {
           </div>
           <div class="dialog__message">
             <p>
+              <img v-if="dialog.lastMessage.status === 'sending'" src="../assets/clock.svg" alt="" width="14" height="14" class="ms-1">
+              <img v-else-if="dialog.lastMessage.status === 'sent'" src="../assets/check.svg" alt="" width="14" height="14" class="ms-1">
+              <img v-else-if="dialog.lastMessage.status === 'seen'" src="../assets/eye.svg" alt="" width="14" height="14" class="ms-1">
+
               <i v-if="dialog.lastMessage.author !== dialog.member.id">You: </i>
               {{ dialog.lastMessage.text }}
             </p>

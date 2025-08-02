@@ -11,6 +11,7 @@ function prepareResponseData(messages) {
       timestamp: message.timestamp,
       text: message.text,
       attachments: [],
+      charge: message.price
     };
 
     for (const attachment of message.attachments) {

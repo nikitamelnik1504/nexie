@@ -11,6 +11,7 @@ function prepareResponseData(dialogs) {
         text: lastMessage ? lastMessage.text : null,
         timestamp: lastMessage ? lastMessage.timestamp : null,
         from: lastMessage ? lastMessage.from.id : null,
+        status: lastMessage ? lastMessage.status : null,
       },
       member: {
         id: dialog.member.id,

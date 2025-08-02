@@ -35,6 +35,7 @@ type Dialog = {
     text: string;
     author: string;
     timestamp: number;
+    status: string;
   };
   unreadMessagesCount: number;
 };
@@ -150,6 +151,7 @@ export const useCoreStore = defineStore('core', () => {
               existingDialog.lastMessage.text = dialog.lastMessage.text;
               existingDialog.lastMessage.author = dialog.lastMessage.from;
               existingDialog.lastMessage.timestamp = dialog.lastMessage.timestamp;
+              existingDialog.lastMessage.status = dialog.lastMessage.status;
 
               existingDialog.unreadMessagesCount = dialog.unreadMessagesCount || 0; // Update unread messages
             } else {
@@ -166,6 +168,7 @@ export const useCoreStore = defineStore('core', () => {
                   text: dialog.lastMessage.text,
                   author: dialog.lastMessage.from,
                   timestamp: dialog.lastMessage.timestamp,
+                  status: dialog.lastMessage.status
                 },
                 unreadMessagesCount: 0,
               });
@@ -185,6 +188,7 @@ export const useCoreStore = defineStore('core', () => {
               timestamp: message.timestamp,
               status: 'sent',
               attachments: message.attachments,
+              charge: message.charge,
             })
           }
           break;
