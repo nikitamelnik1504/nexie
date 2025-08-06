@@ -3,6 +3,7 @@ import {computed, ref} from "vue";
 
 import type {Ref} from 'vue';
 import {useApiStore} from "@/stores/api";
+import {useDialogStore} from "@/stores/dialog.ts";
 
 type User = {
   id: string,
@@ -67,29 +68,6 @@ type Notification = {
   pinned: boolean;
 }
 
-type Album = {
-  id: string,
-  title: string,
-  cover: string,
-  timestamp: string,
-  medias: Array<any>,
-  accountId: string
-}
-
-type Image = {
-  id: string,
-  src: string,
-  timestamp: string,
-  selected?: boolean,
-  type: 'image'
-}
-
-type Video = {
-  id: string,
-  src: string,
-  selected?: boolean,
-  type: 'video'
-}
 
 export const useCoreStore = defineStore('core', () => {
   const users: Ref<Array<User>> = ref([]);
@@ -97,9 +75,9 @@ export const useCoreStore = defineStore('core', () => {
   const dialogs: Ref<Array<Dialog>> = ref([]);
   const messages: Ref<Array<Message>> = ref([]);
   const notifications: Ref<Array<Notification>> = ref([]);
-  const albums: Ref<Array<Album>> = ref([]);
 
   const apiStore = useApiStore();
+  const dialogStore = useDialogStore();
 
   async function startWebSocketConnection(userId: string) {
     const user = users.value.find(user => user.id === userId);
@@ -213,11 +191,16 @@ export const useCoreStore = defineStore('core', () => {
           existingDialog.lastMessage.timestamp = data.data.timestamp;
 
           break;
+
+        case 'dialogSendMessage':
+          // @todo STUPID.
+          messages.value.find(m => m.status === 'sending').status = 'sent';
+          break;
         case 'albumsList':
-          albums.value.length = 0;
+          dialogStore.chat.actions.attachment.mediaBrowserItems.length = 0;
 
           for (const album of data.data) {
-            albums.value.push(<Album>{
+            dialogStore.chat.actions.attachment.mediaBrowserItems.push(<Album>{
               id: album.id,
               title: album.title,
               cover: album.coverUrl,
@@ -228,7 +211,7 @@ export const useCoreStore = defineStore('core', () => {
           }
           break;
         case 'albumMediasList':
-          const album = albums.value.find(album => album.id === data.albumId);
+          const album = dialogStore.chat.actions.attachment.mediaBrowserItems.find(album => album.id === data.albumId);
           for (const media of data.data) {
             if (media.type === 'image') {
               album?.medias.push(<Image>{
@@ -289,10 +272,6 @@ export const useCoreStore = defineStore('core', () => {
     return dialogs.value.filter(dialog => dialog.accountId === accountId);
   });
 
-  const getAlbums = (accountId: string) => computed(() => {
-    return albums.value.filter(album => album.accountId === accountId);
-  })
-
   async function requestDialogs(userId, accountId) {
     const matchedUser = users.value.find(user => user.id === userId);
     return matchedUser.wsConnection.send(JSON.stringify({
@@ -330,23 +309,6 @@ export const useCoreStore = defineStore('core', () => {
     }));
   }
 
-  async function requestAlbums(userId: string, accountId: string) {
-    const matchedUser = users.value.find(user => user.id === userId);
-    return matchedUser.wsConnection.send(JSON.stringify({
-      type: 'albumsList',
-      accountId,
-    }));
-  }
-
-  async function requestAlbumMedias(userId: string, accountId: string, albumId: string) {
-    const matchedUser = users.value.find(user => user.id === userId);
-    return matchedUser.wsConnection.send(JSON.stringify({
-      type: 'albumMediasList',
-      accountId,
-      albumId,
-    }));
-  }
-
   return {
     users,
     user,
@@ -363,9 +325,5 @@ export const useCoreStore = defineStore('core', () => {
     notifications,
     addNotification,
     removeNotification,
-    albums,
-    getAlbums,
-    requestAlbums,
-    requestAlbumMedias,
   }
 });

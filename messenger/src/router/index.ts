@@ -1,6 +1,6 @@
 import {createRouter, createWebHistory} from 'vue-router'
 import DialogsView from "@/views/DialogsView.vue";
-import DialogView from "@/views/DialogView.vue";
+import DialogView from "@/views/DialogView/index.vue";
 import {useCoreStore} from "@/stores/core";
 
 const router = createRouter({
