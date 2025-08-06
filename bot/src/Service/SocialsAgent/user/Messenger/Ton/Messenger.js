@@ -75,19 +75,18 @@ class Messenger extends MessengerBase {
     // @todo browserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {});
 
     browserDaemonEventEmitter.on('messageNew', (data) => {
-      // let currentDialog;
+      let currentDialog;
 
-      // for (const dialog of this.getDialogs().list()) {
-      //   if (dialog.member.remote.id === data.memberId) {
-      //     currentDialog = dialog;
-      //   }
-      // }
+      for (const dialog of this.getDialogs().list()) {
+        if (dialog.member.remote.id === data.memberId) {
+          currentDialog = dialog;
+        }
+      }
 
-      // instance._dialog.member.remote.id
-      // const message = this.getFactory().createMessage(currentDialog.getMessages(), data);
-      // currentDialog.getMessages().addMessage(message);
+      const message = this.getFactory().createMessage(currentDialog.getMessages(), data);
+      currentDialog.getMessages().addMessage(message);
 
-      // this.emit('messageNew', currentDialog.getMessages().message(message.id));
+      this.emit('messageNew', currentDialog.getMessages().message(message.id));
     });
 
     browserDaemonEventEmitter.on('albumsList', (data) => {

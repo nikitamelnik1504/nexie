@@ -177,6 +177,7 @@ export const useCoreStore = defineStore('core', () => {
             dialogId: data.dialogId,
             text: data.data.text,
             author: data.data.from,
+            attachments: [],
             timestamp: data.data.timestamp,
             status: 'sent',
           })
@@ -194,7 +195,10 @@ export const useCoreStore = defineStore('core', () => {
 
         case 'dialogSendMessage':
           // @todo STUPID.
-          messages.value.find(m => m.status === 'sending').status = 'sent';
+          const message = messages.value.find(m => m.status === 'sending');
+          message.status = 'sent';
+          message.timestamp = data.data.timestamp;
+          message.text = data.data.text;
           break;
         case 'albumsList':
           dialogStore.chat.actions.attachment.mediaBrowserItems.length = 0;

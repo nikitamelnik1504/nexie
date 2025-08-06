@@ -38,7 +38,7 @@ class MessagesWatcher extends EventEmitter {
               return;
             }
 
-            await window.messagesWatcherEmit("messageNew", window.formatMessage(data.body))
+            await window.messagesWatcherEmit("messageNew", await window.formatMessage(data.body))
             break;
         }
       });

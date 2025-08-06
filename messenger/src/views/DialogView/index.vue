@@ -33,7 +33,6 @@ const dialogs = computed(() => {
 const dialog = computed(() => {
   return dialogs.value.find(dialog => dialog.accountId === route.params.accountId && dialog.id === route.params.dialogId);
 });
-const messages = coreStore.getMessages(route.params.userId, route.params.accountId, route.params.dialogId);
 
 watch(accounts, (newValue) => {
   if (newValue.length !== 0 && !dialog.value) {
@@ -59,7 +58,7 @@ if (dialogs.value.length !== 0) {
             :dialog="{ platform: dialog ? dialog.platform : 'Loading...' }"
             :me="{ username: dialog ? dialog.username : 'Loading...' }"
     />
-    <Messages :messages="messages" :account="account" />
+    <Messages :account="account" />
     <Footer :account="account" />
   </div>
 

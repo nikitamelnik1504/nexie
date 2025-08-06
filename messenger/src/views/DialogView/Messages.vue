@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {computed} from "vue";
+import {useCoreStore} from "@/stores/core.ts";
+import {useRoute} from "vue-router";
 
 type Separator = {
   type: 'separator';
@@ -10,16 +12,20 @@ type Separator = {
 type MessageItem = Message & { type: 'message' };
 type ChatListItem = MessageItem | Separator;
 
+const route = useRoute();
+const coreStore = useCoreStore();
+
 const props = defineProps<{
-  messages: Array<any>;
   account: any;
 }>();
+
+const messages = coreStore.getMessages(route.params.userId, route.params.accountId, route.params.dialogId);
 
 const reversedMessagesWithSeparators = computed<ChatListItem[]>(() => {
   const items: ChatListItem[] = [];
   let lastLabel = '';
 
-  const asc = [...props.messages].sort((x, y) => x.timestamp - y.timestamp);
+  const asc = [...messages.value].sort((x, y) => x.timestamp - y.timestamp);
 
   for (const msg of asc) {
     const label = formatDate(msg.timestamp);

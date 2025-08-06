@@ -30,6 +30,10 @@ class MessagesCollectionBase {
       : null;
   }
 
+  message(id) {
+    return this.collection.find(message => message.id === id);
+  }
+
   list(offset = 0, limit = 30) {
     const availableItems = this.collection.toSorted((a, b) => b.timestamp - a.timestamp).slice(offset);
     const itemsToReturn = availableItems.slice(0, limit);

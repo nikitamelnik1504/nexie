@@ -159,7 +159,7 @@ class TonDaemon extends PuppeteerBrowserDaemonBase {
     });
 
     this.watchers.messages.watcher.on("messageNew", (data) => {
-      this.eventEmitter.emit('messageNew:' + data.user.id, data.message);
+      this.eventEmitter.emit('messageNew', { memberId: data.fromId, ...data });
     });
 
     this.watchers.media.watcher.on("albumsList", (data) => {
