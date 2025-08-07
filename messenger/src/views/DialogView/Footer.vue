@@ -49,8 +49,8 @@ function sendMessage() {
       <input v-model="messageText" placeholder="Please write the message" class="position-relative"
              style="padding-right: 39px;"/>
       <button class="position-absolute d-flex justify-end w-auto"
-              :class="{'v-btn--disabled': dialogStore.chat.actions.attachment.mediaBrowserSelectedItems.length === 0}" style="top: 3px; right: 2px"><img
-          src="../../assets/dollar.svg" alt="" width="40" @click="dialogStore.chat.actions.charge.modalOpen = true">
+              :class="{'v-btn--disabled': dialogStore.chat.actions.attachment.mediaBrowserSelectedItems.length === 0}" style="top: 13px; right: 15px"><img
+          src="../../assets/dollar.svg" alt="" width="14" @click="dialogStore.chat.actions.charge.modalOpen = true">
         <span v-if="dialogStore.chat.actions.charge.price !== 0" class="position-absolute"
               style="width: 4px;height: 4px;border-radius: 10px;right: 17.6px;top: 34px;background: black;"/>
       </button>

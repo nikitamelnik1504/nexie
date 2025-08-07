@@ -113,13 +113,13 @@ function formatTime(timestamp: number) {
           </v-row>
         </v-container>
         <p>{{ item.text }}</p>
-        <img v-if="item.charge" src="../../assets/dollar.svg" width="14" height="14" alt="" style="filter: contrast(0%)">
-        <div class="d-flex w-100" :class="{
-            'justify-end': item.author === account.me.id,
-            'justify-start': item.author !== account.me.id,
+        <div class="d-flex w-100 justify-space-between" :class="{
+            'flex-row-reverse': item.author === account.me.id,
+            'pt-3': item.charge
           }">
-          <span>{{ formatTime(item.timestamp) }}</span>
-          <span v-if="item.author === account.me.id" class="d-flex align-center">
+          <div class="d-flex align-center">
+            <span>{{ formatTime(item.timestamp) }}</span>
+            <span v-if="item.author === account.me.id" class="d-flex align-center">
               <img v-if="item.status === 'sending'" src="../../assets/clock.svg" alt="" width="14" height="14"
                    class="ms-1">
               <img v-else-if="item.status === 'sent'" src="../../assets/check.svg" alt="" width="14" height="14"
@@ -127,6 +127,16 @@ function formatTime(timestamp: number) {
               <img v-else-if="item.status === 'seen'" src="../../assets/eye.svg" alt="" width="14" height="14"
                    class="ms-1">
             </span>
+          </div>
+          <div class="d-flex align-center" v-if="item.charge">
+            <span :style="{
+              color: item.charge.paid ? '#00ff7c' : '#ffee00'
+            }" class="font-weight-bold me-1">{{ item.charge.value }}</span>
+            <span class="font-weight-bold"
+                  :style="{
+              color: item.charge.paid ? '#00ff7c' : '#ffee00'
+            }">{{ item.charge.currency.toUpperCase() }}</span>
+          </div>
         </div>
       </template>
     </div>
