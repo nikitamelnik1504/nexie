@@ -93,7 +93,7 @@ function formatTime(timestamp: number) {
             </div>
             <h4>{{ dialog.platform }} - {{ dialog.username }}</h4>
           </div>
-          <div class="dialog__message">
+          <div class="dialog__message overflow-hidden">
             <p>
               <img v-if="dialog.lastMessage.status === 'sending'" src="../assets/clock.svg" alt="" width="14" height="14" class="ms-1">
               <img v-else-if="dialog.lastMessage.status === 'sent'" src="../assets/check.svg" alt="" width="14" height="14" class="ms-1">
@@ -195,6 +195,8 @@ function formatTime(timestamp: number) {
       }
 
       .dialog__message {
+        max-height: 21px;
+
         p {
           font-size: 13px;
         }
