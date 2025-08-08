@@ -1,4 +1,4 @@
-import TonDaemon from "../user/Daemon/Ton/TonDaemon.js";
+import TonDaemon from "../user/Daemon/Ton/Daemon.js";
 import FancentroDaemon from "../user/Daemon/Fancentro/FancentroDaemon.js";
 
 class BrowserDaemonFactory {

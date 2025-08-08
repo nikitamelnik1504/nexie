@@ -7,11 +7,13 @@ class Messenger extends MessengerBase {
     await super.start();
 
     this.factory = new MessengerFactory(this, this.daemon.getEventEmitter());
+
     this.me = this.factory.createMe(this.daemon.getEventEmitter().getMe());
     this.albums = this.factory.createAlbumsCollection();
     this.dialogs = this.factory.createDialogsCollection();
 
     const browserDaemonEventEmitter = this.daemon.getEventEmitter();
+
     browserDaemonEventEmitter.on('dialogsList', (data) => {
       for (const dialog of data) {
         this.getDialogs().addDialog(this.getFactory().createDialog(this.getDialogs(), dialog));
@@ -21,9 +23,6 @@ class Messenger extends MessengerBase {
 
       this.emit('dialogsList', this.dialogs.collection); // @todo Replace with actually added.
     });
-
-    // Can be very proactive. `dialogsUpdate:<username>`
-    // @todo browserDaemonEventEmitter.on('dialogUpdate', (data) => {});
 
     browserDaemonEventEmitter.on('messagesList', (data) => {
       let currentDialog;
@@ -72,8 +71,6 @@ class Messenger extends MessengerBase {
       this.emit('messageSent', currentMessage);
     });
 
-    // @todo browserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {});
-
     browserDaemonEventEmitter.on('messageNew', (data) => {
       let currentDialog;
 
@@ -114,6 +111,11 @@ class Messenger extends MessengerBase {
 
       this.emit('albumMediasList', currentAlbum.getItems().collection);
     });
+
+    // Can be very proactive. `dialogsUpdate:<username>`
+    // @todo browserDaemonEventEmitter.on('dialogUpdate', (data) => {});
+
+    // @todo browserDaemonEventEmitter.on('messageUpdate:' + instance.remote.id, () => {});
 
     return this;
   }
