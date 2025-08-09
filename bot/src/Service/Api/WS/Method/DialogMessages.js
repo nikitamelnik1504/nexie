@@ -11,6 +11,7 @@ function prepareResponseData(messages) {
       timestamp: message.timestamp,
       text: message.text,
       attachments: [],
+      isRead: message.isRead,
       charge: message.price
     };
 

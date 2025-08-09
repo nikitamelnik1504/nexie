@@ -164,7 +164,7 @@ export const useCoreStore = defineStore('core', () => {
               text: message.text,
               author: message.from,
               timestamp: message.timestamp,
-              status: 'sent',
+              status: message.isRead ? 'seen' : 'sent',
               attachments: message.attachments,
               charge: message.charge,
             })
@@ -179,7 +179,7 @@ export const useCoreStore = defineStore('core', () => {
             author: data.data.from,
             attachments: [],
             timestamp: data.data.timestamp,
-            status: 'sent',
+            status: data.data.isRead ? 'seen' : 'sent',
           })
 
           const existingDialog = dialogs.value.find(existDialog =>
@@ -196,7 +196,7 @@ export const useCoreStore = defineStore('core', () => {
         case 'dialogSendMessage':
           // @todo STUPID.
           const message = messages.value.find(m => m.status === 'sending');
-          message.status = 'sent';
+          message.status = data.data.isRead ? 'seen' : 'sent';
           message.timestamp = data.data.timestamp;
           message.text = data.data.text;
           break;

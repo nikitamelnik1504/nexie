@@ -8,6 +8,7 @@ class Message extends MessageBase {
     from: null,
     timestamp: null,
     text: null,
+    isUnread: null,
     price: {
       currency: null,
       paid: null,
@@ -19,6 +20,7 @@ class Message extends MessageBase {
   timestamp;
   text;
   price = null;
+  isRead;
 
   attachments = [];
 
@@ -33,10 +35,13 @@ class Message extends MessageBase {
       this.remote.price.value = data.price;
       this.remote.price.currency = data.currency;
       this.remote.price.paid = !data.isHidden;
+      this.remote.isUnread = data.isUnread;
 
       this.from = this.remote.from === this._messenger.me.remote.id ? this._messenger.getMe() : this._collection._dialog.member;
       this.timestamp = this.remote.timestamp;
       this.text = this.remote.text;
+      this.isRead = !this.remote.isUnread;
+
       if (this.remote.price.value && this.remote.price.value.toString() !== '0') {
         this.price = {
           value: this.remote.price.value,
@@ -53,6 +58,7 @@ class Message extends MessageBase {
     } else {
       this.from = this._messenger.getMe();
       this.text = data.text;
+      this.isRead = false;
 
       if (data.price && data.currency) {
         this.price = {

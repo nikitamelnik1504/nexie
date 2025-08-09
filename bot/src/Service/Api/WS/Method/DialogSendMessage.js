@@ -4,6 +4,7 @@ function prepareResponseData(message) {
   return {
     id: message.id,
     from: message.from.id,
+    isRead: message.isRead,
     timestamp: message.timestamp,
     text: message.text,
   };
