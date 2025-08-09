@@ -50,86 +50,103 @@ function formatTime(timestamp: number) {
     return new Date(normalizedTimestamp).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
   }
 }
+
+const drawer = ref(false)
 </script>
 
 <template>
-  <div class="dialogs">
-    <header>
-      <h1 class="my-0">{{ route.params.userId }}</h1>
-      <h5>SEM SocialAgents Version: {{ socialsAgentVersion }}</h5>
-      <h5>SEM Client Version: {{ appVersion }}</h5>
-    </header>
-
-    <div class="dialogs__list">
-      <div v-if="!dialogs || dialogs.length === 0" class="dialogs__loader">
-        <v-progress-circular color="black" model-value="60" indeterminate/>
+  <v-layout>
+    <v-navigation-drawer v-model="drawer" style="box-shadow: none"></v-navigation-drawer>
+    <v-app-bar scroll-behavior="fully-hide" scroll-threshold="60" class="py-0 pe-4" elevation="0">
+      <div class="d-flex align-center">
+        <v-btn class="px-0" @click="drawer = !drawer">
+          <img src="../assets/burger-menu.svg" alt="" width="24">
+        </v-btn>
+        <v-app-bar-title class="my-0 ms-0">{{ route.params.userId }}</v-app-bar-title>
       </div>
-      <router-link v-else v-for="dialog in dialogs.sort((x, y) => {
+      <div class="ms-auto text-end">
+        <h5>SEM SocialAgents Version: {{ socialsAgentVersion }}</h5>
+        <h5>SEM Client Version: {{ appVersion }}</h5>
+      </div>
+    </v-app-bar>
+    <v-main class="dialogs" :style="{
+      height: drawer ? '100vh' : 'unset',
+      overflow: drawer ? 'hidden' : 'unset'
+    }">
+      <div class="dialogs__list">
+        <div v-if="!dialogs || dialogs.length === 0" class="dialogs__loader">
+          <v-progress-circular color="black" model-value="60" indeterminate/>
+        </div>
+        <router-link v-else v-for="dialog in dialogs.sort((x, y) => {
           const xIsMilliseconds = x.lastMessage.timestamp > 9999999999;
           const xNormalizedTimestamp = xIsMilliseconds ? x.lastMessage.timestamp : x.lastMessage.timestamp  * 1000;
           const yIsMilliseconds = y.lastMessage.timestamp > 9999999999;
           const yNormalizedTimestamp = yIsMilliseconds ? y.lastMessage.timestamp : y.lastMessage.timestamp  * 1000;
         return yNormalizedTimestamp - xNormalizedTimestamp ;
       })"
-                   class="dialog__link"
-                   :to="{ name: 'dialog', params: { userId: route.params.userId, accountId: dialog.accountId, dialogId: dialog.id }}">
-        <div class="dialog__avatar">
-          <div class="dialog__avatar_image">
-            {{ Array.from(dialog.member.username)[0].toUpperCase() }}
+                     class="dialog__link"
+                     :to="{ name: 'dialog', params: { userId: route.params.userId, accountId: dialog.accountId, dialogId: dialog.id }}">
+          <div class="dialog__avatar">
+            <div class="dialog__avatar_image">
+              {{ Array.from(dialog.member.username)[0].toUpperCase() }}
+            </div>
           </div>
-        </div>
-        <div class="dialog__message_info">
-          <div class="dialog__username">
-            <h2>{{ dialog.member.username }}</h2>
-          </div>
-          <div class="dialog__platform" :class="{
+          <div class="dialog__message_info">
+            <div class="dialog__username">
+              <h2>{{ dialog.member.username }}</h2>
+            </div>
+            <div class="dialog__platform" :class="{
             'ton': dialog.platform === 'ton',
             'fancentro': dialog.platform === 'fancentro',
           }">
-            <div>
-              <img src="../assets/ton.svg" alt="" v-if="dialog.platform === 'ton'" class="ton-logo">
-              <img src="../assets/fancentro.png" alt="" v-else-if="dialog.platform === 'fancentro'" style="margin-top: -2px;"
-                   class="fancentro-logo">
+              <div>
+                <img src="../assets/ton.svg" alt="" v-if="dialog.platform === 'ton'" class="ton-logo">
+                <img src="../assets/fancentro.png" alt="" v-else-if="dialog.platform === 'fancentro'"
+                     style="margin-top: -2px;"
+                     class="fancentro-logo">
+              </div>
+              <h4>{{ dialog.platform }} - {{ dialog.username }}</h4>
             </div>
-            <h4>{{ dialog.platform }} - {{ dialog.username }}</h4>
-          </div>
-          <div class="dialog__message overflow-hidden">
-            <p>
-              <img v-if="dialog.lastMessage.status === 'sending'" src="../assets/clock.svg" alt="" width="14" height="14" class="ms-1">
-              <img v-else-if="dialog.lastMessage.status === 'sent'" src="../assets/check.svg" alt="" width="14" height="14" class="ms-1">
-              <img v-else-if="dialog.lastMessage.status === 'seen'" src="../assets/eye.svg" alt="" width="14" height="14" class="ms-1">
+            <div class="dialog__message overflow-hidden">
+              <p>
+                <img v-if="dialog.lastMessage.status === 'sending'" src="../assets/clock.svg" alt="" width="14"
+                     height="14" class="ms-1">
+                <img v-else-if="dialog.lastMessage.status === 'sent'" src="../assets/check.svg" alt="" width="14"
+                     height="14" class="ms-1">
+                <img v-else-if="dialog.lastMessage.status === 'seen'" src="../assets/eye.svg" alt="" width="14"
+                     height="14" class="ms-1">
 
-              <i v-if="dialog.lastMessage.author !== dialog.member.id">You: </i>
-              {{ dialog.lastMessage.text }}
-            </p>
+                <i v-if="dialog.lastMessage.author !== dialog.member.id">You: </i>
+                {{ dialog.lastMessage.text }}
+              </p>
+            </div>
           </div>
-        </div>
-        <div>
-          <div class="dialog__date">
-            <p>{{ formatTime(dialog.lastMessage.timestamp) }}</p>
+          <div>
+            <div class="dialog__date">
+              <p>{{ formatTime(dialog.lastMessage.timestamp) }}</p>
+            </div>
+            <div class="dialog__new_messages_count">
+              <!--            <span>{{ dialog.new_messages_count }}</span>-->
+            </div>
           </div>
-          <div class="dialog__new_messages_count">
-            <!--            <span>{{ dialog.new_messages_count }}</span>-->
-          </div>
-        </div>
-      </router-link>
-      <!--      <div v-else class="dialog__list__empty">-->
-      <!--        There is no messages.-->
-      <!--      </div>-->
-    </div>
-  </div>
+        </router-link>
+        <!--      <div v-else class="dialog__list__empty">-->
+        <!--        There is no messages.-->
+        <!--      </div>-->
+      </div>
+    </v-main>
+  </v-layout>
+
 </template>
 
 <style lang="scss">
+.v-toolbar-title__placeholder {
+  font-size: 18px !important;
+}
+
 .dialogs {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-
-  header h1 {
-    font-size: 18px;
-    margin: 6px 0;
-  }
 
   .dialogs__list {
     border-radius: 20px;
