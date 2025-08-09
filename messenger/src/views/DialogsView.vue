@@ -4,7 +4,7 @@ import {computed, ref, watch} from "vue";
 import {useCoreStore} from "@/stores/core.ts";
 
 const appVersion = __APP_VERSION__;
-const socialsAgentVersion = '0.2.6';
+const socialsAgentVersion = '0.2.7';
 
 const route = useRoute();
 
@@ -137,11 +137,16 @@ function formatTime(timestamp: number) {
     flex: 1;
 
     a.dialog__link {
+      transition: .3s;
       text-decoration: none;
       color: black;
       padding: 10px 15px;
       display: flex;
       border-bottom: solid 1px #ffffff1c;
+
+      &:hover {
+        background-color: #EFEFEF;
+      }
 
       .dialog__username {
         h2 {
