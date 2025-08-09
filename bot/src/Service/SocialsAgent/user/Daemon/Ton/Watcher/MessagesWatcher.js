@@ -28,21 +28,31 @@ class MessagesWatcher extends EventEmitter {
   }
 
   static async extendWsConnection(instance) {
-    await instance.page.evaluate(async (memberId) => {
-      window.ws.addEventListener("message", async (event) => {
-        const data = JSON.parse(event.data);
+    await instance.page.evaluate(async () => {
 
-        switch (data.type) {
-          case 'message':
-            if (data.body.message.fromId === memberId) {
-              return;
-            }
+      function attachMessageListener() {
+        if (!window.ws) return;
+        window.ws.addEventListener("message", async (event) => {
+          const data = JSON.parse(event.data);
 
-            await window.messagesWatcherEmit("messageNew", await window.formatMessage(data.body))
-            break;
-        }
+          switch (data.type) {
+            case 'message':
+              await window.messagesWatcherEmit(
+                "messageNew",
+                await window.formatMessage(data.body)
+              );
+              break;
+          }
+        });
+      }
+
+      attachMessageListener();
+
+      window.addEventListener("wsReconnected", () => {
+        attachMessageListener();
       });
-    }, instance.account.id)
+
+    });
   }
 
   async requestMessages(memberId, startFrom) {

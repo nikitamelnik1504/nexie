@@ -47,18 +47,30 @@ class DialogsWatcher extends EventEmitter {
   }
 
   static async createWsConnection(instance) {
-    const ws = await new Promise(async (resolve) => {
-      await instance.page.evaluate((accessToken, wsApiUrl) => {
-        return new Promise((resolveBrowser) => {
-          window.ws = new WebSocket(wsApiUrl + '/ws?access_token=' + accessToken); // Store WebSocket globally
-          resolveBrowser(true); // Resolve promise on successful authentication
-        });
-      }, instance.account.token, WS_API_URL);
+    await instance.page.evaluate((accessToken, wsApiUrl) => {
+      function connect() {
+        if (window.ws) {
+          try {
+            window.ws.close();
+          } catch (e) {
+            console.warn('[WS] Error closing socket:', e);
+          }
+        }
 
-      resolve();
-    });
+        window.ws = new WebSocket(wsApiUrl + '/ws?access_token=' + accessToken);
 
-    return ws;
+        const event = new CustomEvent('wsReconnected');
+        window.dispatchEvent(event);
+      }
+
+      connect();
+
+      if (window.wsReconnectTimer) {
+        clearInterval(window.wsReconnectTimer);
+      }
+      window.wsReconnectTimer = setInterval(connect, 9 * 60 * 1000);
+
+    }, instance.account.token, WS_API_URL);
   }
 
   static formatDialogs(responseBody) {

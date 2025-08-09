@@ -55,7 +55,10 @@ class EventEmitter extends EE {
           return;
         }
 
-        this.emit('messagesList', { memberId: data.memberId, data: this._watchers.messages.store.requestMessages[data.memberId].cache });
+        this.emit('messagesList', {
+          memberId: data.memberId,
+          data: this._watchers.messages.store.requestMessages[data.memberId].cache
+        });
         this._watchers.messages.store.requestMessages[data.memberId].cache.length = 0;
       }
     });
@@ -65,7 +68,7 @@ class EventEmitter extends EE {
     });
 
     this._watchers.messages.watcher.on("messageNew", (data) => {
-      this.emit('messageNew', { memberId: data.fromId, ...data });
+      this.emit('messageNew', {dialogId: data.fromId === this._watchers.account.watcher.account.id ? data.toId : data.fromId, ...data});
     });
 
     this._watchers.media.watcher.on("albumsList", (data) => {
@@ -73,7 +76,7 @@ class EventEmitter extends EE {
     });
 
     this._watchers.media.watcher.on("albumMediasList", (data) => {
-      this.emit('albumMediasList', { albumId: data.albumId, data: data.list });
+      this.emit('albumMediasList', {albumId: data.albumId, data: data.list});
     });
   }
 
