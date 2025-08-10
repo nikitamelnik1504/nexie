@@ -55,7 +55,6 @@ const drawer = ref(false)
 </script>
 
 <template>
-  <v-layout>
     <v-navigation-drawer v-model="drawer" style="box-shadow: none"></v-navigation-drawer>
     <v-app-bar scroll-behavior="fully-hide" scroll-threshold="60" class="py-0 pe-4" elevation="0">
       <div class="d-flex align-center">
@@ -135,8 +134,6 @@ const drawer = ref(false)
         <!--      </div>-->
       </div>
     </v-main>
-  </v-layout>
-
 </template>
 
 <style lang="scss">
