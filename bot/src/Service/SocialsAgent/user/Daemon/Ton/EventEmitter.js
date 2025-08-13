@@ -64,7 +64,7 @@ class EventEmitter extends EE {
     });
 
     this._watchers.messages.watcher.on("messageSent", (data, _bag) => {
-      this.emit('messageSent', data, _bag);
+      this.emit('messageSent', {dialogId: data.fromId === this._watchers.account.watcher.account.id ? data.toId : data.fromId, ...data}, _bag);
     });
 
     this._watchers.messages.watcher.on("messageNew", (data) => {

@@ -46,7 +46,7 @@ class Messenger extends MessengerBase {
       let currentDialog, currentMessage;
 
       for (const dialog of this.getDialogs().list()) {
-        if (dialog.member.remote.id === data.memberId) {
+        if (dialog.member.remote.id === data.dialogId) {
           currentDialog = dialog;
         }
       }

@@ -59,6 +59,7 @@ class Message extends MessageBase {
       this.from = this._messenger.getMe();
       this.text = data.text;
       this.isRead = false;
+      this.timestamp = Math.floor(Date.now() / 1000);
 
       if (data.price && data.currency) {
         this.price = {

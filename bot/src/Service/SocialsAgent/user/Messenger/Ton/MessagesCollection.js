@@ -12,6 +12,10 @@ class MessagesCollection extends MessagesCollectionBase {
     return instance;
   }
 
+  remoteMessage(id) {
+    return this.collection.find(message => message.remote.id === id);
+  }
+
 }
 
 export default MessagesCollection;
