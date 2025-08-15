@@ -60,7 +60,7 @@ export const useDialogStore = defineStore('dialog', () => {
       },
       charge: {
         modalOpen: false,
-        price: 0,
+        value: 0,
         currency: null,
       }
     }

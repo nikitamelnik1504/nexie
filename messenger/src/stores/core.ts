@@ -49,7 +49,7 @@ type Message = {
   timestamp: number;
   status: string;
   charge?: {
-    price: number,
+    value: number,
     paid: boolean,
     currency: string
   };

@@ -26,9 +26,9 @@ function sendMessage() {
     attachments: [...dialogStore.chat.actions.attachment.mediaBrowserSelectedItems]
   };
 
-  if (dialogStore.chat.actions.charge.price !== 0) {
+  if (dialogStore.chat.actions.charge.value !== 0) {
     message.charge = {
-      price: dialogStore.chat.actions.charge.price,
+      value: dialogStore.chat.actions.charge.value,
       currency: 'eur',
       paid: false,
     };
@@ -36,7 +36,7 @@ function sendMessage() {
 
   coreStore.messages.push(message);
   coreStore.requestSendMessage(route.params.userId, route.params.accountId, route.params.dialogId, messageText.value, dialogStore.chat.actions.attachment.mediaBrowserSelectedItems, message.charge ? message.charge : {});
-  dialogStore.chat.actions.charge.price = 0;
+  dialogStore.chat.actions.charge.value = 0;
   messageText.value = '';
   dialogStore.chat.actions.attachment.mediaBrowserSelectedItems.length = 0;
 }
@@ -51,8 +51,8 @@ function sendMessage() {
       <button class="position-absolute d-flex justify-end w-auto"
               :class="{'v-btn--disabled': dialogStore.chat.actions.attachment.mediaBrowserSelectedItems.length === 0}" style="top: 13px; right: 15px"><img
           src="../../assets/dollar.svg" alt="" width="14" @click="dialogStore.chat.actions.charge.modalOpen = true">
-        <span v-if="dialogStore.chat.actions.charge.price !== 0" class="position-absolute"
-              style="width: 4px;height: 4px;border-radius: 10px;right: 17.6px;top: 34px;background: black;"/>
+        <span v-if="dialogStore.chat.actions.charge.value !== 0" class="position-absolute"
+              style="width: 4px;height: 4px;border-radius: 10px;right: 4.6px;top: 24px;background: black;"/>
       </button>
     </div>
     <button class="attachment d-flex justify-center position-relative" @click="dialogStore.chat.actions.attachment.selectTypeOpen = true">

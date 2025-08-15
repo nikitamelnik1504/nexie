@@ -19,7 +19,7 @@ sem_telegram_bot_production_build:
     - docker build -t registry.gitlab.com/nikitamelnikwork/sem:bot .
     - docker push registry.gitlab.com/nikitamelnikwork/sem:bot
   only:
-    - 0.2.9
+    - 0.2.10
 
 sem_messenger_production_build:
   image: docker:latest
@@ -38,7 +38,7 @@ sem_messenger_production_build:
     - docker build -t registry.gitlab.com/nikitamelnikwork/sem:messenger .
     - docker push registry.gitlab.com/nikitamelnikwork/sem:messenger
   only:
-    - 0.2.9
+    - 0.2.10
 
 sem_production_deploy:
   stage: deploy
@@ -53,4 +53,4 @@ sem_production_deploy:
   script:
     - ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_ROOT};docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin <<<$CI_REGISTRY_PASSWORD;docker compose up --build -d sem-telegram-bot sem-messenger;docker logout;docker restart nginx;docker system prune -f"
   only:
-    - 0.2.9
+    - 0.2.10

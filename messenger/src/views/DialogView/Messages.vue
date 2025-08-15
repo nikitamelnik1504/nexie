@@ -128,7 +128,7 @@ function formatTime(timestamp: number) {
                    class="ms-1">
             </span>
           </div>
-          <div class="d-flex align-center" v-if="item.charge">
+          <div class="d-flex align-center pe-3" v-if="item.charge">
             <span :style="{
               color: item.charge.paid ? '#00ff7c' : '#ffee00'
             }" class="font-weight-bold me-1">{{ item.charge.value }}</span>
