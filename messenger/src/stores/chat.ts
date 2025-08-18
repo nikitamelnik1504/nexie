@@ -1,7 +1,7 @@
 import {defineStore} from 'pinia'
+import {reactive} from "vue";
 
 import {useCoreStore} from "@/stores/core";
-import {reactive} from "vue";
 
 type Album = {
   id: string,
@@ -27,7 +27,7 @@ type Video = {
   type: 'video'
 }
 
-export const useDialogStore = defineStore('dialog', () => {
+export const useChatStore = defineStore('chat', () => {
   const coreStore = useCoreStore();
 
   async function requestAlbums(userId: string, accountId: string) {
@@ -47,27 +47,25 @@ export const useDialogStore = defineStore('dialog', () => {
     }));
   }
 
-  const chat = reactive({
-    actions: {
-      attachment: {
-        selectTypeOpen: false,
-        mediaBrowserOpen: false,
-        mediaBrowserCurrentAlbum: null as Album | null,
-        mediaBrowserItems: [] as Array<Image | Video>,
-        mediaBrowserSelectedItems: [] as Array<Image | Video>,
-        mediaBrowserSnackbarVisible: false,
-        chargeableMessageModalOpen: false,
-      },
-      charge: {
-        modalOpen: false,
-        value: 0,
-        currency: null,
-      }
+  const actions = reactive({
+    attachment: {
+      selectTypeOpen: false,
+      mediaBrowserOpen: false,
+      mediaBrowserCurrentAlbum: null as Album | null,
+      mediaBrowserItems: [] as Array<Image | Video>,
+      mediaBrowserSelectedItems: [] as Array<Image | Video>,
+      mediaBrowserSnackbarVisible: false,
+      chargeableMessageModalOpen: false,
+    },
+    charge: {
+      modalOpen: false,
+      value: 0,
+      currency: null,
     }
   });
 
   return {
-    chat,
+    actions,
     requestAlbums,
     requestAlbumMedias
   };

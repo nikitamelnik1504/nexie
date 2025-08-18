@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import {useDialogStore} from "@/stores/dialog.ts";
+import {useChatStore} from "@/stores/chat.ts";
 
-const dialogStore = useDialogStore();
+const chatStore = useChatStore();
 </script>
 
 <template>
-    <v-dialog v-model="dialogStore.chat.actions.charge.modalOpen" class="paid-message-dialog">
+    <v-dialog v-model="chatStore.actions.charge.modalOpen" class="paid-message-dialog">
       <v-card
           title="Chargeable message"
           style="box-shadow: none"
@@ -16,7 +16,7 @@ const dialogStore = useDialogStore();
               <v-col cols="12" class="py-0">
                 <label class="ms-1">
                   Price (EUR)
-                  <input v-model="dialogStore.chat.actions.charge.value" type="number" step="0.01" class="mt-1" style="border-radius: 5px">
+                  <input v-model="chatStore.actions.charge.value" type="number" step="0.01" class="mt-1" style="border-radius: 5px">
                 </label>
               </v-col>
             </v-row>
@@ -24,11 +24,11 @@ const dialogStore = useDialogStore();
         </template>
         <template v-slot:actions>
           <v-spacer></v-spacer>
-          <v-btn @click="dialogStore.chat.actions.charge.modalOpen = false; dialogStore.chat.actions.charge.value = 0">
+          <v-btn @click="chatStore.actions.charge.modalOpen = false; chatStore.actions.charge.value = 0">
             Cancel
           </v-btn>
 
-          <v-btn @click="dialogStore.chat.actions.charge.modalOpen = false">
+          <v-btn @click="chatStore.actions.charge.modalOpen = false">
             Submit
           </v-btn>
         </template>

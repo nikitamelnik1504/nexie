@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import {useDialogStore} from "@/stores/dialog.ts";
+import {useChatStore} from "@/stores/chat.ts";
 
-const dialogStore = useDialogStore();
+const chatStore = useChatStore();
 </script>
 
 <template>
-  <v-bottom-sheet v-model="dialogStore.chat.actions.attachment.selectTypeOpen">
+  <v-bottom-sheet v-model="chatStore.actions.attachment.selectTypeOpen">
     <v-list>
       <v-list-subheader title="Select attachment type"/>
       <v-list-item
@@ -13,7 +13,7 @@ const dialogStore = useDialogStore();
           :key="tile.title"
           :title="tile.title"
           :disabled="tile.title === 'Upload'"
-          @click="dialogStore.chat.actions.attachment.selectTypeOpen = false; dialogStore.chat.actions.attachment.mediaBrowserOpen = true"
+          @click="chatStore.actions.attachment.selectTypeOpen = false; chatStore.actions.attachment.mediaBrowserOpen = true"
       />
     </v-list>
   </v-bottom-sheet>

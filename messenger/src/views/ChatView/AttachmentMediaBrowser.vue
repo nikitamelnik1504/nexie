@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import {useDialogStore} from "@/stores/dialog.ts";
+import {useChatStore} from "@/stores/chat.ts";
 import {watch} from "vue";
 import {useRoute} from "vue-router";
 
 const route = useRoute();
-const dialogStore = useDialogStore();
+const chatStore = useChatStore();
 
 function openAlbum(album) {
-  dialogStore.chat.actions.attachment.mediaBrowserCurrentAlbum = album;
+  chatStore.actions.attachment.mediaBrowserCurrentAlbum = album;
   updateSelectedMedias();
 }
 
@@ -17,45 +17,45 @@ function toggleMedia(media) {
 }
 
 function updateSelectedMedias() {
-  if (dialogStore.chat.actions.attachment.mediaBrowserSelectedItems) {
-    dialogStore.chat.actions.attachment.mediaBrowserSelectedItems = dialogStore.chat.actions.attachment.mediaBrowserCurrentAlbum.medias.filter(media => media.selected)
+  if (chatStore.actions.attachment.mediaBrowserSelectedItems) {
+    chatStore.actions.attachment.mediaBrowserSelectedItems = chatStore.actions.attachment.mediaBrowserCurrentAlbum.medias.filter(media => media.selected)
   }
 }
 
 function backButton() {
-  if (dialogStore.chat.actions.attachment.mediaBrowserCurrentAlbum) {
-    dialogStore.chat.actions.attachment.mediaBrowserCurrentAlbum = null;
+  if (chatStore.actions.attachment.mediaBrowserCurrentAlbum) {
+    chatStore.actions.attachment.mediaBrowserCurrentAlbum = null;
   } else {
-    dialogStore.chat.actions.attachment.mediaBrowserSelectedItems.length = 0;
+    chatStore.actions.attachment.mediaBrowserSelectedItems.length = 0;
     // for (const album of mediaBrowserAlbums.value) {
     //   for (const image of album.images) {
     //     image.selected = false;
     // }
     // }
-    dialogStore.chat.actions.attachment.mediaBrowserSnackbarVisible = false;
-    dialogStore.chat.actions.attachment.mediaBrowserOpen = false;
+    chatStore.actions.attachment.mediaBrowserSnackbarVisible = false;
+    chatStore.actions.attachment.mediaBrowserOpen = false;
   }
 }
 
 function attachButton() {
-  dialogStore.chat.actions.attachment.mediaBrowserOpen = false;
-  dialogStore.chat.actions.attachment.mediaBrowserCurrentAlbum = null;
+  chatStore.actions.attachment.mediaBrowserOpen = false;
+  chatStore.actions.attachment.mediaBrowserCurrentAlbum = null;
 }
 
-watch(() => dialogStore.chat.actions.attachment.mediaBrowserOpen, (newValue) => {
+watch(() => chatStore.actions.attachment.mediaBrowserOpen, (newValue) => {
   if (newValue) {
-    dialogStore.requestAlbums(route.params.userId, route.params.accountId);
+    chatStore.requestAlbums(route.params.userId, route.params.accountId);
   }
 });
 
-watch(() => dialogStore.chat.actions.attachment.mediaBrowserCurrentAlbum, (newValue) => {
+watch(() => chatStore.actions.attachment.mediaBrowserCurrentAlbum, (newValue) => {
   if (newValue) {
-    dialogStore.requestAlbumMedias(route.params.userId, route.params.accountId, newValue.id);
+    chatStore.requestAlbumMedias(route.params.userId, route.params.accountId, newValue.id);
   }
 })
 
-watch(() => dialogStore.chat.actions.attachment.mediaBrowserSelectedItems, (val) => {
-  dialogStore.chat.actions.attachment.mediaBrowserSnackbarVisible = val.length > 0;
+watch(() => chatStore.actions.attachment.mediaBrowserSelectedItems, (val) => {
+  chatStore.actions.attachment.mediaBrowserSnackbarVisible = val.length > 0;
 })
 </script>
 
@@ -63,7 +63,7 @@ watch(() => dialogStore.chat.actions.attachment.mediaBrowserSelectedItems, (val)
   <v-dialog
       transition="dialog-bottom-transition"
       fullscreen
-      v-model="dialogStore.chat.actions.attachment.mediaBrowserOpen"
+      v-model="chatStore.actions.attachment.mediaBrowserOpen"
   >
     <v-card>
       <v-toolbar color="white" height="45">
@@ -79,14 +79,14 @@ watch(() => dialogStore.chat.actions.attachment.mediaBrowserSelectedItems, (val)
       <v-list
           multiple
       >
-        <div v-if="!dialogStore.chat.actions.attachment.mediaBrowserCurrentAlbum">
+        <div v-if="!chatStore.actions.attachment.mediaBrowserCurrentAlbum">
           <v-container>
             <v-row>
               <v-col cols="12">
                 <v-list-subheader style="padding: 0 !important;">Albums</v-list-subheader>
               </v-col>
               <v-col
-                  v-for="album in dialogStore.chat.actions.attachment.mediaBrowserItems"
+                  v-for="album in chatStore.actions.attachment.mediaBrowserItems"
                   :key="album.id"
                   cols="6"
                   md="4"
@@ -106,12 +106,12 @@ watch(() => dialogStore.chat.actions.attachment.mediaBrowserSelectedItems, (val)
             <v-row>
               <v-col cols="12">
                 <v-list-subheader style="padding: 0 !important;">Images - {{
-                    dialogStore.chat.actions.attachment.mediaBrowserCurrentAlbum.title
+                    chatStore.actions.attachment.mediaBrowserCurrentAlbum.title
                   }}
                 </v-list-subheader>
               </v-col>
               <v-col
-                  v-for="media in dialogStore.chat.actions.attachment.mediaBrowserCurrentAlbum.medias"
+                  v-for="media in chatStore.actions.attachment.mediaBrowserCurrentAlbum.medias"
                   :key="media.id"
                   cols="4"
                   md="4"
@@ -141,8 +141,8 @@ watch(() => dialogStore.chat.actions.attachment.mediaBrowserSelectedItems, (val)
           </v-container>
         </div>
       </v-list>
-      <v-snackbar v-model="dialogStore.chat.actions.attachment.mediaBrowserSnackbarVisible" timeout="-1" color="black">
-        Selected {{ dialogStore.chat.actions.attachment.mediaBrowserSelectedItems.length }} items.
+      <v-snackbar v-model="chatStore.actions.attachment.mediaBrowserSnackbarVisible" timeout="-1" color="black">
+        Selected {{ chatStore.actions.attachment.mediaBrowserSelectedItems.length }} items.
         <template v-slot:actions>
           <v-btn
               color="white"

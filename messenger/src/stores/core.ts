@@ -3,7 +3,7 @@ import {computed, ref} from "vue";
 
 import type {Ref} from 'vue';
 import {useApiStore} from "@/stores/api";
-import {useDialogStore} from "@/stores/dialog.ts";
+import {useChatStore} from "@/stores/chat.ts";
 
 type User = {
   id: string,
@@ -77,7 +77,7 @@ export const useCoreStore = defineStore('core', () => {
   const notifications: Ref<Array<Notification>> = ref([]);
 
   const apiStore = useApiStore();
-  const dialogStore = useDialogStore();
+  const chatStore = useChatStore();
 
   async function startWebSocketConnection(userId: string) {
     const user = users.value.find(user => user.id === userId);
@@ -201,10 +201,10 @@ export const useCoreStore = defineStore('core', () => {
           message.text = data.data.text;
           break;
         case 'albumsList':
-          dialogStore.chat.actions.attachment.mediaBrowserItems.length = 0;
+          chatStore.actions.attachment.mediaBrowserItems.length = 0;
 
           for (const album of data.data) {
-            dialogStore.chat.actions.attachment.mediaBrowserItems.push(<Album>{
+            chatStore.actions.attachment.mediaBrowserItems.push(<Album>{
               id: album.id,
               title: album.title,
               cover: album.coverUrl,
@@ -215,7 +215,7 @@ export const useCoreStore = defineStore('core', () => {
           }
           break;
         case 'albumMediasList':
-          const album = dialogStore.chat.actions.attachment.mediaBrowserItems.find(album => album.id === data.albumId);
+          const album = chatStore.actions.attachment.mediaBrowserItems.find(album => album.id === data.albumId);
           for (const media of data.data) {
             if (media.type === 'image') {
               album?.medias.push(<Image>{
