@@ -2,6 +2,7 @@
 import {computed} from "vue";
 import {useCoreStore} from "@/stores/core.ts";
 import {useRoute} from "vue-router";
+import {useSystemStore} from "@/stores/system.ts";
 
 type Separator = {
   type: 'separator';
@@ -14,6 +15,7 @@ type ChatListItem = MessageItem | Separator;
 
 const route = useRoute();
 const coreStore = useCoreStore();
+const systemStore = useSystemStore();
 
 const props = defineProps<{
   account: any;
@@ -119,13 +121,13 @@ function formatTime(timestamp: number) {
           }">
           <div class="d-flex align-center">
             <span>{{ formatTime(item.timestamp) }}</span>
-            <span v-if="item.author === account.me.id" class="d-flex align-center">
-              <img v-if="item.status === 'sending'" src="../../assets/clock.svg" alt="" width="14" height="14"
-                   class="ms-1">
-              <img v-else-if="item.status === 'sent'" src="../../assets/check.svg" alt="" width="14" height="14"
-                   class="ms-1">
-              <img v-else-if="item.status === 'seen'" src="../../assets/eye.svg" alt="" width="14" height="14"
-                   class="ms-1">
+            <span v-if="item.author === account.me.id" class="status ms-1" style="width: 14px;height: 14px"
+            :class="{
+              'sending': item.status === 'sending',
+              'sent': item.status === 'sent',
+              'seen': item.status === 'seen',
+            }"
+            >
             </span>
           </div>
           <div class="d-flex align-center pe-3" v-if="item.charge">
@@ -141,11 +143,65 @@ function formatTime(timestamp: number) {
       </template>
     </div>
     <div v-else class="dialog__messages__loader">
-      <v-progress-circular color="black" model-value="60" indeterminate/>
+      <v-progress-circular :color="systemStore.theme === 'dreamsync' ? '#9D4EDD' : 'black'" model-value="60" indeterminate/>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
 
+.dialog__messages {
+  .message {
+    .status {
+      background-size: cover;
+      background-repeat: no-repeat;
+
+      &.sending {
+        background-image: url("../../assets/light/clock.svg");
+      }
+      &.sent {
+        background-image: url("../../assets/light/check.svg");
+      }
+      &.seen {
+        background-image: url("../../assets/light/eye.svg");
+      }
+    }
+  }
+}
+
+.v-theme--dreamsync {
+  .dialog__messages {
+    background: #0D0F1A;
+
+    .message {
+      &.me, &.not-me {
+        background: unset;
+        color: #00C9FF;
+        border: 1px solid #1E1E2E;
+      }
+
+      &.me {
+        color: #9FA4B9;
+      }
+
+      .status {
+        &.sending {
+          background-image: url("../../assets/dreamsync/clock.svg");
+        }
+        &.sent {
+          background-image: url("../../assets/dreamsync/check.svg");
+        }
+        &.seen {
+          background-image: url("../../assets/dreamsync/eye.svg");
+        }
+      }
+    }
+
+    .message-separator {
+      span {
+        color: #E0E0E0;
+      }
+    }
+  }
+}
 </style>

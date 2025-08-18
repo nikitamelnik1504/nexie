@@ -20,7 +20,7 @@ defineProps<{
   <header>
     <div class="dialog__back">
       <router-link :to="{name: 'dialogs', params: { userId: route.params.userId }}">
-        <img src="../../assets/arrow-back.svg" alt="back">
+        <span></span>
       </router-link>
     </div>
     <div class="dialog__user">
@@ -52,5 +52,37 @@ defineProps<{
 </template>
 
 <style scoped lang="scss">
+.v-theme--dreamsync {
+  header {
+    background: #0D0F1A;
+    color: #7F00FF;
 
+    .dialog__back {
+      a {
+        span {
+          background-image: url("../../assets/dreamsync/arrow-back.svg");
+        }
+      }
+    }
+
+    .dialog__user {
+      .dialog__user__name {
+        background: #E0E0E0;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .dialog__user__image {
+        background: #E0E0E0;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent;
+        border: solid 1px #9FA4B9;
+      }
+    }
+  }
+}
 </style>

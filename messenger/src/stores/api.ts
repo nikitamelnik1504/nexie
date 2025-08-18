@@ -27,7 +27,7 @@ export const useApiStore = defineStore('api', () => {
         ws.onclose = (event) => {
           console.log(`WebSocket connection closed for user ${userId}`, event.reason);
           delete websocketConnections.value[userId];
-          coreStore.addNotification('error', 'Lost connection to the SEM SocialAgents service', true);
+          coreStore.addNotification('error', 'Lost connection to the SocialAgents service', true);
         };
 
         ws.onerror = (error) => {

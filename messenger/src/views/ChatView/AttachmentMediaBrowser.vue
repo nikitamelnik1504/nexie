@@ -66,9 +66,9 @@ watch(() => chatStore.actions.attachment.mediaBrowserSelectedItems, (val) => {
       v-model="chatStore.actions.attachment.mediaBrowserOpen"
   >
     <v-card>
-      <v-toolbar color="white" height="45">
-        <v-btn @click="backButton" style="z-index: 1">
-          <img src="../../assets/arrow-back.svg" alt="back" width="26"/>
+      <v-toolbar height="45">
+        <v-btn @click="backButton" style="z-index: 1" class="back-button">
+          <span style="width: 26px; height: 26px;"></span>
         </v-btn>
         <h2
             style="position: absolute; left: 0; right: 0"
@@ -82,7 +82,7 @@ watch(() => chatStore.actions.attachment.mediaBrowserSelectedItems, (val) => {
         <div v-if="!chatStore.actions.attachment.mediaBrowserCurrentAlbum">
           <v-container>
             <v-row>
-              <v-col cols="12">
+              <v-col cols="12" class="py-0">
                 <v-list-subheader style="padding: 0 !important;">Albums</v-list-subheader>
               </v-col>
               <v-col
@@ -158,5 +158,40 @@ watch(() => chatStore.actions.attachment.mediaBrowserSelectedItems, (val) => {
 </template>
 
 <style scoped lang="scss">
+
+.v-dialog {
+  .v-toolbar {
+    background: #fff;
+
+    .back-button .v-btn__content span {
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-image: url("../../assets/light/arrow-back.svg");
+    }
+  }
+}
+
+.v-dialog.v-theme--dreamsync {
+  .v-card {
+    background: #0D0F1A;
+
+    .v-toolbar {
+      background: #0D0F1A;
+      color: #E0E0E0;
+
+      .back-button .v-btn__content span {
+        background-image: url("../../assets/dreamsync/arrow-back.svg");
+      }
+    }
+
+    .v-list {
+      background: #0D0F1A;
+
+      .v-list-subheader {
+        color: #E0E0E0;
+      }
+    }
+  }
+}
 
 </style>

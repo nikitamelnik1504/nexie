@@ -101,7 +101,11 @@ watch(accounts, (newValue) => {
 
         &.ton {
           h4 {
-            color: #3380cc;
+            background-color: #3380cc;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
           }
         }
       }
@@ -144,4 +148,5 @@ watch(accounts, (newValue) => {
     }
   }
 }
+
 </style>

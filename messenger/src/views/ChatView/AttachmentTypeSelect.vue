@@ -19,6 +19,21 @@ const chatStore = useChatStore();
   </v-bottom-sheet>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
+.v-theme--dreamsync.v-bottom-sheet {
 
+  .v-overlay__content {
+    .v-list {
+      background: #0D0F1A;
+
+      .v-list-subheader__text {
+        color: #E0E0E0;
+      }
+
+      .v-list-item-title {
+        color: #E0E0E0;
+      }
+    }
+  }
+}
 </style>

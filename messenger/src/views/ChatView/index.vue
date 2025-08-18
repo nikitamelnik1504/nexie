@@ -87,8 +87,12 @@ if (dialogs.value.length !== 0) {
         display: flex;
         align-items: center;
 
-        img {
+        span {
           width: 26px;
+          height: 26px;
+          background-image: url("../../assets/light/arrow-back.svg");
+          background-size: cover;
+          background-repeat: no-repeat;
         }
       }
     }
@@ -125,7 +129,6 @@ if (dialogs.value.length !== 0) {
         h4 {
           font-size: 12px;
           line-height: 14px;
-          opacity: 0.7;
           font-weight: bold;
         }
 
@@ -167,7 +170,7 @@ if (dialogs.value.length !== 0) {
     display: flex;
     flex-direction: column-reverse;
     padding: 10px 12px;
-    overflow: scroll;
+    overflow-y: scroll;
 
     .message {
       font-size: 14px;
@@ -209,7 +212,6 @@ if (dialogs.value.length !== 0) {
       justify-content: center;
       align-items: center;
       max-width: 100%;
-      background: #fff;
 
       span {
         font-size: 12px;
@@ -248,13 +250,33 @@ if (dialogs.value.length !== 0) {
       width: 64px;
       border: none;
       border-radius: 20px;
-      background: black;
-      color: white;
-      margin-left: 8px;
+
+      &.charge {
+        width: 48px;
+
+        .charge-indicator {
+          background: black;
+        }
+
+        .charge-icon {
+          background-size: cover;
+          background-image: url("../../assets/light/dollar.svg");
+        }
+      }
 
       &.attachment {
         border-radius: 12px;
         width: 48px;
+
+        .attachment-indicator {
+          background: black;
+          color: white;
+        }
+
+        .attachment-icon {
+          background-size: cover;
+          background-image: url("../../assets/light/attachment.svg");
+        }
       }
     }
   }
@@ -268,6 +290,9 @@ if (dialogs.value.length !== 0) {
     border: none;
     width: 100%;
     flex: 1;
+    outline: none;
   }
 }
+
+
 </style>

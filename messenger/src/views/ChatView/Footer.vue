@@ -46,28 +46,73 @@ function sendMessage() {
 <template>
   <div class="dialog__field">
     <div class="position-relative wrapper" style="flex: 1">
-      <input v-model="messageText" placeholder="Please write the message" class="position-relative"
-             style="padding-right: 39px;"/>
-      <button class="position-absolute d-flex justify-end w-auto"
-              :class="{'v-btn--disabled': chatStore.actions.attachment.mediaBrowserSelectedItems.length === 0}" style="top: 13px; right: 15px"><img
-          src="../../assets/dollar.svg" alt="" width="14" @click="chatStore.actions.charge.modalOpen = true">
-        <span v-if="chatStore.actions.charge.value !== 0" class="position-absolute"
-              style="width: 4px;height: 4px;border-radius: 10px;right: 4.6px;top: 24px;background: black;"/>
-      </button>
+      <input v-model="messageText" placeholder="Type here..." class="position-relative pe-0"/>
     </div>
-    <button class="attachment d-flex justify-center position-relative" @click="chatStore.actions.attachment.selectTypeOpen = true">
-      <img alt="attachment" src="../../assets/attachment.svg" width="21" />
-      <span v-if="chatStore.actions.attachment.mediaBrowserSelectedItems.length > 0" class="px-1"
-            style="position:absolute;right: -5px;top: -5px;background: white;color: black;border-radius: 20px;border: solid 4px black;font-size: 12px;line-height: 16px">{{
-          chatStore.actions.attachment.mediaBrowserSelectedItems.length
-        }}</span>
+    <button class="position-relative charge d-flex justify-center align-center"
+            :class="{'v-btn--disabled': chatStore.actions.attachment.mediaBrowserSelectedItems.length === 0}"
+            @click="chatStore.actions.charge.modalOpen = true">
+      <span class="charge-icon" style="width: 15px;height: 22px"></span>
+      <span v-if="chatStore.actions.charge.value !== 0" class="charge-indicator position-absolute"
+            style="width: 4px;height: 4px;border-radius: 10px;left: 22.3px;bottom: 3px"/>
     </button>
-    <button @click="sendMessage" :disabled="!messageText && chatStore.actions.attachment.mediaBrowserSelectedItems.length === 0"
-            :class="{'v-btn--disabled': !messageText && chatStore.actions.attachment.mediaBrowserSelectedItems.length === 0}">Send
+    <button class="attachment d-flex justify-center position-relative align-center"
+            @click="chatStore.actions.attachment.selectTypeOpen = true">
+      <span class="attachment-icon" style="width: 21px; height: 21px"></span>
+      <span v-if="chatStore.actions.attachment.mediaBrowserSelectedItems.length > 0" class="attachment-indicator px-1"
+            style="position:absolute;right: -5px;top: -5px;border-radius: 20px;font-size: 12px;line-height: 16px">{{
+          chatStore.actions.attachment.mediaBrowserSelectedItems.length
+        }}
+      </span>
+    </button>
+    <button @click="sendMessage"
+            :disabled="!messageText && chatStore.actions.attachment.mediaBrowserSelectedItems.length === 0"
+            :class="{'v-btn--disabled': !messageText && chatStore.actions.attachment.mediaBrowserSelectedItems.length === 0}">
+      Send
     </button>
   </div>
 </template>
 
 <style scoped lang="scss">
+.v-theme--dreamsync {
+  .dialog__field {
+    background: #0D0F1A;
+    border: none;
 
+    .wrapper {
+      input {
+        background: none;
+        color: #E0E0E0;
+        outline: none;
+      }
+    }
+
+    button {
+      background: transparent;
+      color: #E0E0E0;
+      border: #E0E0E0;
+
+      &.charge {
+        .charge-indicator {
+          background: #9D4EDD;
+        }
+
+        .charge-icon {
+          background-image: url("../../assets/dreamsync/dollar.svg");
+        }
+      }
+
+      &.attachment {
+        background: transparent;
+
+        .attachment-indicator {
+          background: #9D4EDD;
+        }
+
+        .attachment-icon {
+          background-image: url("../../assets/dreamsync/attachment.svg");
+        }
+      }
+    }
+  }
+}
 </style>

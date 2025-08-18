@@ -3,10 +3,12 @@ import {computed} from "vue";
 import {useCoreStore} from "@/stores/core.ts";
 import {useDialogsStore} from "@/stores/dialogs.ts";
 import {useRoute} from "vue-router";
+import {useSystemStore} from "@/stores/system.ts";
 
 const route = useRoute();
 const coreStore = useCoreStore();
 const dialogStore = useDialogsStore();
+const systemStore = useSystemStore();
 
 const accounts = coreStore.getAccounts(route.params.userId);
 
@@ -50,7 +52,7 @@ function formatTime(timestamp: number) {
     }">
     <div class="dialogs__list">
       <div v-if="!dialogs || dialogs.length === 0" class="dialogs__loader">
-        <v-progress-circular color="black" model-value="60" indeterminate/>
+        <v-progress-circular :color="systemStore.theme === 'dreamsync' ? '#9D4EDD' : 'white'" model-value="60" indeterminate/>
       </div>
       <router-link v-else v-for="dialog in dialogs.sort((x, y) => {
           const xIsMilliseconds = x.lastMessage.timestamp > 9999999999;
@@ -83,14 +85,9 @@ function formatTime(timestamp: number) {
             <h4>{{ dialog.platform }} - {{ dialog.username }}</h4>
           </div>
           <div class="dialog__message overflow-hidden">
-            <p>
-              <img v-if="dialog.lastMessage.status === 'sending'" src="../assets/clock.svg" alt="" width="14"
-                   height="14" class="ms-1">
-              <img v-else-if="dialog.lastMessage.status === 'sent'" src="../assets/check.svg" alt="" width="14"
-                   height="14" class="ms-1">
-              <img v-else-if="dialog.lastMessage.status === 'seen'" src="../assets/eye.svg" alt="" width="14"
-                   height="14" class="ms-1">
-
+            <p :class="{
+              me: dialog.lastMessage.author !== dialog.member.id
+            }">
               <i v-if="dialog.lastMessage.author !== dialog.member.id">You: </i>
               {{ dialog.lastMessage.text }}
             </p>
@@ -113,5 +110,49 @@ function formatTime(timestamp: number) {
 </template>
 
 <style scoped lang="scss">
+.v-theme--dreamsync {
+  .dialogs {
+    background: #0D0F1A;
 
+    .dialogs__list {
+      background: #0D0F1A;
+
+      .dialog__message {
+        p {
+          color: #00C9FF;
+
+          &.me {
+            color: #9FA4B9;
+          }
+        }
+      }
+
+      a.dialog__link {
+        color: #9FA4B9;
+        border-bottom: none;
+
+        &:hover {
+          background: #151722;
+        }
+
+        .dialog__username {
+          background: #E0E0E0;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          color: transparent;
+        }
+
+        .dialog__avatar_image {
+          background: #E0E0E0;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          border: solid 1px #9FA4B9;
+          background-clip: text;
+          color: transparent;
+        }
+      }
+    }
+  }
+}
 </style>
