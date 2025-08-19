@@ -38,7 +38,7 @@ const chatStore = useChatStore();
 </template>
 
 <style scoped lang="scss">
-.v-theme--dreamsync.paid-message-dialog {
+.v-theme--nexie-minimal.paid-message-dialog {
   .v-card {
     background: #0D0F1A;
     color: #E0E0E0;

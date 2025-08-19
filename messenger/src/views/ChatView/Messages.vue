@@ -143,7 +143,7 @@ function formatTime(timestamp: number) {
       </template>
     </div>
     <div v-else class="dialog__messages__loader">
-      <v-progress-circular :color="systemStore.theme === 'dreamsync' ? '#9D4EDD' : 'black'" model-value="60" indeterminate/>
+      <v-progress-circular :color="systemStore.theme === 'nexie-minimal' ? '#E0E0E0' : 'black'" model-value="60" indeterminate/>
     </div>
   </div>
 </template>
@@ -169,7 +169,7 @@ function formatTime(timestamp: number) {
   }
 }
 
-.v-theme--dreamsync {
+.v-theme--nexie-minimal {
   .dialog__messages {
     background: #0D0F1A;
 
@@ -186,13 +186,13 @@ function formatTime(timestamp: number) {
 
       .status {
         &.sending {
-          background-image: url("../../assets/dreamsync/clock.svg");
+          background-image: url("../../assets/nexie-minimal/clock.svg");
         }
         &.sent {
-          background-image: url("../../assets/dreamsync/check.svg");
+          background-image: url("../../assets/nexie-minimal/check.svg");
         }
         &.seen {
-          background-image: url("../../assets/dreamsync/eye.svg");
+          background-image: url("../../assets/nexie-minimal/eye.svg");
         }
       }
     }

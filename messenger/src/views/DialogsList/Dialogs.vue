@@ -52,7 +52,7 @@ function formatTime(timestamp: number) {
     }">
     <div class="dialogs__list">
       <div v-if="!dialogs || dialogs.length === 0" class="dialogs__loader">
-        <v-progress-circular :color="systemStore.theme === 'dreamsync' ? '#9D4EDD' : 'white'" model-value="60" indeterminate/>
+        <v-progress-circular :color="systemStore.theme === 'nexie-minimal' ? '#E0E0E0' : 'white'" model-value="60" indeterminate/>
       </div>
       <router-link v-else v-for="dialog in dialogs.sort((x, y) => {
           const xIsMilliseconds = x.lastMessage.timestamp > 9999999999;
@@ -110,7 +110,7 @@ function formatTime(timestamp: number) {
 </template>
 
 <style scoped lang="scss">
-.v-theme--dreamsync {
+.v-theme--nexie-minimal {
   .dialogs {
     background: #0D0F1A;
 

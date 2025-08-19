@@ -52,7 +52,7 @@ defineProps<{
 </template>
 
 <style scoped lang="scss">
-.v-theme--dreamsync {
+.v-theme--nexie-minimal {
   header {
     background: #0D0F1A;
     color: #7F00FF;
@@ -60,7 +60,7 @@ defineProps<{
     .dialog__back {
       a {
         span {
-          background-image: url("../../assets/dreamsync/arrow-back.svg");
+          background-image: url("../../assets/nexie-minimal/arrow-back.svg");
         }
       }
     }

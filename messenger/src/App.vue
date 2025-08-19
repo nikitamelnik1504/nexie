@@ -10,7 +10,7 @@ const systemStore = useSystemStore();
 
 watch(systemStore, (oldValue, newValue) => {
   switch (newValue.theme) {
-    case 'dreamsync':
+    case 'nexie-minimal':
       document.body.style.background = '#0D0F1A';
       break;
     case 'light':

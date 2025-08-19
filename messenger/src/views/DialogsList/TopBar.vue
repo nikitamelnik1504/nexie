@@ -6,7 +6,7 @@ const route = useRoute();
 const dialogsStore = useDialogsStore();
 
 const appVersion = __APP_VERSION__;
-const socialsAgentVersion = '0.2.11';
+const socialsAgentVersion = '0.2.12';
 </script>
 
 <template>
@@ -38,14 +38,14 @@ const socialsAgentVersion = '0.2.11';
   }
 }
 
-.v-theme--dreamsync {
+.v-theme--nexie-minimal {
   .v-app-bar {
     background: #0D0F1A;
     color: #E0E0E0;
 
     .drawer-button {
       span {
-        background-image: url("../../assets/dreamsync/burger-menu.svg");
+        background-image: url("../../assets/nexie-minimal/burger-menu.svg");
       }
     }
   }

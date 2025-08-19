@@ -4,10 +4,6 @@ import {useSystemStore} from "@/stores/system.ts";
 
 const dialogsStore = useDialogsStore();
 const systemStore = useSystemStore();
-
-const list = [{
-  title: 'Theme',
-}];
 </script>
 
 <template>
@@ -21,11 +17,8 @@ const list = [{
         <v-list-item @click="systemStore.theme = 'light'" :disabled="systemStore.theme === 'light'">
           Light
         </v-list-item>
-        <v-list-item @click="systemStore.theme = 'dark'" disabled>
-          Dark
-        </v-list-item>
-        <v-list-item @click="systemStore.theme = 'dreamsync'" :disabled="systemStore.theme === 'dreamsync'">
-          Nexie
+        <v-list-item @click="systemStore.theme = 'nexie-minimal'" :disabled="systemStore.theme === 'nexie-minimal'">
+          Nexie Minimal
         </v-list-item>
       </v-list-group>
     </v-list>
@@ -33,7 +26,7 @@ const list = [{
 </template>
 
 <style scoped lang="scss">
-.v-theme--dreamsync {
+.v-theme--nexie-minimal {
   .v-navigation-drawer {
     background: #0D0F1A;
 

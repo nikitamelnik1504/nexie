@@ -73,7 +73,7 @@ function sendMessage() {
 </template>
 
 <style scoped lang="scss">
-.v-theme--dreamsync {
+.v-theme--nexie-minimal {
   .dialog__field {
     background: #0D0F1A;
     border: none;
@@ -93,11 +93,11 @@ function sendMessage() {
 
       &.charge {
         .charge-indicator {
-          background: #9D4EDD;
+          background: #E0E0E0;
         }
 
         .charge-icon {
-          background-image: url("../../assets/dreamsync/dollar.svg");
+          background-image: url("../../assets/nexie-minimal/dollar.svg");
         }
       }
 
@@ -105,11 +105,12 @@ function sendMessage() {
         background: transparent;
 
         .attachment-indicator {
-          background: #9D4EDD;
+          background: #E0E0E0;
+          color: #0D0F1A;
         }
 
         .attachment-icon {
-          background-image: url("../../assets/dreamsync/attachment.svg");
+          background-image: url("../../assets/nexie-minimal/attachment.svg");
         }
       }
     }

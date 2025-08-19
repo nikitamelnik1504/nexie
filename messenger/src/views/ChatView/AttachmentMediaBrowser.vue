@@ -171,7 +171,7 @@ watch(() => chatStore.actions.attachment.mediaBrowserSelectedItems, (val) => {
   }
 }
 
-.v-dialog.v-theme--dreamsync {
+.v-dialog.v-theme--nexie-minimal {
   .v-card {
     background: #0D0F1A;
 
@@ -180,7 +180,7 @@ watch(() => chatStore.actions.attachment.mediaBrowserSelectedItems, (val) => {
       color: #E0E0E0;
 
       .back-button .v-btn__content span {
-        background-image: url("../../assets/dreamsync/arrow-back.svg");
+        background-image: url("../../assets/nexie-minimal/arrow-back.svg");
       }
     }
 

@@ -20,7 +20,7 @@ const chatStore = useChatStore();
 </template>
 
 <style lang="scss">
-.v-theme--dreamsync.v-bottom-sheet {
+.v-theme--nexie-minimal.v-bottom-sheet {
 
   .v-overlay__content {
     .v-list {
