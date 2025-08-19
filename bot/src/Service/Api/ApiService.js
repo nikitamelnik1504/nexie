@@ -1,30 +1,31 @@
-import {telegramBotService, socialsAgentService} from "../../../index.js";
+import { telegramBotService, socialsAgentService } from "../../../index.js";
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import {WebSocketServer} from "ws";
-import Connection from "./WS/Connection.js";
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import { SocketHandler } from './SocketHandler.js';
 
 class ApiService {
-
   static async init(port) {
     const app = express();
     app.use(bodyParser.json());
     app.use(cors());
 
-    const wsServer = new WebSocketServer({
-      noServer: true
+    const server = createServer(app);
+    const io = new Server(server, {
+      cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+      }
     });
 
-    const server = app.listen(port);
+    // Initialize socket handler
+    const socketHandler = new SocketHandler(io, telegramBotService, socialsAgentService);
 
-    server.on('upgrade', (request, socket, head) => {
-      wsServer.handleUpgrade(request, socket, head, (wsClient) => {
-        Connection.run(wsClient, request, telegramBotService, socialsAgentService);
-      });
-    });
+    server.listen(port);
+    console.log(`API Service started on port ${port}`);
   }
-
 }
 
 export default ApiService;

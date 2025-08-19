@@ -1,5 +1,6 @@
 import {ref} from 'vue'
 import {defineStore} from 'pinia'
+import { io } from "socket.io-client";
 
 import {useCoreStore} from "@/stores/core.ts";
 
@@ -22,21 +23,23 @@ export const useApiStore = defineStore('api', () => {
       try {
         // @todo Implement env properly.
         const wsUrl = (import.meta.env.VITE_WS_API_URL ? import.meta.env.VITE_WS_API_URL : 'wss://sem-bot.cryptowordll.space') + `?userId=${userId}`;
-        const ws = new WebSocket(wsUrl);
+        const ws = io(wsUrl);
 
-        ws.onclose = (event) => {
-          console.log(`WebSocket connection closed for user ${userId}`, event.reason);
-          delete websocketConnections.value[userId];
-          coreStore.addNotification('error', 'Lost connection to the SocialAgents service', true);
-        };
+        ws.emit('authenticate', {
+          userId
+        });
 
-        ws.onerror = (error) => {
-          console.error(`WebSocket error for user ${userId}:`, error);
-        };
+        resolve(ws);
 
-        ws.onopen = () => {
-          resolve(ws);
-        };
+        // ws.onclose = (event) => {
+        //   console.log(`WebSocket connection closed for user ${userId}`, event.reason);
+        //   delete websocketConnections.value[userId];
+        //   coreStore.addNotification('error', 'Lost connection to the SocialAgents service', true);
+        // };
+        //
+        // ws.onerror = (error) => {
+        //   console.error(`WebSocket error for user ${userId}:`, error);
+        // };
       } catch (error) {
         console.error(`Error establishing WebSocket connection for user ${userId}:`, error);
         throw error;

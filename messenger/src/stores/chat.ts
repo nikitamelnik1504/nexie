@@ -32,19 +32,17 @@ export const useChatStore = defineStore('chat', () => {
 
   async function requestAlbums(userId: string, accountId: string) {
     const matchedUser = coreStore.users.find(user => user.id === userId);
-    return matchedUser.wsConnection.send(JSON.stringify({
-      type: 'albumsList',
+    return matchedUser.wsConnection.emit('albumsList', {
       accountId,
-    }));
+    });
   }
 
   async function requestAlbumMedias(userId: string, accountId: string, albumId: string) {
     const matchedUser = coreStore.users.find(user => user.id === userId);
-    return matchedUser.wsConnection.send(JSON.stringify({
-      type: 'albumMediasList',
+    return matchedUser.wsConnection.emit('albumMediasList', {
       accountId,
       albumId,
-    }));
+    });
   }
 
   const actions = reactive({

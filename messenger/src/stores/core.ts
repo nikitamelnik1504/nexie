@@ -86,156 +86,155 @@ export const useCoreStore = defineStore('core', () => {
     }
 
     user.wsConnection = await apiStore.getWebSocketConnection(userId);
-    user.wsConnection.onmessage = async (message) => {
-      const data = JSON.parse(message.data);
 
-      switch (data.type) {
-        case 'accounts':
-          for (const account of data.data) {
-            if (accounts.value.find(existAccount => existAccount.id === account.id)) {
-              continue;
-            }
+    user.wsConnection.on("accounts", (data) => {
+      for (const account of data.data) {
+        if (accounts.value.find(existAccount => existAccount.id === account.id)) {
+          continue;
+        }
 
-            accounts.value.push(<Account>{
-              id: account.id,
-              username: account.username,
-              platform: account.platform,
-              userId,
-              me: null,
-            });
-          }
-          break;
-        case 'dialogsList':
-          const account = accounts.value.find(account => account.id === data.accountId);
-
-          if (account && account.me === null) {
-            account.me = <Me>{
-              id: data.me,
-            };
-          }
-
-          for (const dialog of data.data) {
-            const existingDialog = dialogs.value.find(existDialog =>
-              existDialog.id === dialog.id &&
-              existDialog.accountId === data.accountId
-            );
-
-            // @todo High-level error handle needed.
-            if (existingDialog) {
-              existingDialog.member.id = dialog.member.id;
-              existingDialog.member.username = dialog.member.username;
-              existingDialog.member.image = dialog.member.image || null;
-
-              existingDialog.lastMessage.text = dialog.lastMessage.text;
-              existingDialog.lastMessage.author = dialog.lastMessage.from;
-              existingDialog.lastMessage.timestamp = dialog.lastMessage.timestamp;
-              existingDialog.lastMessage.status = dialog.lastMessage.status;
-
-              existingDialog.unreadMessagesCount = dialog.unreadMessagesCount || 0; // Update unread messages
-            } else {
-              // Add new dialog if it doesn't exist
-              dialogs.value.push(<Dialog>{
-                accountId: data.accountId,
-                id: dialog.id,
-                member: <Member>{
-                  id: dialog.member.id,
-                  username: dialog.member.username,
-                  image: null,
-                },
-                lastMessage: {
-                  text: dialog.lastMessage.text,
-                  author: dialog.lastMessage.from,
-                  timestamp: dialog.lastMessage.timestamp,
-                  status: dialog.lastMessage.status
-                },
-                unreadMessagesCount: 0,
-              });
-            }
-          }
-          break;
-        case 'dialogMessages':
-          messages.value.length = 0;
-
-          for (const message of data.data) {
-            messages.value.push(<Message>{
-              // @todo ACCOUNT ID??????
-              id: message.id,
-              dialogId: data.dialogId,
-              text: message.text,
-              author: message.from,
-              timestamp: message.timestamp,
-              status: message.isRead ? 'seen' : 'sent',
-              attachments: message.attachments,
-              charge: message.charge,
-            })
-          }
-          break;
-        case 'dialogMessageNew':
-          messages.value.push(<Message>{
-            // @todo ACCOUNT ID??????
-            id: data.data.id,
-            dialogId: data.dialogId,
-            text: data.data.text,
-            author: data.data.from,
-            attachments: [],
-            timestamp: data.data.timestamp,
-            status: data.data.isRead ? 'seen' : 'sent',
-          })
-
-          const existingDialog = dialogs.value.find(existDialog =>
-            existDialog.id === data.dialogId
-            // existDialog.accountId === data.accountId
-          );
-
-          existingDialog.lastMessage.text = data.data.text;
-          existingDialog.lastMessage.author = data.data.from;
-          existingDialog.lastMessage.timestamp = data.data.timestamp;
-
-          break;
-
-        case 'dialogSendMessage':
-          // @todo STUPID.
-          const message = messages.value.find(m => m.status === 'sending');
-          message.status = data.data.isRead ? 'seen' : 'sent';
-          message.timestamp = data.data.timestamp;
-          message.text = data.data.text;
-          break;
-        case 'albumsList':
-          chatStore.actions.attachment.mediaBrowserItems.length = 0;
-
-          for (const album of data.data) {
-            chatStore.actions.attachment.mediaBrowserItems.push(<Album>{
-              id: album.id,
-              title: album.title,
-              cover: album.coverUrl,
-              timestamp: album.timestamp,
-              medias: [],
-              accountId: data.accountId,
-            });
-          }
-          break;
-        case 'albumMediasList':
-          const album = chatStore.actions.attachment.mediaBrowserItems.find(album => album.id === data.albumId);
-          for (const media of data.data) {
-            if (media.type === 'image') {
-              album?.medias.push(<Image>{
-                id: media.id,
-                src: media.src,
-                timestamp: media.timestamp,
-                type: 'image'
-              });
-            } else if (media.type === 'video') {
-              album?.medias.push(<Video>{
-                id: media.id,
-                src: media.src,
-                timestamp: media.timestamp,
-                type: 'video',
-              });
-            }
-          }
-          break;
+        accounts.value.push(<Account>{
+          id: account.id,
+          username: account.username,
+          platform: account.platform,
+          userId,
+          me: null,
+        });
       }
-    }
+    });
+
+    user.wsConnection.on("dialogsList", (data) => {
+      const account = accounts.value.find(account => account.id === data.accountId);
+
+      if (account && account.me === null) {
+        account.me = <Me>{
+          id: data.me,
+        };
+      }
+
+      for (const dialog of data.data) {
+        const existingDialog = dialogs.value.find(existDialog =>
+          existDialog.id === dialog.id &&
+          existDialog.accountId === data.accountId
+        );
+
+        // @todo High-level error handle needed.
+        if (existingDialog) {
+          existingDialog.member.id = dialog.member.id;
+          existingDialog.member.username = dialog.member.username;
+          existingDialog.member.image = dialog.member.image || null;
+
+          existingDialog.lastMessage.text = dialog.lastMessage.text;
+          existingDialog.lastMessage.author = dialog.lastMessage.from;
+          existingDialog.lastMessage.timestamp = dialog.lastMessage.timestamp;
+          existingDialog.lastMessage.status = dialog.lastMessage.status;
+
+          existingDialog.unreadMessagesCount = dialog.unreadMessagesCount || 0; // Update unread messages
+        } else {
+          // Add new dialog if it doesn't exist
+          dialogs.value.push(<Dialog>{
+            accountId: data.accountId,
+            id: dialog.id,
+            member: <Member>{
+              id: dialog.member.id,
+              username: dialog.member.username,
+              image: null,
+            },
+            lastMessage: {
+              text: dialog.lastMessage.text,
+              author: dialog.lastMessage.from,
+              timestamp: dialog.lastMessage.timestamp,
+              status: dialog.lastMessage.status
+            },
+            unreadMessagesCount: 0,
+          });
+        }
+      }
+    });
+
+    user.wsConnection.on("dialogMessages", (data) => {
+      messages.value.length = 0;
+
+      for (const message of data.data) {
+        messages.value.push(<Message>{
+          // @todo ACCOUNT ID??????
+          id: message.id,
+          dialogId: data.dialogId,
+          text: message.text,
+          author: message.from,
+          timestamp: message.timestamp,
+          status: message.isRead ? 'seen' : 'sent',
+          attachments: message.attachments,
+          charge: message.charge,
+        })
+      }
+    })
+
+    user.wsConnection.on("dialogMessageNew", (data) => {
+      messages.value.push(<Message>{
+        // @todo ACCOUNT ID??????
+        id: data.data.id,
+        dialogId: data.dialogId,
+        text: data.data.text,
+        author: data.data.from,
+        attachments: [],
+        timestamp: data.data.timestamp,
+        status: data.data.isRead ? 'seen' : 'sent',
+      })
+
+      const existingDialog = dialogs.value.find(existDialog =>
+          existDialog.id === data.dialogId
+        // existDialog.accountId === data.accountId
+      );
+
+      existingDialog.lastMessage.text = data.data.text;
+      existingDialog.lastMessage.author = data.data.from;
+      existingDialog.lastMessage.timestamp = data.data.timestamp;
+    });
+
+    user.wsConnection.on("dialogSendMessage", (data) => {
+      // @todo STUPID.
+      const message = messages.value.find(m => m.status === 'sending');
+      message.status = data.data.isRead ? 'seen' : 'sent';
+      message.timestamp = data.data.timestamp;
+      message.text = data.data.text;
+    });
+
+    user.wsConnection.on("albumsList", (data) => {
+      chatStore.actions.attachment.mediaBrowserItems.length = 0;
+
+      for (const album of data.data) {
+        chatStore.actions.attachment.mediaBrowserItems.push(<Album>{
+          id: album.id,
+          title: album.title,
+          cover: album.coverUrl,
+          timestamp: album.timestamp,
+          medias: [],
+          accountId: data.accountId,
+        });
+      }
+    });
+
+    user.wsConnection.on("albumMediasList", (data) => {
+      const album = chatStore.actions.attachment.mediaBrowserItems.find(album => album.id === data.albumId);
+      for (const media of data.data) {
+        if (media.type === 'image') {
+          album?.medias.push(<Image>{
+            id: media.id,
+            src: media.src,
+            timestamp: media.timestamp,
+            type: 'image'
+          });
+        } else if (media.type === 'video') {
+          album?.medias.push(<Video>{
+            id: media.id,
+            src: media.src,
+            timestamp: media.timestamp,
+            type: 'video',
+          });
+        }
+      }
+    });
   }
 
   const user = (userId: string) => computed(() => users.value.find(user => user.id === userId));
@@ -278,10 +277,9 @@ export const useCoreStore = defineStore('core', () => {
 
   async function requestDialogs(userId, accountId) {
     const matchedUser = users.value.find(user => user.id === userId);
-    return matchedUser.wsConnection.send(JSON.stringify({
-      type: 'dialogsList',
+    return matchedUser.wsConnection.emit('dialogsList', {
       accountId
-    }));
+    });
   }
 
   const getMessages = (userId: string, accountId: string, dialogId: string) => computed(() => {
@@ -290,13 +288,12 @@ export const useCoreStore = defineStore('core', () => {
 
   async function requestMessages(userId: string, accountId: string, dialogId: string) {
     const matchedUser = users.value.find(user => user.id === userId);
-    return matchedUser.wsConnection.send(JSON.stringify({
-      type: 'dialogMessages',
+    return matchedUser.wsConnection.emit('dialogMessages', {
       data: {
         accountId,
         dialogId
       }
-    }));
+    });
   }
 
   async function requestSendMessage(userId: string, accountId: string, dialogId: string, message: string, attachments: Array<Attachment> = [], charge = {}) {
