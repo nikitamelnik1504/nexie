@@ -1,28 +1,37 @@
 services:
-  sem-telegram-bot:
-    build: ./bot
-    container_name: sem_telegram_bot
+  nexie-socials-agent:
+    build: ./socials-agent
+    container_name: nexie_socials_agent
     shm_size: '1gb'
     networks:
-      - sem_network
+      - nexie_network
     cap_add:
       - SYS_ADMIN
     devices:
       - /dev/fuse
     volumes:
-      - ./bot/data:/app/data
+      - ./data:/app/data
     env_file:
-      - ./bot/.env
+      - ./socials-agent/.env
     ports:
       - "3000:3000"
-  sem-messenger:
-    build: ./messenger
-    container_name: sem_messenger
+  nexie-telegram-bot:
+    build: ./telegram-bot
+    container_name: nexie_telegram_bot
     networks:
-      - sem_network
+      - nexie_network
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - ./telegram-bot/.env
+  nexie-messenger:
+    build: ./messenger
+    container_name: nexie_messenger
+    networks:
+      - nexie_network
     ports:
       - "80:80"
 
 networks:
-  sem_network:
+  nexie_network:
     driver: bridge
