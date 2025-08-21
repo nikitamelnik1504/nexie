@@ -18,10 +18,10 @@ class Service {
 
   socialsAgentService;
 
-  static async init(token, storagePath) {
+  static async init(token, socialsAgentApiUrl, storagePath) {
     const instance = new this();
 
-    instance.socialsAgentService = new SocialsAgentService();
+    instance.socialsAgentService = new SocialsAgentService(socialsAgentApiUrl);
 
     instance.storage = await Storage.init(storagePath);
 

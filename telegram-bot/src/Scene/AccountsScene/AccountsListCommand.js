@@ -14,7 +14,8 @@ class AccountsListCommand extends CommandBase {
 
     const messages = [];
 
-    const accounts = socialsAgentService.getAccounts();
+    const accounts = await socialsAgentService.getAccounts();
+
     if (accounts.length === 0) {
       await this.context.reply('No accounts found.');
       return;
@@ -35,7 +36,7 @@ class AccountsListCommand extends CommandBase {
           'Account': (await storage.getSocialAgentAccount({id: socialAgent.id})).name,
           'Client': socialAgent.client,
           'Platform': socialAgent.platform.type,
-          'Connection Status': socialAgent.connectionStatus === null ? 'Account is not running' : 'Account is running',
+          'Connection Status': socialAgent.running ? 'Account is not running' : 'Account is running',
           'Username': socialAgent.platform.username,
           'Login': socialAgent.platform.login,
           'Password': socialAgent.platform.password,
