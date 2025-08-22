@@ -31,11 +31,26 @@ export default function accountsRouter({ socialsAgentService }) {
     })
   });
 
+  router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+    await socialsAgentService.removeAccount(id);
+    res.sendStatus(200);
+  });
+
   router.post('/:id/messenger/start', (req, res) => {
     const { id } = req.params;
 
     const account = socialsAgentService.getAccount(id);
     account.startMessenger();
+
+    res.sendStatus(200);
+  });
+
+  router.post('/:id/messenger/stop', (req, res) => {
+    const { id } = req.params;
+
+    const account = socialsAgentService.getAccount(id);
+    account.stopMessenger();
 
     res.sendStatus(200);
   });

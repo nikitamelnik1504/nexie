@@ -12,7 +12,10 @@ export default class SocialsAgentService {
     });
   }
 
-  stopMessenger(accountId) {
+  async stopMessenger(accountId) {
+    return await fetch(this.#apiUrl + `/accounts/${accountId}/messenger/stop`, {
+      method: 'POST'
+    });
   }
 
   async getAccounts() {
@@ -23,10 +26,11 @@ export default class SocialsAgentService {
     return await fetch(this.#apiUrl + `/accounts/${id}`).then(async (response) => await response.json());
   }
 
-  addAccount() {
+  async addAccount() {
   }
 
-  removeAccount(id) {
+  async removeAccount(id) {
+    return await fetch(this.#apiUrl + `/accounts/${id}`, {method: 'DELETE'});
   }
 
   getClientProfiles(clientType, params) {
