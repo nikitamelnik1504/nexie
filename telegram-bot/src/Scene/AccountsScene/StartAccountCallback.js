@@ -11,10 +11,33 @@ class StartAccountCallback extends CommandBase {
 
     const socialsAgentAccountId = this.context.match[1];
     const socialsAgentService = await this.service.getSocialsAgentService();
-    const socialsAgentAccount = socialsAgentService.getAccount(socialsAgentAccountId);
 
     try {
       await socialsAgentService.startMessenger(socialsAgentAccountId);
+
+      await new Promise((resolve, reject) => {
+        const maxTimeout = setTimeout(() => {
+          clearInterval(interval);
+          reject(new Error('Account did not start in time'));
+        }, 30000);
+
+        const interval = setInterval(async () => {
+          try {
+            const socialsAgentAccount = await socialsAgentService.getAccount(socialsAgentAccountId);
+
+            if (socialsAgentAccount.running) {
+              clearTimeout(maxTimeout);
+              clearInterval(interval);
+              resolve();
+            }
+          } catch (err) {
+            clearTimeout(maxTimeout);
+            clearInterval(interval);
+            reject(err);
+          }
+        }, 1000);
+      });
+
       await this.context.reply('Account has been successfully started.');
     } catch (error) {
       console.error(error);

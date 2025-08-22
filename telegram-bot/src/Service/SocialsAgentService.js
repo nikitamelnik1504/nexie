@@ -6,7 +6,10 @@ export default class SocialsAgentService {
     this.#apiUrl = apiUrl;
   }
 
-  startMessenger(accountId) {
+  async startMessenger(accountId) {
+    return await fetch(this.#apiUrl + `/accounts/${accountId}/messenger/start`, {
+      method: 'POST'
+    });
   }
 
   stopMessenger(accountId) {
@@ -14,6 +17,10 @@ export default class SocialsAgentService {
 
   async getAccounts() {
     return await fetch(this.#apiUrl + '/accounts').then(async (response) => await response.json());
+  }
+
+  async getAccount(id) {
+    return await fetch(this.#apiUrl + `/accounts/${id}`).then(async (response) => await response.json());
   }
 
   addAccount() {

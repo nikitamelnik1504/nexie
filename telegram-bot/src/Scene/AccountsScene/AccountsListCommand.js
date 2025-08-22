@@ -36,7 +36,7 @@ class AccountsListCommand extends CommandBase {
           'Account': (await storage.getSocialAgentAccount({id: socialAgent.id})).name,
           'Client': socialAgent.client,
           'Platform': socialAgent.platform.type,
-          'Connection Status': socialAgent.running ? 'Account is not running' : 'Account is running',
+          'Connection Status': socialAgent.running ? 'Account is running' : 'Account is not running',
           'Username': socialAgent.platform.username,
           'Login': socialAgent.platform.login,
           'Password': socialAgent.platform.password,
@@ -47,7 +47,7 @@ class AccountsListCommand extends CommandBase {
           'Account': (await storage.getSocialAgentAccount({id: socialAgent.id})).name,
           'Client': socialAgent.client,
           'Platform': socialAgent.platform.type,
-          'Connection Status': socialAgent.connectionStatus === null ? 'Account is not running' : 'Account is running',
+          'Connection Status': socialAgent.running ? 'Account is running' : 'Account is not running',
           'Username': socialAgent.platform.username,
         };
       }
@@ -60,20 +60,17 @@ class AccountsListCommand extends CommandBase {
       message.text = accountInfoString;
 
       if (user.role === 'admin') {
-        switch (socialAgent.connectionStatus) {
-          case null:
-            message.keyboard = Markup.inlineKeyboard(
-              [
-                Markup.button.callback('Remove', 'remove_account_' + socialAgent.id),
-                Markup.button.callback('Start', 'start_account_' + socialAgent.id)
-              ],
-            );
-            break;
-          default:
-            message.keyboard = Markup.inlineKeyboard(
-              [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
-            );
-            break;
+        if (socialAgent.running) {
+          message.keyboard = Markup.inlineKeyboard(
+            [Markup.button.callback('Remove', 'remove_account_' + socialAgent.id)],
+          );
+        } else {
+          message.keyboard = Markup.inlineKeyboard(
+            [
+              Markup.button.callback('Remove', 'remove_account_' + socialAgent.id),
+              Markup.button.callback('Start', 'start_account_' + socialAgent.id)
+            ],
+          );
         }
       }
 
