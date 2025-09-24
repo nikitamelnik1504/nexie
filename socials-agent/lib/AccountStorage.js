@@ -62,6 +62,17 @@ class AccountStorage {
     await fs.writeFile(this.#filePath + '/socialAccounts.json', JSON.stringify(accounts), {encoding: 'utf8'});
   }
 
+  /**
+   * @deprecated
+   * Should the SocialsAgent service know about Telegram Bot?
+   */
+  async getByTelegramId(id) {
+      const storageFilePath = this.#filePath + '/telegramUsers.json';
+      const usersData = JSON.parse(await fs.readFile(storageFilePath, {encoding: 'utf8'}));
+      const userData = usersData.users.find(user => user.username === id);
+      return userData.social_agent_accounts;
+  }
+
 }
 
 export default AccountStorage;

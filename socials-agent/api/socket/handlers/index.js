@@ -11,8 +11,8 @@ export default function registerSocketHandlers({ io, socialsAgentService, userLi
   io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
 
-    socket.on('authenticate', async (data) =>
-      authenticateHandler({ socket, data, socialsAgentService, setupListener: (...args) => setupListener(userListeners, ...args) })
+    socket.on('authenticate', async (payload) =>
+      authenticateHandler({ socket, payload, socialsAgentService, setupListener: (...args) => setupListener(userListeners, ...args) })
     );
 
     socket.on('dialogsList', (payload) =>

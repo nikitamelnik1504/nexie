@@ -126,6 +126,10 @@ class Service {
     return this.#browserManager;
   }
 
+  getStorage() {
+      return this.#storage;
+  }
+
 }
 
 export default Service;
