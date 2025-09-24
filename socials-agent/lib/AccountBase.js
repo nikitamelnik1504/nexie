@@ -17,14 +17,6 @@ class AccountBase {
     username: null
   };
 
-  // @todo Implement dolphin client hierarchy.
-  static CLIENT_BROWSER_STATUS = {
-    0: 'Profile is not found',
-    1: 'Profile is failed to start',
-    2: 'Profile is running out of bot',
-    3: 'Profile is successfully started'
-  };
-
   messenger = null;
 
   service;
@@ -107,6 +99,10 @@ class AccountBase {
   }
 
   async stopMessenger() {
+    if (this.messenger === null) {
+      throw new Error('Messenger already stopped.');
+    }
+
     await this.messenger.stop();
     // @todo Do messenger related things.
     this.messenger = null;

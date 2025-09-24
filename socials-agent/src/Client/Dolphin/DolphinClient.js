@@ -8,6 +8,14 @@ class DolphinClient {
   authToken;
   apiUrl;
 
+  // @todo Implement dolphin client hierarchy.
+  static CLIENT_BROWSER_STATUS = {
+    0: 'Profile is not found',
+    1: 'Profile is failed to start',
+    2: 'Profile is running out of bot',
+    3: 'Profile is successfully started'
+  };
+
   constructor(apiUrl, authToken) {
     this.authToken = authToken;
     this.apiUrl = apiUrl;
