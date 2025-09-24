@@ -18,9 +18,17 @@ export default function accountsRouter({ socialsAgentService }) {
     res.json(responseBody);
   });
 
+  router.post('/', async (req, res) => {
+    // @todo Factory there???
+    const accountFactory = socialsAgentService.getFactory();
+    const account = accountFactory.createAccount(req.body);
+    await socialsAgentService.addAccount(account);
+
+    res.json(account.toJSON());
+  });
+
   router.get('/:id', async (req, res) => {
     const { id } = req.params;
-
     const account = socialsAgentService.getAccount(id);
 
     res.json({

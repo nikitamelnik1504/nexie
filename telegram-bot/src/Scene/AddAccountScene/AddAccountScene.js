@@ -48,8 +48,10 @@ class AddAccountScene extends SceneBase {
 
   // @todo Hardcoded clients.
   static async selectClientStep(service, context, vars, back = false) {
+    const socialsAgentService = await service.getSocialsAgentService();
+
     await context.reply('Select client', Markup.keyboard(
-      [['Dolphin Anty'], ['Cancel']]
+      [[...(await socialsAgentService.getClients())], ['Cancel']]
     ).resize().oneTime());
 
     return context.wizard.next();
@@ -219,8 +221,8 @@ class AddAccountScene extends SceneBase {
     const socialsAgentService = await service.getSocialsAgentService();
 
     try {
-      await socialsAgentService.addAccount(socialAgentAccount);
-      await storage.addSocialAgentAccount(socialAgentAccount.id, userText);
+      vars.socialAgentAccount = await socialsAgentService.addAccount(socialAgentAccount);
+      await storage.addSocialAgentAccount(vars.socialAgentAccount.id, userText);
     } catch (error) {
       console.log(error);
       await context.reply('Error! ' + error.message);

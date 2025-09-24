@@ -26,14 +26,29 @@ export default class SocialsAgentService {
     return await fetch(this.#apiUrl + `/accounts/${id}`).then(async (response) => await response.json());
   }
 
-  async addAccount() {
+  async addAccount(data) {
+    return await fetch(this.#apiUrl + `/accounts`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    }).then(async (response) => await response.json());
   }
 
   async removeAccount(id) {
     return await fetch(this.#apiUrl + `/accounts/${id}`, {method: 'DELETE'});
   }
 
-  getClientProfiles(clientType, params) {
+  async getClients() {
+    return await fetch(this.#apiUrl + `/clients`).then(async (response) => await response.json());
+  }
+
+  async getClientProfiles(clientType, params) {
+    const query = new URLSearchParams(params).toString();
+
+    return await fetch(this.#apiUrl + `/clients/${clientType}/profiles?${query}`).then(async (response) => await response.json());
   }
 
 }
