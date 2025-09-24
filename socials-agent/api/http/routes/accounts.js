@@ -9,8 +9,8 @@ export default function accountsRouter({ socialsAgentService }) {
     for (const account of socialsAgentService.getAccounts()) {
       responseBody.push({
         id: account.id,
-        client: {},
-        platform: {},
+        client: account.clientSettings,
+        platform: account.platformSettings,
         running: !!(await account.getMessenger()),
       });
     }

@@ -34,8 +34,8 @@ class AccountsListCommand extends CommandBase {
 
         accountInfo = {
           'Account': (await storage.getSocialAgentAccount({id: socialAgent.id})).name,
-          'Client': socialAgent.client,
-          'Platform': socialAgent.platform.type,
+          'Client': socialAgent.client.type,
+          'Platform': socialAgent.platform.name,
           'Connection Status': socialAgent.running ? 'Account is running' : 'Account is not running',
           'Username': socialAgent.platform.username,
           'Login': socialAgent.platform.login,
@@ -45,8 +45,8 @@ class AccountsListCommand extends CommandBase {
       } else {
         accountInfo = {
           'Account': (await storage.getSocialAgentAccount({id: socialAgent.id})).name,
-          'Client': socialAgent.client,
-          'Platform': socialAgent.platform.type,
+          'Client': socialAgent.client.type,
+          'Platform': socialAgent.platform.name,
           'Connection Status': socialAgent.running ? 'Account is running' : 'Account is not running',
           'Username': socialAgent.platform.username,
         };
